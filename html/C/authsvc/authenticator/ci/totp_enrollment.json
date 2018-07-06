@@ -1,0 +1,1 @@
+{"id": "@ID@", "isEnabled":"@IS_ENABLED@", "isValidated":"@IS_VALIDATED@", "creationTime":"@CREATION_TIME@", "attributes":{"period":"@PERIOD@", "digits":"@DIGITS@", "secret":"@SECRET@", "algorithm":"@ALGORITHM@", "qrCode":"@QRCODE@"}, "mechanism": "@MECHANISM_ID@", "stateId": "@STATE@", "location": "@ACTION@"}

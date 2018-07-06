@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="/sps/static/design.css"></link>
+    <link rel="stylesheet" type="text/css" href="/sps/static/ci.css"></link>
+    <script src="/sps/static/ciI18n.js"></script>
+  <script>
+    function cancel() {
+      document.getElementById("cancelForm").submit();
+    }
+    function populateStrings() {
+        document.title = inMsg.errorLabel;
+        document.getElementsByClassName("pageTitle")[0].textContent = inMsg.errorLabel;
+        document.getElementById("cancel_button").value = inMsg.back;
+    }
+  </script>
+  </head>
+  <body onload="populateStrings()">
+    <div class="content">
+      <div class="main-container">
+        <div class="header-container ">
+          <h2 class="pageTitle error"></h2>
+            <div class="message-box">@ERROR_MESSAGE@
+              <div class="controls">
+                <input id="cancel_button" class="button-1 back-button" type="reset" value="" onClick="cancel();" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <form id="cancelForm" method="post" action="@ACTION@" autocomplete="off">
+        <input type="hidden" name="operation" value="verify" />
+        <input type="hidden" name="action" value="initiate" />
+    </form>
+  </body>
+</html>

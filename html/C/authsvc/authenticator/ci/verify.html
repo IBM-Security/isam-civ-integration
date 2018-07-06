@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="/sps/static/design.css"></link>
+    <link rel="stylesheet" type="text/css" href="/sps/static/ci.css"></link>
+    <script src="/sps/static/ciI18n.js"></script>
+    <script src="/sps/mga/user/mgmt/html/common.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    function populateStrings() {
+        document.title = inMsg.authMethodVerification;
+        document.getElementById("header_text").textContent = inMsg.verification;
+        document.getElementById("otp").placeholder = inMsg.accessTokenPlaceholder;
+        document.getElementById("verify_button").value = inMsg.verify;
+        document.getElementById("cancel_button").value = inMsg.back;
+        
+        var correlation = "@CORRELATION@";
+        if(correlation != "") {
+            correlation += " -";
+        }
+
+        if("@TYPE@" == "smsotp" || "@TYPE@" == "transientsms") {
+            document.getElementById("header_text").textContent = inMsg.smsVerification;
+            document.getElementById("instructions").textContent = inMsg.smsVerificationInstructions;
+            document.getElementById("correlation").textContent = correlation;
+            
+            document.getElementById("correlation").className = "textbox-left";
+            document.getElementById("otp").className = "textbox-right";
+        } else if("@TYPE@" == "emailotp" || "@TYPE@" == "transientemail") {
+            document.getElementById("header_text").textContent = inMsg.emailVerification;
+            document.getElementById("instructions").textContent = inMsg.emailVerificationInstructions;
+            document.getElementById("correlation").textContent = correlation;
+            
+            document.getElementById("correlation").className = "textbox-left";
+            document.getElementById("otp").className = "textbox-right";
+        } else if("@TYPE@" == "totp") {
+            document.getElementById("header_text").textContent = inMsg.verifyVerification;
+            document.getElementById("instructions").textContent = inMsg.verifyVerificationInstructions;
+            document.getElementById("otp").style["display"] = "block";
+        }
+    }
+
+    function enableButton(text) {
+        if(text.value != null && text.value != "") {
+            document.getElementById("verify_button").disabled = false;
+        } else {
+            document.getElementById("verify_button").disabled = true;
+        }
+    }
+
+    function cancel() {
+        document.getElementById("cancelForm").submit();
+    }
+
+    function startup() {
+        populateStrings();
+    }
+    </script>
+ <head>
+  </head>
+  <body onload="startup()">
+    <div class="content">
+      <div class="main-container">
+        <div class="header-container">
+          <h2 id="header_text"></h2>
+          <div class="message-box active">
+            <form method="post" action="@ACTION@" autocomplete="off">
+              <div>
+                <p id="instructions" class="type-body-m"></p>
+                <div style="height:40px">
+                  <div id="correlation"></div>
+                  <input class="ci-input" type="number" placeholder="" name="otp" id="otp" maxlength="40" oninput="enableButton(this)"  style="width:80%;" autofocus/>
+                </div>
+                <input type="hidden" name="operation" value="verify" />
+                <input type="hidden" name="action" value="verifyOTP" />
+                <div class="controls">
+                  <input id="verify_button" class="button-1" type="submit" value="" disabled />
+                  <input id="cancel_button" class="button-1 back-button" type="reset" value="" onClick="cancel();" />
+                </div>
+              </div>
+            </form>
+            <form id="cancelForm" method="post" action="@ACTION@" autocomplete="off">
+              <input type="hidden" name="operation" value="verify" />
+              <input type="hidden" name="action" value="initiate" />
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

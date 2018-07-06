@@ -1,0 +1,1975 @@
+ #dialog {
+     display: none;
+}
+ #dialog .dialog-window {
+     position: fixed;
+     left: calc( 50% - 480px);
+     top: calc( 50% - 307px);
+     width: 960px;
+     height: 614px;
+     background-color: #ffffff;
+     overflow: hidden;
+     z-index: 1;
+     font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
+     -webkit-transform: scale(0.8);
+     transform: scale(0.8);
+     opacity: 0;
+     -webkit-animation: window-launch;
+     animation: window-launch;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 300ms;
+     animation-duration: 300ms;
+     -webkit-animation-iteration-count: 1;
+     animation-iteration-count: 1;
+     -webkit-animation-delay: 150ms;
+     animation-delay: 150ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+     animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ @-webkit-keyframes window-launch {
+     0% {
+         -webkit-transform: scale(0.8);
+         transform: scale(0.8);
+         opacity: 0;
+
+    }
+     100% {
+         -webkit-transform: scale(1);
+         transform: scale(1);
+         opacity: 1;
+         
+    }
+}
+ @keyframes window-launch {
+     0% {
+         -webkit-transform: scale(0.8);
+         transform: scale(0.8);
+         opacity: 0;
+
+    }
+     100% {
+         -webkit-transform: scale(1);
+         transform: scale(1);
+         opacity: 1;
+         
+    }
+}
+ #dialog .dialog-window.close-window {
+     -webkit-animation: window-close;
+     animation: window-close;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 150ms;
+     animation-duration: 150ms;
+     -webkit-animation-iteration-count: 1;
+     animation-iteration-count: 1;
+     -webkit-animation-delay: 0ms;
+     animation-delay: 0ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.85, 0, 0.9, 0.4);
+     animation-timing-function: cubic-bezier(0.85, 0, 0.9, 0.4);
+}
+ @-webkit-keyframes window-close {
+     0% {
+         -webkit-transform: scale(1);
+         transform: scale(1);
+         opacity: .95;
+    }
+     100% {
+         -webkit-transform: scale(0.8);
+         transform: scale(0.8);
+         opacity: 0;
+
+    }
+}
+ @keyframes window-close {
+     0% {
+         -webkit-transform: scale(1);
+         transform: scale(1);
+         opacity: .95;
+    }
+     100% {
+         -webkit-transform: scale(0.8);
+         transform: scale(0.8);
+         opacity: 0;
+
+    }
+}
+ @media (max-width: 1000px) {
+     #dialog .dialog-window {
+         left: 3%;
+         width: 94%;
+    }
+}
+ @media (max-height: 600px) {
+     #dialog .dialog-window {
+         top: 3%;
+         height: 94%;
+    }
+}
+ #dialog .dialog-window .dialog-close {
+     position: absolute;
+     top: 0;
+     right: 0;
+     width: 64px;
+     height: 64px;
+     background-image: url("../static/design_images/close.svg");
+     background-repeat: no-repeat;
+     background-position: center;
+     cursor: pointer;
+     z-index: 999;
+}
+ #dialog .dialog-window .dialog-close:hover, #dialog .dialog-window .dialog-close:focus {
+     background-color: #152935;
+     transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-close--dark {
+     background-image: url("../static/design_images/close_dark.svg");
+}
+ #dialog .dialog-window .dialog-close--dark:hover, #dialog .dialog-window .dialog-close--dark:focus {
+     background-color: #f4f4f4;
+     transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ @media (max-width: 768px) {
+     #dialog .dialog-window .dialog-close {
+         background-image: url("../static/design_images/close_dark.svg");
+    }
+     #dialog .dialog-window .dialog-close:hover, #dialog .dialog-window .dialog-close:focus {
+         background-color: #f4f4f4;
+         transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
+    }
+}
+ @media screen and (max-height: 600px) and (max-width: 768px) {
+     #dialog .dialog-window .dialog-close {
+         position: fixed;
+         top: 0;
+         right: 0;
+    }
+}
+ #dialog .dialog-window .dialog-back {
+     position: absolute;
+     top: 0;
+     left: 0;
+     width: 64px;
+     height: 64px;
+     background-image: url("../static/design_images/back.svg");
+     background-repeat: no-repeat;
+     background-position: center;
+     cursor: pointer;
+     z-index: 999;
+}
+ #dialog .dialog-window .dialog-back:hover, #dialog .dialog-window .dialog-back:focus {
+     background-color: #f4f4f4;
+     transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ @media screen and (max-height: 600px) and (max-width: 768px) {
+     #dialog .dialog-window .dialog-back {
+         position: fixed;
+         top: 0;
+         left: 0;
+    }
+}
+ #dialog .dialog-window .dialog-content {
+     position: absolute;
+     top: 0;
+     width: 100%;
+     height: 100%;
+     left: 50%;
+     opacity: 0;
+     transition: all 0.3s cubic-bezier(0.1, 0.6, 0.15, 1);
+     visibility: hidden;
+}
+ #dialog .dialog-window .dialog-content--visible {
+     left: 0;
+     opacity: 1;
+     visibility: visible;
+}
+ #dialog .dialog-window .dialog-content--hidden {
+     left: -50%;
+     opacity: 0;
+}
+ #dialog .dialog-window .dialog-content .simple-header {
+     position: absolute;
+     top: 0;
+     left: 0;
+     width: calc(100% - 80px);
+     height: calc(156px - 128px);
+     padding: 64px 40px 64px 40px;
+     box-sizing: initial;
+}
+ .simple-container {
+     position: absolute;
+     top: 156px;
+     left: 0;
+     width: 100%;
+     height: calc(100% - 156px);
+     padding: 30px 30px 30px 30px;
+     box-sizing: border-box;
+     background-color: #ECECEC;
+     overflow: auto;
+}
+ .simple-container {
+     background-position: center 100px;
+     background-size: 150px;
+     background-repeat: no-repeat;
+}
+ .simple-container::after {
+     position: absolute;
+     font-size: 18px;
+     line-height: 26px;
+     font-weight: 200;
+     white-space: pre;
+     top: 36px;
+     text-align: center;
+     left: 13%;
+     width: 74%;
+}
+ .simple-container.no-after::after {
+     content: none;
+}
+ .simple-container .sc-more-dropdown {
+     width:30%;
+     margin-left:auto;
+     margin-right:auto;
+     margin-top: 94px;
+}
+ .simple-container .sc-more-dropdown button.more-menu {
+     background-position: calc(100% - .5rem) 50%;
+     background-repeat: no-repeat;
+     background-image: url("../static/design_images/down_arrow.svg");
+     text-align: left;
+     width: 100%;
+     height: 34px;
+     background-color: #ffffff;
+     border: 1px solid #c7c7c7;
+     outline: 0;
+     margin: 0;
+     font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+     font-size: 14px;
+     color: #121212;
+}
+ .simple-container .sc-more-dropdown button.more-menu:hover, .simple-container .sc-more-dropdown button.more-menu:focus {
+     cursor: pointer;
+     background-color: #f4f4f4;
+     transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ .simple-container .sc-more-dropdown ul.dropdown-list {
+     overflow: auto;
+     height: 300px;
+     display: none;
+     position: absolute;
+     width: 25%;
+     max-width: calc(100% - 10px);
+     padding: 0;
+     margin: 0;
+     list-style: none;
+     background-color: #ffffff;
+     font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
+     font-size: 14px;
+     box-shadow: 0 2px 2px 0 rgba(18, 18, 18, 0.2);
+     z-index: 10;
+}
+ .simple-container .sc-more-dropdown ul.dropdown-list li {
+     height: 32px;
+     padding: 0 12px 0 12px;
+     line-height: 32px;
+     border-left: 4px solid #ffffff;
+     transition: all 100ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ .simple-container .sc-more-dropdown ul.dropdown-list li:hover {
+     border-left: 4px solid #4178be;
+     background-color: #f4f4f4;
+     cursor: pointer;
+}
+ input[type=text]:active {
+     border-color: #008ABF !important;
+}
+ #dialog .dialog-window .dialog-content .sc-header {
+     position: absolute;
+     top: 0;
+     left: 0;
+     width: calc(100% - 80px);
+     height: calc(156px - 128px);
+     padding: 64px 40px 64px 40px;
+     box-sizing: initial;
+}
+ #dialog .dialog-window .dialog-content .sc-header .add-device {
+     position: absolute;
+     bottom: 28px;
+     right: 30px;
+}
+ @media (max-width: 600px) {
+     #dialog .dialog-window .dialog-content .sc-header {
+         padding: 24px 32px 24px 32px;
+         height: auto;
+    }
+     #dialog .dialog-window .dialog-content .sc-header h3 {
+         font-size: 14px;
+    }
+     #dialog .dialog-window .dialog-content .sc-header h1 {
+         font-size: 24px;
+    }
+     #dialog .dialog-window .dialog-content .sc-header .add-device {
+         position: static;
+         margin-top: 12px;
+    }
+}
+ @media (max-width: 331px) {
+     #dialog .dialog-window .dialog-content .sc-header {
+         padding: 32px 32px 32px 32px;
+    }
+     #dialog .dialog-window .dialog-content .sc-header h3 {
+         font-size: 12px;
+    }
+     #dialog .dialog-window .dialog-content .sc-header h1 {
+         font-size: 20px;
+         font-weight: bold;
+    }
+     #dialog .dialog-window .dialog-content .sc-header .imbsy-add-device {
+         display: none;
+    }
+}
+ #dialog .dialog-window .dialog-content .sc-device-container {
+     position: absolute;
+     top: 156px;
+     left: 0;
+     width: 100%;
+     height: calc(100% - 156px);
+     padding: 30px 30px 30px 30px;
+     box-sizing: border-box;
+     background-color: #ECECEC;
+     overflow: auto;
+}
+ #dialog .dialog-window .dialog-content .all-device-containers-empty {
+     background-image: url("../static/design_images/empty.svg");
+     background-position: center 135px;
+     background-size: 411px;
+     background-repeat: no-repeat;
+}
+ #dialog .dialog-window .dialog-content .all-device-containers-empty:after {
+     position: absolute;
+     width: 50%;
+     left: 25%;
+     font-size: 18px;
+     line-height: 26px;
+     font-weight: 200;
+     white-space: pre;
+     top: 50px;
+     text-align: center;
+}
+ .pwd-device-container {
+     position: absolute;
+     top: 156px;
+     left: 0;
+     width: 100%;
+     height: calc(100% - 156px);
+     padding: 30px 30px 30px 30px;
+     box-sizing: border-box;
+     background-color: #ECECEC;
+     overflow: auto;
+}
+ @media (max-width: 331px) {
+     #dialog .dialog-window .dialog-content .sc-device-container {
+         top: 110px;
+         padding: 8px;
+    }
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device {
+     position: relative;
+     display: block;
+     float: left;
+     max-width: 280px;
+     width: 31%;
+     min-height: 280px;
+     margin-right: 30px;
+     margin-bottom: 30px;
+     box-sizing: border-box;
+     background-color: #ffffff;
+     transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device.device-deactivated .sc-device-info {
+     opacity: .3;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device.device-deactivated .sc-device-illustration > img {
+     opacity: .3;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device:nth-child(3n+3) {
+     margin-right: 0px;
+}
+ @media (max-width: 1000px) {
+     #dialog .dialog-window .dialog-content .sc-device-container .sc-device {
+         min-width: 280px;
+    }
+     #dialog .dialog-window .dialog-content .sc-device-container .sc-device:nth-child(2n+2) {
+         margin-right: 0px;
+    }
+     #dialog .dialog-window .dialog-content .sc-device-container .sc-device:nth-child(3n+3) {
+         margin-right: 30px;
+    }
+}
+ @media (max-width: 600px) {
+     #dialog .dialog-window .dialog-content .sc-device-container .sc-device {
+         margin-left: 0px;
+    }
+     #dialog .dialog-window .dialog-content .sc-device-container .sc-device:nth-child(2n+2) {
+         margin-right: 0px;
+    }
+     #dialog .dialog-window .dialog-content .sc-device-container .sc-device:nth-child(3n+3) {
+         margin-right: 0px;
+    }
+}
+ @media (max-width: 331px) {
+     #dialog .dialog-window .dialog-content .sc-device-container .sc-device {
+         max-width: 100%;
+         width: 100%;
+         margin-bottom: 16px;
+    }
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device:hover {
+     box-shadow: 0px 2px 4px #c7c7c7;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-more-dropdown button.more-menu {
+     position: absolute;
+     width: 40px;
+     height: 40px;
+     right: 8px;
+     top: 8px;
+     background-image: url("../static/design_images/menu.svg");
+     background-repeat: no-repeat;
+     background-position: center;
+     background-color: #ffffff;
+     border: 0px;
+     outline: 0;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-more-dropdown button.more-menu:hover, #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-more-dropdown button.more-menu:focus {
+     cursor: pointer;
+     background-color: #f4f4f4;
+     transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-more-dropdown ul.dropdown-list {
+     display: none;
+     position: absolute;
+     right: 8px;
+     top: 48px;
+     width: 200px;
+     height: auto;
+     padding: 0;
+     margin: 0;
+     list-style: none;
+     background-color: #ffffff;
+     font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
+     font-size: 14px;
+     box-shadow: 0 2px 2px 0 rgba(18, 18, 18, 0.2);
+     z-index: 10;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-more-dropdown ul.dropdown-list li {
+     height: 32px;
+     padding-left: 12px;
+     line-height: 32px;
+     border-left: 4px solid #ffffff;
+     transition: all 100ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-more-dropdown ul.dropdown-list li:hover {
+     border-left: 4px solid #4178be;
+     background-color: #f4f4f4;
+     cursor: pointer;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-device-illustration {
+     position: absolute;
+     left: calc(50% - 92.5px);
+     bottom: 112px;
+     width: 185px;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-device-illustration img {
+     width: 100%;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-device-info {
+     position: absolute;
+     bottom: 24px;
+     left: 24px;
+     font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-device-info .device-title {
+     font-size: 14px;
+     line-height: 20px;
+     font-weight: 600;
+     color: #121212;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-device-info input.device-title {
+     height: 16px;
+     border: 0;
+     border-bottom: 1px solid #c7c7c7;
+     outline: 0;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-device-info input.device-title:focus {
+     border-bottom: 1px solid #4178be;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-device-info .device-type {
+     font-size: 11px;
+     line-height: 16px;
+     font-weight: 500;
+     color: #121212;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-device-info .device-lastUsed {
+     font-size: 11px;
+     line-height: 16px;
+     font-weight: 500;
+     color: #777677;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-alert {
+     position: absolute;
+     top: 0;
+     left: 0;
+     width: 100%;
+     height: 100%;
+     padding: 24px;
+     box-sizing: border-box;
+     z-index: 12;
+     background: #ffffff;
+     box-shadow: 0 2px 2px 0 rgba(18, 18, 18, 0.2);
+     overflow: hidden;
+     display: none;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-alert .alert-title {
+     position: absolute;
+     left: 0;
+     top: 0;
+     width: 100%;
+     line-height: 56px;
+     padding: 16px 24px 16px 24px;
+     box-sizing: border-box;
+     background-color: #f4f4f4;
+     opacity: 0;
+     -webkit-animation: alertShow;
+     animation: alertShow;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 250ms;
+     animation-duration: 250ms;
+     -webkit-animation-iteration-count: 1;
+     animation-iteration-count: 1;
+     -webkit-animation-delay: 150ms;
+     animation-delay: 150ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+     animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ @-webkit-keyframes alertShow {
+     0% {
+         opacity: 0;
+    }
+     100% {
+         opacity: 1;
+    }
+}
+ @keyframes alertShow {
+     0% {
+         opacity: 0;
+    }
+     100% {
+         opacity: 1;
+    }
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-alert p {
+     padding-top: 24px;
+     width: 100%;
+     opacity: 0;
+     -webkit-animation: showMessage;
+     animation: showMessage;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 300ms;
+     animation-duration: 300ms;
+     -webkit-animation-iteration-count: 1;
+     animation-iteration-count: 1;
+     -webkit-animation-delay: 200ms;
+     animation-delay: 200ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+     animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ @-webkit-keyframes showMessage {
+     0% {
+         opacity: 0;
+         margin-left: 16px;
+    }
+     100% {
+         opacity: 1;
+         margin-left: 0px;
+    }
+}
+ @keyframes showMessage {
+     0% {
+         opacity: 0;
+         margin-left: 16px;
+    }
+     100% {
+         opacity: 1;
+         margin-left: 0px;
+    }
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-alert .alert-actions {
+     position: absolute;
+     bottom: 32px;
+     right: 24px;
+     opacity: 0;
+     -webkit-animation: actionsShow;
+     animation: actionsShow;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 300ms;
+     animation-duration: 300ms;
+     -webkit-animation-iteration-count: 1;
+     animation-iteration-count: 1;
+     -webkit-animation-delay: 250ms;
+     animation-delay: 250ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+     animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ @-webkit-keyframes actionsShow {
+     0% {
+         opacity: 0;
+    }
+     100% {
+         opacity: 1;
+    }
+}
+ @keyframes actionsShow {
+     0% {
+         opacity: 0;
+    }
+     100% {
+         opacity: 1;
+    }
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-alert .alert-actions button.device-primary {
+     padding-left: 16px;
+     padding-right: 16px;
+     height: 40px;
+     font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
+     font-size: 14px;
+     font-weight: 700;
+     border: none;
+     background-color: #4178be;
+     color: #ffffff;
+     cursor: pointer;
+     text-rendering: optimizeLegibility;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+     transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-alert .alert-actions button.device-primary.delete {
+     background-color: #DC0000;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-alert .alert-actions button.device-primary.delete:hover {
+     background-color: #8C101C;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-alert .alert-actions button.device-primary:hover {
+     background-color: #1d3649;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-alert .alert-actions button.device-primary:disabled {
+     background-color: #e0e0e0;
+     color: #959595;
+     cursor: default;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-alert .alert-actions button.device-secondary {
+     padding-left: 16px;
+     padding-right: 16px;
+     height: 40px;
+     margin-right: 12px;
+     font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
+     font-size: 14px;
+     font-weight: 700;
+     border: 1px solid #4178be;
+     background-color: #ffffff;
+     color: #4178be;
+     cursor: pointer;
+     text-rendering: optimizeLegibility;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+     transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-alert .alert-actions button.device-secondary:hover {
+     background-color: #1d3649;
+     border-color: #1d3649;
+     color: #ffffff;
+}
+ #dialog .dialog-window .dialog-content .sc-device-container .sc-device .sc-alert .alert-actions button.device-secondary:disabled {
+     background-color: #e0e0e0;
+     color: #959595;
+     cursor: default;
+}
+ #dialog .dialog-window .dialog-content .layout-left, #dialog .dialog-window .dialog-content .layout-large-left {
+     position: absolute;
+     top: 0;
+     left: 0px;
+     width: calc(50% - 80px);
+     height: calc(100% - 144px);
+     padding: 80px 40px 64px 40px;
+     overflow: auto;
+     background-color: #ffffff;
+     transition: all 100ms cubic-bezier(0.1, 0.6, 0.15, 1);
+     box-sizing: initial;
+}
+ #dialog .dialog-window .dialog-content .layout-left--hidden, #dialog .dialog-window .dialog-content .layout-large-left--hidden {
+     left: -100%;
+     opacity: 0;
+     transition: none;
+}
+ @media (max-width: 768px) {
+     #dialog .dialog-window .dialog-content .layout-left, #dialog .dialog-window .dialog-content .layout-large-left {
+         width: calc(100% - 80px);
+    }
+}
+ @media (max-width: 400px) {
+     #dialog .dialog-window .dialog-content .layout-left, #dialog .dialog-window .dialog-content .layout-large-left {
+         padding: 80px 24px 64px 24px;
+         width: calc(100% - 48px);
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-left.large-layout, #dialog .dialog-window .dialog-content .layout-large-left.large-layout {
+     width: calc(100% - 80px);
+     padding: 64px 40px 64px 40px;
+}
+ @media (max-width: 768px) {
+     #dialog .dialog-window .dialog-content .layout-left.large-layout, #dialog .dialog-window .dialog-content .layout-large-left.large-layout {
+         width: calc(100% - 80px);
+    }
+}
+ @media (max-width: 400px) {
+     #dialog .dialog-window .dialog-content .layout-left.large-layout, #dialog .dialog-window .dialog-content .layout-large-left.large-layout {
+         padding: 80px 24px 64px 24px;
+         width: calc(100% - 48px);
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-left.large-layout p.type-body-m, #dialog .dialog-window .dialog-content .layout-large-left.large-layout p.type-body-m {
+     max-width: 400px;
+}
+ #dialog .dialog-window .dialog-content .layout-left .layout-embed, #dialog .dialog-window .dialog-content .layout-large-left .layout-embed {
+     display: none;
+     text-align: center;
+}
+ @media (max-width: 768px) {
+     #dialog .dialog-window .dialog-content .layout-left .layout-embed, #dialog .dialog-window .dialog-content .layout-large-left .layout-embed {
+         display: block;
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-left .layout-embed .qr-code, #dialog .dialog-window .dialog-content .layout-large-left .layout-embed .qr-code {
+     position: relative;
+     min-width: 200px;
+     margin: 0 auto;
+}
+ #dialog .dialog-window .dialog-content .layout-left .layout-embed .qr-code img, #dialog .dialog-window .dialog-content .layout-large-left .layout-embed .qr-code img {
+     max-width: 180px;
+     min-width: 150px;
+     width: 100%;
+     height: auto;
+}
+ #dialog .dialog-window .dialog-content .layout-left .layout-embed .qr-code .success-check, #dialog .dialog-window .dialog-content .layout-large-left .layout-embed .qr-code .success-check {
+     display: none;
+     position: absolute;
+     width: 100px;
+     height: 100px;
+     left: calc(50% - 50px);
+     top: calc(50% - 50px);
+     z-index: 2;
+     overflow: hidden;
+}
+ #dialog .dialog-window .dialog-content .layout-left .layout-embed .qr-code .success-check img, #dialog .dialog-window .dialog-content .layout-large-left .layout-embed .qr-code .success-check img {
+     min-width: 100px;
+     max-width: 100px;
+}
+ #dialog .dialog-window .dialog-content .layout-left .layout-embed .manual-code, #dialog .dialog-window .dialog-content .layout-large-left .layout-embed .manual-code {
+     width: 100%;
+     text-align: center;
+     background-color: #f4f4f4;
+     padding-top: 16px;
+     padding-bottom: 16px;
+}
+ #dialog .dialog-window .dialog-content .layout-left .layout-embed .manual-code .manual-code-number, #dialog .dialog-window .dialog-content .layout-large-left .layout-embed .manual-code .manual-code-number {
+     font-size: 27px;
+}
+ #dialog .dialog-window .dialog-content .layout-left .layout-embed .manual-code .manual-code-number span, #dialog .dialog-window .dialog-content .layout-large-left .layout-embed .manual-code .manual-code-number span {
+     color: #c7c7c7;
+}
+ #dialog .dialog-window .dialog-content .layout-left .layout-embed .manual-code .success-check, #dialog .dialog-window .dialog-content .layout-large-left .layout-embed .manual-code .success-check {
+     display: none;
+     position: absolute;
+     width: 75px;
+     height: 75px;
+     left: calc(50% - 37.5px);
+     top: calc(50% - 5px);
+     z-index: 2;
+     overflow: hidden;
+}
+ #dialog .dialog-window .dialog-content .layout-left .layout-embed .manual-code .success-check img, #dialog .dialog-window .dialog-content .layout-large-left .layout-embed .manual-code .success-check img {
+     min-width: 75px;
+     max-width: 75px;
+}
+ #dialog .dialog-window .dialog-content .layout-right {
+     position: absolute;
+     top: 0;
+     right: 0px;
+     width: 50%;
+     height: 100%;
+     background-color: #1d3649;
+     overflow: hidden;
+}
+ @media (max-width: 768px) {
+     #dialog .dialog-window .dialog-content .layout-right {
+         display: none;
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-right--hidden {
+     opacity: 0;
+}
+ #dialog .dialog-window .dialog-content .layout-right.small-layout {
+     background-color: transparent;
+     width: 35%;
+     overflow: visible;
+}
+ #dialog .dialog-window .dialog-content .layout-right.small-layout .welcome-illustrations {
+     width: 100%;
+     min-width: 315px;
+     position: absolute;
+     top: 28%;
+     left: -75px;
+}
+ #dialog .dialog-window .dialog-content .layout-right.small-layout .welcome-illustrations img {
+     width: 100%;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation {
+     position: absolute;
+     top: 0%;
+     right: 0;
+     width: 100%;
+     height: 100%;
+     opacity: 1;
+     transition: all 0.3s cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation--hidden {
+     top: 5%;
+     opacity: 0;
+     transition: all 0s cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation .dynamic-message {
+     position: absolute;
+     color: #ffffff;
+     width: 216px;
+     height: 344px;
+     text-align: center;
+     bottom: 0;
+     left: calc(50% - 108px);
+     z-index: 999;
+     background-color: transparent;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation .dynamic-message.otp {
+     width: 220px;
+     left: calc(50% - 110px);
+     bottom: 10px;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation .dynamic-message .header-message {
+     font-weight: 200;
+     font-size: 22px;
+     display: block;
+     letter-spacing: 1px;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation .dynamic-message .header-message.otp {
+     font-size: 20px;
+     text-overflow: ellipsis;
+     white-space: nowrap;
+     overflow: hidden;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation .dynamic-message .company-name {
+     display: block;
+     font-size: 12px;
+     margin-top: 18px;
+     color: #ffffff;
+     font-weight: 500;
+     text-overflow: ellipsis;
+     white-space: nowrap;
+     overflow: hidden;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation .dynamic-message .company-name.otp {
+     margin-top: 4px;
+     color: #c7c7c7;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation .dynamic-message .confirmation-number {
+     font-size: 12px;
+     color: #c7c7c7;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation .dynamic-message .authentication-image {
+     width: 28px;
+     padding-top: 10px;
+     left: calc( 50% - 14px);
+     bottom: inherit;
+     display: none;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation .dynamic-message .verify-text {
+     position: relative;
+     font-size: 12px;
+     margin-top: 50px;
+     color: #ffffff;
+     font-weight: 500;
+     text-overflow: ellipsis;
+     white-space: nowrap;
+     overflow: hidden;
+     -webkit-font-smoothing: antialiased;
+     display: none;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation .dynamic-message .fingerprint-authentication {
+     display: block;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation .dynamic-message .timing {
+     display: block;
+     font-size: 12px;
+     margin-top: 139px;
+     color: #c7c7c7;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation img {
+     position: absolute;
+     left: calc( 50% - 150px);
+     bottom: 0;
+     width: 300px;
+     margin: 0 auto;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation img.download-app {
+     left: calc(50% - 156.5px);
+     bottom: calc(50% - 44px);
+     width: 313px;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation img.illustration {
+     top: calc(50% - 95px);
+     left: calc(50% - 187.5px);
+     width: 375px;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation img.pickDevice-bg {
+     position: absolute;
+     z-index: 0;
+     top: calc(50% - 62px);
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation img.pickDevice-phone {
+     position: absolute;
+     width: 59px;
+     z-index: 3;
+     top: calc(50% - 78px);
+     left: calc(50% - 19px);
+     -webkit-animation: phoneHover, phoneHoverB;
+     animation: phoneHover, phoneHoverB;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 1200ms, 1200ms;
+     animation-duration: 1200ms, 1200ms;
+     -webkit-animation-iteration-count: infinite;
+     animation-iteration-count: infinite;
+     -webkit-animation-delay: 0ms, 1100ms;
+     animation-delay: 0ms, 1100ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.4, 0.135, 0.2, 0.86);
+     animation-timing-function: cubic-bezier(0.4, 0.135, 0.2, 0.86);
+}
+ @-webkit-keyframes phoneHover {
+     0% {
+         top: calc(50% - 78px);
+    }
+     50% {
+         top: calc(50% - 70px);
+    }
+     100% {
+         top: calc(50% - 78px);
+    }
+}
+ @keyframes phoneHover {
+     0% {
+         top: calc(50% - 78px);
+    }
+     50% {
+         top: calc(50% - 70px);
+    }
+     100% {
+         top: calc(50% - 78px);
+    }
+}
+ @-webkit-keyframes phoneHoverB {
+     0% {
+         top: calc(50% - 78px);
+    }
+     50% {
+         top: calc(50% - 66px);
+    }
+     100% {
+         top: calc(50% - 78px);
+    }
+}
+ @keyframes phoneHoverB {
+     0% {
+         top: calc(50% - 78px);
+    }
+     50% {
+         top: calc(50% - 66px);
+    }
+     100% {
+         top: calc(50% - 78px);
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation img.pickDevice-shadow {
+     position: absolute;
+     width: 59px;
+     z-index: 5;
+     top: calc(50% - -88px);
+     left: calc(50% - 19px);
+     -webkit-animation: shadowMove;
+     animation: shadowMove;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 1200ms;
+     animation-duration: 1200ms;
+     -webkit-animation-iteration-count: infinite;
+     animation-iteration-count: infinite;
+     -webkit-animation-delay: 0ms;
+     animation-delay: 0ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.5, 0.135, 0.15, 0.86);
+     animation-timing-function: cubic-bezier(0.5, 0.135, 0.15, 0.86);
+}
+ @-webkit-keyframes shadowMove {
+     0% {
+         opacity: .3;
+    }
+     50% {
+         opacity: 1;
+    }
+     100% {
+         opacity: .3;
+    }
+}
+ @keyframes shadowMove {
+     0% {
+         opacity: .3;
+    }
+     50% {
+         opacity: 1;
+    }
+     100% {
+         opacity: .3;
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation img.pickDevice-twinkle1 {
+     position: absolute;
+     width: 14px;
+     z-index: 9;
+     top: calc(50% - 0px);
+     left: calc(50% - 38px);
+     -webkit-animation: twinkleMoveA;
+     animation: twinkleMoveA;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 1200ms;
+     animation-duration: 1200ms;
+     -webkit-animation-iteration-count: infinite;
+     animation-iteration-count: infinite;
+     -webkit-animation-delay: 0ms;
+     animation-delay: 0ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.6, 0.135, 0.15, 0.86);
+     animation-timing-function: cubic-bezier(0.6, 0.135, 0.15, 0.86);
+}
+ @-webkit-keyframes twinkleMoveA {
+     0% {
+         opacity: 0;
+    }
+     50% {
+         opacity: 1;
+    }
+     100% {
+         opacity: 0;
+    }
+}
+ @keyframes twinkleMoveA {
+     0% {
+         opacity: 0;
+    }
+     50% {
+         opacity: 1;
+    }
+     100% {
+         opacity: 0;
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation img.pickDevice-twinkle2 {
+     position: absolute;
+     width: 14px;
+     z-index: 9;
+     top: calc(50% - 95px);
+     left: calc(50% - 32px);
+     -webkit-animation: twinkleMoveB;
+     animation: twinkleMoveB;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 1200ms;
+     animation-duration: 1200ms;
+     -webkit-animation-iteration-count: infinite;
+     animation-iteration-count: infinite;
+     -webkit-animation-delay: 700ms;
+     animation-delay: 700ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.4, 0.135, 0.15, 0.86);
+     animation-timing-function: cubic-bezier(0.4, 0.135, 0.15, 0.86);
+}
+ @-webkit-keyframes twinkleMoveB {
+     0% {
+         opacity: 0;
+    }
+     50% {
+         opacity: 1;
+    }
+     100% {
+         opacity: 0;
+    }
+}
+ @keyframes twinkleMoveB {
+     0% {
+         opacity: 0;
+    }
+     50% {
+         opacity: 1;
+    }
+     100% {
+         opacity: 0;
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation img.pickDevice-twinkle3 {
+     position: absolute;
+     width: 14px;
+     z-index: 9;
+     top: calc(50% - 87px);
+     left: calc(50% - -40px);
+     -webkit-animation: twinkleMoveC;
+     animation: twinkleMoveC;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 1200ms;
+     animation-duration: 1200ms;
+     -webkit-animation-iteration-count: infinite;
+     animation-iteration-count: infinite;
+     -webkit-animation-delay: 400ms;
+     animation-delay: 400ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+     animation-timing-function: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+ @-webkit-keyframes twinkleMoveC {
+     0% {
+         opacity: 0;
+    }
+     50% {
+         opacity: 1;
+    }
+     100% {
+         opacity: 0;
+    }
+}
+ @keyframes twinkleMoveC {
+     0% {
+         opacity: 0;
+    }
+     50% {
+         opacity: 1;
+    }
+     100% {
+         opacity: 0;
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation .app-store-links {
+     position: relative;
+     text-align: center;
+     top: 62%;
+}
+ #dialog .dialog-window .dialog-content .layout-right .example-animation .app-store-links img {
+     position: static;
+     width: 135px;
+     padding: 8px;
+}
+ #dialog .dialog-window .dialog-content .layout-right .qr-code {
+     position: absolute;
+     top: calc(50% - 132px);
+     left: calc(50% - 100px);
+     width: 200px;
+     height: 200px;
+     text-align: center;
+     opacity: 1;
+     transition: all 0.3s cubic-bezier(0.5, 0, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-content .layout-right .qr-code-error {
+     position: absolute;
+     top: calc(50% - 132px);
+     left: calc(50% - 175px);
+     width: 350px;
+     height: 200px;
+     text-align: center;
+     opacity: 1;
+     transition: all 0.3s cubic-bezier(0.5, 0, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-content .layout-right .qr-code--hidden {
+     opacity: 0;
+     top: 50%;
+     visibility: hidden;
+}
+ #dialog .dialog-window .dialog-content .layout-right .qr-code img {
+     position: relative;
+     width: 100%;
+     left: calc(50% - 100px);
+     margin-bottom: 16px;
+     margin-top: 16px;
+}
+ #dialog .dialog-window .dialog-content .layout-right .qr-code span {
+     color: #ffffff;
+     font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
+     font-weight: 400;
+     font-size: 16px;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+}
+ #dialog .dialog-window .dialog-content .layout-right .qr-code-error span {
+     display: block;
+}
+ #dialog .dialog-window .dialog-content .layout-right .qr-code span.sm {
+     font-size: 14px;
+}
+ #dialog .dialog-window .dialog-content .layout-right .qr-code .success-check {
+     display: none;
+     position: absolute;
+     opacity: 0;
+     width: 0%;
+     left: 100%;
+     height: 0%;
+     top: 50%;
+     z-index: 2;
+     -webkit-animation: successAnimation;
+     animation: successAnimation;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 350ms;
+     animation-duration: 350ms;
+     -webkit-animation-iteration-count: 1;
+     animation-iteration-count: 1;
+     -webkit-animation-delay: 300ms;
+     animation-delay: 300ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+     animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+ @-webkit-keyframes successAnimation {
+     0% {
+         opacity: 0;
+         width: 0%;
+         left: 100%;
+         height: 0%;
+         top: 50%;
+    }
+     100% {
+         opacity: 1;
+         width: 50%;
+         left: 50%;
+         height: 50%;
+         top: 36%;
+    }
+}
+ @keyframes successAnimation {
+     0% {
+         opacity: 0;
+         width: 0%;
+         left: 100%;
+         height: 0%;
+         top: 50%;
+    }
+     100% {
+         opacity: 1;
+         width: 50%;
+         left: 50%;
+         height: 50%;
+         top: 36%;
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-right .manual-code {
+     position: absolute;
+     top: calc(50% - 44px);
+     width: 100%;
+     text-align: center;
+     font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
+     opacity: 1;
+     transition: all 0.3s cubic-bezier(0.5, 0, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-content .layout-right .manual-code--hidden {
+     opacity: 0;
+     top: 50%;
+     visibility: hidden;
+}
+ #dialog .dialog-window .dialog-content .layout-right .manual-code .manual-code-number {
+     font-size: 36px;
+     color: #ffffff;
+     font-weight: 300;
+}
+ #dialog .dialog-window .dialog-content .layout-right .manual-code .manual-code-number span.dash {
+     position: relative;
+     top: -6px;
+     color: #325C80;
+     display: inline;
+     padding-top: 0px;
+}
+ #dialog .dialog-window .dialog-content .layout-right .manual-code span {
+     display: block;
+     padding-top: 24px;
+     color: #ffffff;
+     font-weight: 800;
+     font-size: 16px;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+}
+ #dialog .dialog-window .dialog-content .layout-right .manual-code .success-check {
+     display: none;
+     position: absolute;
+     opacity: 0;
+     width: 0%;
+     left: calc(100% - 25px);
+     height: 0%;
+     top: 100%;
+     z-index: 2;
+     -webkit-animation: successAnimationManual;
+     animation: successAnimationManual;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 350ms;
+     animation-duration: 350ms;
+     -webkit-animation-iteration-count: 1;
+     animation-iteration-count: 1;
+     -webkit-animation-delay: 300ms;
+     animation-delay: 300ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+     animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+ @-webkit-keyframes successAnimationManual {
+     0% {
+         opacity: 0;
+         width: 0px;
+         left: 80%;
+         height: 0px;
+         top: 50%;
+    }
+     100% {
+         opacity: 1;
+         width: 100px;
+         left: 60%;
+         height: 100px;
+         top: -10%;
+    }
+}
+ @keyframes successAnimationManual {
+     0% {
+         opacity: 0;
+         width: 0px;
+         left: 80%;
+         height: 0px;
+         top: 50%;
+    }
+     100% {
+         opacity: 1;
+         width: 100px;
+         left: 60%;
+         height: 100px;
+         top: -10%;
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-right .manual-code .success-check img {
+     width: 100%;
+}
+ #dialog .dialog-window .dialog-content .layout-learn-more {
+     position: absolute;
+     top: 0;
+     right: -100%;
+     width: calc(100% - 64px);
+     height: 100%;
+     padding: 86px 40px 64px 40px;
+     box-sizing: border-box;
+     background-color: #1d3649;
+     visibility: hidden;
+}
+ @media (max-width: 768px) {
+     #dialog .dialog-window .dialog-content .layout-learn-more {
+         overflow: auto;
+    }
+}
+ @media (max-width: 400px) {
+     #dialog .dialog-window .dialog-content .layout-learn-more {
+         width: 100%;
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-learn-more .content-float {
+     width: 50%;
+     float: left;
+     margin-top: 24px;
+     padding-right: 80px;
+     box-sizing: border-box;
+}
+ @media (max-width: 768px) {
+     #dialog .dialog-window .dialog-content .layout-learn-more .content-float {
+         width: 100%;
+         padding-right: 24px;
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-confirmation {
+     position: absolute;
+     top: 0;
+     left: 0px;
+     width: 100%;
+     height: 100%;
+     background-color: #1d3649;
+     z-index: 2;
+}
+ #dialog .dialog-window .dialog-content .layout-confirmation .request-message {
+     position: absolute;
+     left: calc( 50% - 132px);
+     top: calc( 50% - 100px);
+     max-width: 264px;
+     width: 100%;
+     height: 300px;
+     text-align: center;
+}
+ #dialog .dialog-window .dialog-content .layout-confirmation .request-message img {
+     margin-bottom: 16px;
+}
+ #dialog .dialog-window .dialog-content .layout-confirmation .request-message p {
+     display: none;
+     position: relative;
+     top: 150px;
+     opacity: 0;
+     color: #ffffff;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+     -webkit-animation: titleAnimation;
+     animation: titleAnimation;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 400ms;
+     animation-duration: 400ms;
+     -webkit-animation-iteration-count: 1;
+     animation-iteration-count: 1;
+     -webkit-animation-delay: 650ms;
+     animation-delay: 650ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+     animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ @-webkit-keyframes titleAnimation {
+     0% {
+         opacity: 0;
+         top: 125px;
+    }
+     100% {
+         opacity: 1;
+         top: 165px;
+    }
+}
+ @keyframes titleAnimation {
+     0% {
+         opacity: 0;
+         top: 125px;
+    }
+     100% {
+         opacity: 1;
+         top: 165px;
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-confirmation .request-message h3 {
+     display: none;
+     position: relative;
+     top: 125px;
+     opacity: 0;
+     color: #ffffff;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+     -webkit-animation: titleAnimation;
+     animation: titleAnimation;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 400ms;
+     animation-duration: 400ms;
+     -webkit-animation-iteration-count: 1;
+     animation-iteration-count: 1;
+     -webkit-animation-delay: 650ms;
+     animation-delay: 650ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+     animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ @keyframes titleAnimation {
+     0% {
+         opacity: 0;
+         top: 125px;
+    }
+     100% {
+         opacity: 1;
+         top: 165px;
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-confirmation .request-message img.animation-phone {
+     display: none;
+     position: absolute;
+     width: 81px;
+     height: auto;
+     top: 47px;
+     left: -112px;
+     opacity: 0;
+     z-index: 3;
+     -webkit-animation: phoneAnimation;
+     animation: phoneAnimation;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 400ms;
+     animation-duration: 400ms;
+     -webkit-animation-iteration-count: 1;
+     animation-iteration-count: 1;
+     -webkit-animation-delay: 380ms;
+     animation-delay: 380ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+     animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ @-webkit-keyframes phoneAnimation {
+     0% {
+         opacity: 0;
+         left: -100px;
+    }
+     100% {
+         opacity: 1;
+         left: 0;
+    }
+}
+ @keyframes phoneAnimation {
+     0% {
+         opacity: 0;
+         left: -100px;
+    }
+     100% {
+         opacity: 1;
+         left: 0;
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-confirmation .request-message img.animation-check {
+     display: none;
+     position: absolute;
+     width: 47px;
+     height: auto;
+     top: 0px;
+     right: -100px;
+     opacity: 0;
+     z-index: 3;
+     -webkit-animation: checkAnimation;
+     animation: checkAnimation;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 400ms;
+     animation-duration: 400ms;
+     -webkit-animation-iteration-count: 1;
+     animation-iteration-count: 1;
+     -webkit-animation-delay: 400ms;
+     animation-delay: 400ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+     animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ @-webkit-keyframes checkAnimation {
+     0% {
+         opacity: 0;
+         right: -120px;
+    }
+     100% {
+         opacity: 1;
+         right: 22px;
+    }
+}
+ @keyframes checkAnimation {
+     0% {
+         opacity: 0;
+         right: -120px;
+    }
+     100% {
+         opacity: 1;
+         right: 22px;
+    }
+}
+ #dialog .dialog-window .dialog-content .layout-confirmation .request-message img.animation-computer {
+     display: none;
+     position: absolute;
+     width: 220px;
+     height: auto;
+     top: 24px;
+     right: -11px;
+     opacity: 0;
+     -webkit-animation: computerAnimation;
+     animation: computerAnimation;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 400ms;
+     animation-duration: 400ms;
+     -webkit-animation-iteration-count: 1;
+     animation-iteration-count: 1;
+     -webkit-animation-delay: 350ms;
+     animation-delay: 350ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+     animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ @-webkit-keyframes computerAnimation {
+     0% {
+         opacity: 0;
+         right: -100px;
+    }
+     100% {
+         opacity: 1;
+         right: 0;
+    }
+}
+ @keyframes computerAnimation {
+     0% {
+         opacity: 0;
+         right: -100px;
+    }
+     100% {
+         opacity: 1;
+         right: 0;
+    }
+}
+ #dialog .dialog-window .dialog-content .form {
+     position: relative;
+     margin-top: 35px;
+}
+ #dialog .dialog-window .dialog-content .form label {
+     position: absolute;
+     font-size: 11px;
+     line-height: 16px;
+     font-weight: 500;
+     color: #777677;
+     transition: all 0.15s cubic-bezier(0.5, 0, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-content .form label.placeholder {
+     top: -10px;
+     margin-left: 16px;
+     opacity: 0;
+}
+ #dialog .dialog-window .dialog-content .form label.placeholder.visible {
+     top: -20px;
+     opacity: 1;
+}
+ #dialog .dialog-window .dialog-content .form label.invalid {
+     display: none;
+     width: 100%;
+     max-width: 320px;
+     box-sizing: border-box;
+     padding: 4px 16px 4px 16px;
+     background-color: #f4f4f4;
+     color: #AD1625;
+     top: 16px;
+     opacity: 0;
+}
+ #dialog .dialog-window .dialog-content .form label.invalid.visible {
+     top: 40px;
+     opacity: 1;
+}
+ #dialog .dialog-window .dialog-content .form input.input--text {
+     display: block;
+     width: 100%;
+     max-width: 320px;
+     height: 40px;
+     padding-left: 16px;
+     border: 1px solid #c7c7c7;
+     box-sizing: border-box;
+     font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
+     font-size: 14px;
+     font-weight: normal;
+     outline: 0;
+     transition: all 100ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-content .form input.input--text:focus {
+     color: #121212;
+     background-color: #ffffff;
+     border-color: #5aaafa;
+     border-left-color: #4178be;
+     border-width: 1px;
+     border-left-width: 4px;
+     outline: 0;
+}
+ #dialog .dialog-window .dialog-content .form input.input--text:disabled {
+     border-color: #e0e0e0;
+     color: #c7c7c7;
+}
+ #dialog .dialog-window .dialog-content--more-info-visible {
+     left: calc(-100% + 64px);
+}
+ #dialog .dialog-window .dialog-content--more-info-visible .layout-right, #dialog .dialog-window .dialog-content--more-info-visible .layout-right {
+     opacity: 0;
+}
+ #dialog .dialog-window .dialog-content--more-info-visible .layout-learn-more {
+     left: 100%;
+     visibility: visible;
+}
+ #dialog .dialog-window button.button-primary {
+     margin-top: 40px;
+     padding-left: 40px;
+     padding-right: 40px;
+     height: 48px;
+     min-width: 144px;
+     font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
+     font-size: 14px;
+     font-weight: 700;
+     border: none;
+     background-color: #4178be;
+     color: #ffffff;
+     cursor: pointer;
+     text-rendering: optimizeLegibility;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+     transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ #dialog .dialog-window button.button-primary:hover, #dialog .dialog-window button.button-primary:focus {
+     background-color: #1d3649;
+}
+ #dialog .dialog-window button.button-primary:disabled {
+     background-color: #e0e0e0;
+     color: #959595;
+     cursor: default;
+}
+ #dialog .dialog-window .dropdown {
+     position: relative;
+     width: 100%;
+     max-width: 320px;
+     height: 40px;
+     border: 1px solid #c7c7c7;
+     background-image: url("../../img/design-team/arrow.svg");
+     background-repeat: no-repeat;
+     background-position: right 16px center;
+     overflow: hidden;
+}
+ #dialog .dialog-window .dropdown select {
+     width: calc(100% + 24px);
+     height: 40px;
+     background-color: transparent;
+     border: 0px;
+     font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
+     font-size: 14px;
+}
+ #dialog .dialog-window ul.dg-input-group {
+     padding: 0;
+     margin-top: 16px;
+}
+ #dialog .dialog-window ul.dg-input-group li.dg-input-group__item label {
+     font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
+     font-size: 12px;
+}
+ #dialog .dialog-window nav.footer-nav {
+     position: absolute;
+     bottom: 0;
+     width: calc(50% - 40px);
+     padding-top: 16px;
+     padding-left: 40px;
+     padding-bottom: 21px;
+}
+ @media screen and (max-height: 600px) and (max-width: 768px) {
+     #dialog .dialog-window nav.footer-nav {
+         position: fixed;
+         bottom: 0%;
+         left: 0%;
+         width: calc(94% - 40px);
+         background-color: #ffffff;
+    }
+}
+ @media (max-width: 768px) {
+     #dialog .dialog-window nav.footer-nav {
+         width: calc(94% - 40px);
+         background-color: #ffffff;
+    }
+}
+ @media (max-width: 400px) {
+     #dialog .dialog-window nav.footer-nav {
+         width: calc(94% - 24px);
+         padding-left: 24px;
+         background-color: #ffffff;
+    }
+}
+ #dialog .dialog-window nav.footer-nav[data-name="selfcare"] {
+     width: calc(100% - 40px);
+     background-color: #ECECEC;
+     z-index: 12;
+}
+ @media (max-width: 768px) {
+     #dialog .dialog-window nav.footer-nav[data-name="selfcare"] {
+         background-color: #ECECEC;
+    }
+}
+ #dialog .dialog-window nav.footer-nav ul {
+     padding: 0;
+     margin: 0;
+}
+ #dialog .dialog-window nav.footer-nav ul li {
+     display: inline;
+     font-size: 11px;
+     font-weight: 500;
+     line-height: 16px;
+     margin-right: 24px;
+}
+ #dialog .dialog-window nav.footer-nav ul li a {
+     text-decoration: none;
+     color: #121212;
+}
+ #dialog .dialog-window nav.footer-nav ul li a:hover {
+     text-decoration: underline;
+}
+ #dialog .dialog-window .sc-intime-alert {
+     position: absolute;
+     bottom: -40px;
+     left: 0;
+     width: 100%;
+     height: auto;
+     min-height: 40px;
+     box-sizing: border-box;
+     opacity: 0;
+     padding: 10px 26px 0px 26px;
+     background-color: #4178be;
+     z-index: 12;
+     transition: all 0.3s cubic-bezier(0.85, 0, 0.9, 0.4);
+}
+ #dialog .dialog-window .sc-intime-alert--visible {
+     visibility: visible;
+     opacity: 1;
+     bottom: 0;
+     transition: all 0.3s cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ #dialog .dialog-window .sc-intime-alert p {
+     margin-top: 0;
+}
+ #dialog .overlay {
+     position: fixed;
+     left: 0;
+     top: 0;
+     width: 100%;
+     height: 100%;
+     background-color: #323232;
+     opacity: .95;
+     -webkit-animation: overlayLaunch;
+     animation: overlayLaunch;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 300ms;
+     animation-duration: 300ms;
+     -webkit-animation-iteration-count: 1;
+     animation-iteration-count: 1;
+     -webkit-animation-delay: 0ms;
+     animation-delay: 0ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+     animation-timing-function: cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ @-webkit-keyframes overlayLaunch {
+     0% {
+         opacity: 0;
+
+    }
+     100% {
+         opacity: .95;
+    }
+}
+ @keyframes overlayLaunch {
+     0% {
+         opacity: 0;
+
+    }
+     100% {
+         opacity: .95;
+    }
+}
+ #dialog .overlay.close-overlay {
+     -webkit-animation: overlayClose;
+     animation: overlayClose;
+     -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+     -webkit-animation-duration: 150ms;
+     animation-duration: 150ms;
+     -webkit-animation-iteration-count: 1;
+     animation-iteration-count: 1;
+     -webkit-animation-delay: 0ms;
+     animation-delay: 0ms;
+     -webkit-animation-play-state: running;
+     animation-play-state: running;
+     -webkit-animation-timing-function: cubic-bezier(0.85, 0, 0.9, 0.4);
+     animation-timing-function: cubic-bezier(0.85, 0, 0.9, 0.4);
+}
+ @-webkit-keyframes overlayClose {
+     0% {
+         opacity: .95;
+    }
+     100% {
+         opacity: 0;
+
+    }
+}
+ @keyframes overlayClose {
+     0% {
+         opacity: .95;
+    }
+     100% {
+         opacity: 0;
+
+    }
+}
+ .open-modal {
+     display: inline-block;
+     padding-left: 16px;
+     padding-right: 16px;
+     height: 40px;
+     font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
+     font-size: 14px;
+     font-weight: 700;
+     border: none;
+     line-height: 40px;
+     background-color: #4178be;
+     color: #ffffff;
+     cursor: pointer;
+     text-rendering: optimizeLegibility;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+     transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ .open-modal:hover {
+     background-color: #1d3649;
+}
+ 

@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="/sps/static/design.css"></link>
+    <link rel="stylesheet" type="text/css" href="/sps/static/ci.css"></link>
+    <script src="/sps/static/ciI18n.js"></script>
+    <script src="/sps/mga/user/mgmt/html/common.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    function populateStrings() {
+        document.title = inMsg.login;
+        document.getElementById("header_text").textContent = inMsg.welcome;
+        document.getElementById("submit_button").value = inMsg.submit;
+        document.getElementById("username").placeholder = inMsg.username;
+        document.getElementById("password").placeholder = inMsg.password;
+    }
+
+    function enableButton() {
+        var usernameInput = document.getElementById("username");
+        var passwordInput = document.getElementById("password");
+
+        if(usernameInput.value != null && usernameInput.value != "" && usernameInput.validity.valid &&
+                passwordInput.value != null && passwordInput.value != "" && passwordInput.validity.valid) {
+            document.getElementById("submit_button").disabled = false;
+        } else {
+            document.getElementById("submit_button").disabled = true;
+        }
+    }
+
+    function startup() {
+        populateStrings();
+    }
+    </script>
+ <head>
+  </head>
+  <body onload="startup()">
+    <div class="content">
+      <div class="main-container">
+        <div class="header-container">
+          <h2 id="header_text"></h2>
+          <div class="message-box active">
+            <form method="post" action="@ACTION@" autocomplete="off">
+              <div>
+                <input class="ci-input" type="text" name="username" id="username" maxlength="40" oninput="enableButton()" value="@USERNAME@" autofocus/>
+                <input class="ci-input" type="password" name="password" id="password" maxlength="40" oninput="enableButton()" style="margin-top:32px"/>
+                <input type="hidden" name="operation" value="verify" />
+                <div class="controls">
+                  <input id="submit_button" class="button-1" type="submit" value="" disabled />
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

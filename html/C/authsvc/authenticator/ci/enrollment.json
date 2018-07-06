@@ -1,0 +1,1 @@
+{"id":"@ID@", "isEnabled":"@IS_ENABLED@", "lastValidation":"@LAST_VALIDATION@", "validationRequired":"@REQUIRE_VALIDATION@", "correlation":"@CORRELATION@", "type":"@TYPE@", "creationTime":"@CREATION_TIME@", "mechanism": "@MECHANISM_ID@", "stateId": "@STATE@", "location": "@ACTION@"}

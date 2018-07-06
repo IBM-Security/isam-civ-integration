@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="/sps/static/design.css"></link>
+    <link rel="stylesheet" type="text/css" href="/sps/static/ci.css"></link>
+    <script src="/sps/static/ciI18n.js"></script>
+    <script src="/sps/mga/user/mgmt/html/common.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+    var methods = @AUTH_METHODS@;
+    var signature_methods = @SIGNATURE_METHODS@;
+    var transient_methods = @TRANSIENT_METHODS@;
+
+    function createGrid() {
+        var method_container_div = document.getElementById("method-container");
+
+        for(var i = 0; i < methods.length; i++) {
+            var method = methods[i];
+
+            var id = method['id'];
+            var creationDate = new Date(method['creationTime']);
+
+            var type = method['methodType'];
+            var enabled = method['isEnabled'];
+
+            if(type != "signature" && enabled) {
+                var method_div = document.createElement('div');
+                method_div.className = "method";
+                method_div.id = id;
+                method_div.type = type;
+                method_div.tabIndex = 0;
+
+                method_div.onclick = function () {
+                    document.getElementById("chooseMethodForm").type.value = this.type;
+                    document.getElementById("chooseMethodForm").id.value = this.id;
+                    document.getElementById("chooseMethodForm").submit();
+                };
+
+                method_div.addEventListener("keyup", function(event) {
+                    event.preventDefault();
+                    // Enter key is 13, space is 32
+                    if (event.keyCode === 13 || event.keyCode == 32) {
+                        this.click();
+                    }
+                });
+
+                var illustration_div = document.createElement('div');
+                illustration_div.className = "method-illustration";
+                var image = document.createElement('img');
+                image.src = "./static/design_images/" + type + ".svg";
+                image.alt = "illustration";
+                illustration_div.appendChild(image);
+
+                method_div.appendChild(illustration_div);
+
+                var info_div = document.createElement('div');
+                info_div.className = "method-info";
+                var info_title_div = document.createElement('div');
+                info_title_div.className = "method-title";
+                info_title_div.textContent = inMsg[type];
+                info_div.appendChild(info_title_div);
+
+                method_div.appendChild(info_div);
+
+                method_container_div.appendChild(method_div);
+            }
+        }
+
+        for(var i = 0; i < signature_methods.length; i++) {
+
+            var signature_method = signature_methods[i];
+            var authenticator = signature_method["_embedded"];
+            var id = authenticator['id'];
+
+            var enabled = authenticator['enabled'];
+            if(enabled) {
+                var type = signature_method["methodType"];
+                var subType = signature_method["subType"];
+
+                var imgsrc = "./static/design_images/" + subType +".svg";
+                if(subType == "eye" || subType == "iris" || subType == "retina") {
+                    imgsrc = "./static/design_images/face.svg";
+                }
+
+                var method_div = document.createElement('div');
+                method_div.className = "method";
+                method_div.id = id;
+                method_div.type = type;
+                method_div.tabIndex = 0;
+
+                method_div.onclick = function () {
+                    document.getElementById("chooseMethodForm").type.value = this.type;
+                    document.getElementById("chooseMethodForm").id.value = this.id;
+                    document.getElementById("chooseMethodForm").submit();
+                };
+
+                method_div.addEventListener("keyup", function(event) {
+                    event.preventDefault();
+                    // Enter key is 13, space is 32
+                    if (event.keyCode === 13 || event.keyCode == 32) {
+                        this.click();
+                    }
+                });
+
+                var illustration_div = document.createElement('div');
+                illustration_div.className = "method-illustration";
+                var image = document.createElement('img');
+                image.src = imgsrc;
+                image.alt = "illustration";
+                illustration_div.appendChild(image);
+
+                method_div.appendChild(illustration_div);
+
+                var info_div = document.createElement('div');
+                info_div.className = "method-info";
+                var info_title_div = document.createElement('div');
+                info_title_div.className = "method-title";
+                info_title_div.textContent = inMsg.ibmVerify + " - " + inMsg[subType];
+                info_div.appendChild(info_title_div);
+
+                method_div.appendChild(info_div);
+
+                method_container_div.insertBefore(method_div, method_container_div.childNodes[0]);
+            }
+        }
+
+        for(var i = 0; i < transient_methods.length; i++) {
+
+            var transient_method = transient_methods[i];
+
+            var imgsrc = "./static/design_images/emailotp.svg";
+            if(transient_method == "transientsms") {
+                imgsrc = "./static/design_images/smsotp.svg";
+            }
+
+            var method_div = document.createElement('div');
+            method_div.className = "method";
+            method_div.type = transient_method;
+            method_div.tabIndex = 0;
+
+            method_div.onclick = function () {
+                document.getElementById("chooseMethodForm").type.value = this.type;
+                document.getElementById("chooseMethodForm").submit();
+            };
+
+            method_div.addEventListener("keyup", function(event) {
+                event.preventDefault();
+                // Enter key is 13, space is 32
+                if (event.keyCode === 13 || event.keyCode == 32) {
+                    this.click();
+                }
+            });
+
+            var illustration_div = document.createElement('div');
+            illustration_div.className = "method-illustration";
+            var image = document.createElement('img');
+            image.src = imgsrc;
+            image.alt = "illustration";
+            illustration_div.appendChild(image);
+
+            method_div.appendChild(illustration_div);
+
+            var info_div = document.createElement('div');
+            info_div.className = "method-info";
+            var info_title_div = document.createElement('div');
+            info_title_div.className = "method-title";
+            info_title_div.textContent = inMsg[transient_method];
+            info_div.appendChild(info_title_div);
+
+            method_div.appendChild(info_div);
+
+            method_container_div.appendChild(method_div);
+        }
+
+        if(methods.length == 0 && signature_methods.length == 0 && transient_methods.length == 0) {
+            document.getElementsByClassName("empty-method-container")[0].classList.remove("hidden");
+            document.getElementsByClassName("empty-method-container")[0].classList.add("all-device-containers-empty");
+            
+        }
+    }
+
+    function populateStrings() {
+        document.title = inMsg.authMethodSelection;
+        document.getElementsByClassName("pageTitle")[0].textContent = inMsg.authenticate;
+        document.getElementsByClassName("empty-method-container")[0].textContent = inMsg.nothingConnected;
+    }
+
+    function startup() {
+        populateStrings();
+        createGrid();
+    }
+    </script>
+ <head>
+  </head>
+  <body onload="startup()">
+    <div class="content">
+      <div class="main-container choose-main-container">
+        <div class="header-container choose-header-container">
+          <h2 class="pageTitle"></h2>
+          <div class="message-box choose-message-box active">
+            <div id="method-container" class="method-container">
+            </div>
+            <div class="empty-method-container method-container hidden">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <form id="chooseMethodForm" method="POST" action="@ACTION@">
+      <input type="hidden" name="action" value="chooseMethod">
+      <input type="hidden" name="operation" value="verify">
+      <input type="hidden" name="id" value="">
+      <input type="hidden" name="type" value="">
+    </form>
+  </body>
+</html>

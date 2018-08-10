@@ -82,6 +82,7 @@
                     var id = method['id'];
                     var creationDate = new Date(method['creationTime']);
                     var type = method['methodType'];
+                    var enabled = method['isEnabled'];
 
                     if(type != "signature") {
                         var enabled = method['isEnabled'] ? inMsg.enabled : inMsg.disabled;
@@ -90,6 +91,10 @@
                         methodDiv.className = "sc-device";
                         methodDiv.id = id;
                         methodDiv.type = type;
+
+                        if(!enabled) {
+                            methodDiv.classList.add("device-deactivated");
+                        }
 
                         var dropdownDiv = document.createElement('div');
                         dropdownDiv.className = "sc-more-dropdown";
@@ -141,7 +146,7 @@
                         var illustrationDiv = document.createElement('div');
                         illustrationDiv.className = "sc-device-illustration";
                         var image = document.createElement('img');
-                        image.src = "./static/design_images/" + type + ".svg";
+                        image.src = "static/design_images/" + type + ".svg";
                         image.alt = "illustration";
                         illustrationDiv.appendChild(image);
                         methodDiv.appendChild(illustrationDiv);
@@ -164,16 +169,21 @@
                 for(var i = 0; i < authenticators.length; i++) {
                     var authenticator = authenticators[i];
                     var id = authenticator['id'];
+                    var type = "verify";
                     var enabled = authenticator['enabled'];
                     var creationDate = new Date(authenticator['creationTime']);
                     var enabledPretty = enabled ? inMsg.enabled : inMsg.disabled;
                     var enablePretty = !enabled ? inMsg.enable : inMsg.disable;
-                    var imgsrc = "./static/design_images/fingerprint.svg";
+                    var imgsrc = "static/design_images/fingerprint.svg";
 
                     var methodDiv = document.createElement('div');
                     methodDiv.className = "sc-device";
                     methodDiv.id = id;
                     methodDiv.type = type;
+
+                    if(!enabled) {
+                        methodDiv.classList.add("device-deactivated");
+                    }
 
                     var dropdownDiv = document.createElement('div');
                     dropdownDiv.className = "sc-more-dropdown";
@@ -259,14 +269,14 @@
                     infoTitleDiv.className = "sc-device-title";
                     infoTitleDiv.textContent = inMsg.ibmVerify;
                     infoDiv.appendChild(infoTitleDiv);
-                    var deviceTypeDiv = document.createElement('div');
-                    deviceTypeDiv.className = "sc-device-type";
-                    deviceTypeDiv.textContent = authenticator.attributes.deviceType + ' (' + authenticator.attributes.osVersion + ')';
-                    infoDiv.appendChild(deviceTypeDiv);
-                    var infoTitleDiv = document.createElement('div');
-                    infoTitleDiv.className = "sc-device-enabled";
-                    infoTitleDiv.textContent = enabledPretty;
-                    infoDiv.appendChild(infoTitleDiv);
+                    var deviceInfoDiv = document.createElement('div');
+                    deviceInfoDiv.className = "sc-device-type";
+                    deviceInfoDiv.textContent = authenticator.attributes.deviceName + ' (' + authenticator.attributes.deviceType + ')';
+                    infoDiv.appendChild(deviceInfoDiv);
+                    var enabledTitleDiv = document.createElement('div');
+                    enabledTitleDiv.className = "sc-device-enabled";
+                    enabledTitleDiv.textContent = enabledPretty;
+                    infoDiv.appendChild(enabledTitleDiv);
                     methodDiv.appendChild(infoDiv);
                     deviceContainerDiv.insertBefore(methodDiv, deviceContainerDiv.childNodes[0]);
                 }
@@ -631,6 +641,7 @@
                     refreshList();
                     refreshRequired = false;
                 }
+                pollCount = 0;
             }
 
             var countries = [inMsg.AD, inMsg.AT, inMsg.AU, inMsg.BE, inMsg.BM, inMsg.CA, inMsg.CY, inMsg.CZ, inMsg.DK, inMsg.EE, inMsg.FO, inMsg.FI, inMsg.FR, inMsg.DE, inMsg.GR, inMsg.GL, inMsg.HK, inMsg.IS, inMsg.IN, inMsg.IE, inMsg.IL, inMsg.IT, inMsg.JP, inMsg.LI, inMsg.LU, inMsg.MT, inMsg.MC, inMsg.NL, inMsg.NZ, inMsg.NO, inMsg.PH, inMsg.PL, inMsg.PT, inMsg.SM, inMsg.SA, inMsg.SG, inMsg.SK, inMsg.SI, inMsg.ES, inMsg.SE, inMsg.CH, inMsg.TH, inMsg.AE, inMsg.GB, inMsg.US];
@@ -656,9 +667,11 @@
 
             function registerAuthenticatorOrTOTP(button) {
                 showContentSection(button)
-                var type = button.parentNode.parentNode.getAttribute('next-target');
+                type = button.parentNode.parentNode.getAttribute('next-target');
                 if(type == "verify") {
                     data = {"action":"register", "type":"verify"};
+                    document.querySelector("[data-name=section-connectaccount] .button-1").classList.add("hidden");
+                    pollCount = 30;
                 } else {
                     data = {"action":"register", "type":"totp"};
                 }
@@ -689,6 +702,48 @@
                             } else {
                                 displayQRCode(json.attributes.qrCode);
                             }
+                            pollEnrollment();
+                        }
+                    }
+                }
+            }
+
+            var pollCount = 30;
+
+            function pollEnrollment() {
+                if(pollCount > 0) {
+                    var data = {"action":"pollEnrollment", "type":type};
+                    var pollRequest = new XMLHttpRequest();
+                    pollRequest.onreadystatechange =  function() {processPollRequest(pollRequest);};
+                    pollRequest.open("PUT", actionLocation, true);
+                    pollRequest.setRequestHeader("Accept", "application/json");
+                    pollRequest.setRequestHeader("Content-Type", "application/json");
+                    pollRequest.send(JSON.stringify(data));
+                    pollCount--;
+                }
+            }
+
+            function processPollRequest(request) {
+                if (request.readyState == 4 && request.status == 200) {
+                    if (request.responseText == "Not found") {} else {
+                        var json = JSON.parse(request.responseText);
+                        actionLocation = json.location;
+                        if(json.status == "success") {
+                            closeDialog();
+                        } else if(json.status == "successfulTOTP") {
+                            if(document.getElementById("qrCode").classList.contains("hidden")) {
+                                // There was an error fetching the qr code. Don't prompt
+                                // for validation.
+                                closeDialog();
+                            } else {
+                                showContentSection(document.querySelector("[data-target='section-totp-validation']"));
+                            }
+                        } else if(json.status == "pending") {
+                            setTimeout(pollEnrollment, 2000);
+                        } else {
+                            // We most likely got an error when trying to poll.
+                            // Stop polling by setting pollCount to 0.
+                            pollCount = 0;
                         }
                     }
                 }
@@ -1027,7 +1082,7 @@
                     </div>
                     <div class="layout-right small-layout">
                         <div class="welcome-illustrations">
-                            <img src="./static/design_images/welcome_illustration.svg" class="launch-animation" alt="IBM Verify" />
+                            <img src="/sps/static/design_images/welcome_illustration.svg" class="launch-animation" alt="IBM Verify" />
                         </div>
                     </div>
                 </section>
@@ -1045,7 +1100,7 @@
                     </div>
                     <div class="layout-right small-layout">
                         <div class="welcome-illustrations">
-                            <img src="./static/design_images/phone.svg" class="launch-animation" alt="IBM Verify" />
+                            <img src="/sps/static/design_images/phone.svg" class="launch-animation" alt="IBM Verify" />
                         </div>
                     </div>
                 </section>
@@ -1064,10 +1119,10 @@
                     </div>
                     <div class="layout-right">
                         <div class="example-animation">
-                            <img src="./static/design_images/download_the_app.svg" class="download-app" alt="" />
+                            <img src="/sps/static/design_images/download_the_app.svg" class="download-app" alt="" />
                             <div class="app-store-links">
-                                <a href="https://itunes.apple.com/us/app/ibm-verify/id1162190392"><img src="./static/design_images/apple_app_store.svg" alt="apple app store" /></a>
-                                <a href="https://play.google.com/store/apps/details?id=com.ibm.security.verifyapp"><img src="./static/design_images/google_play_badge.svg" alt="google play store" /></a>
+                                <a href="https://itunes.apple.com/us/app/ibm-verify/id1162190392"><img src="/sps/static/design_images/apple_app_store.svg" alt="apple app store" /></a>
+                                <a href="https://play.google.com/store/apps/details?id=com.ibm.security.verifyapp"><img src="/sps/static/design_images/google_play_badge.svg" alt="google play store" /></a>
                             </div>
                         </div>
                     </div>
@@ -1085,7 +1140,7 @@
                             <div class="qr-code">
                                 <!-- Blue success check, is display:none by default, animates in when device is connected successfully -->
                                 <div class="success-check">
-                                    <img src="./static/design_images/confirmation_check.svg" alt="confirmation" />
+                                    <img src="/sps/static/design_images/confirmation_check.svg" alt="confirmation" />
                                 </div>
                                 <img class="center qr-img"></img>
                             </div>
@@ -1112,7 +1167,7 @@
                             </div>
                         </div>
                         <div class="loader" style="position: absolute;left: calc(50% - 32px);top: calc(40% - 72px);
-                        background-image: url('./static/loader_dark.gif');"></div>
+                        background-image: url('/sps/static/loader_dark.gif');"></div>
                     </div>
                 </section>
 
@@ -1133,7 +1188,7 @@
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="enrollSMSorEmail('smsotp', this)" type="button" style="
                         margin-top: 140px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Save</button>
                         <div class="validation hidden" data-target="section-sms-validation"></div>
-                        <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
+                        <div class="loader hidden" style="background-image: url('/sps/static/loader_light.gif');"></div>
                     </div>
                 </section>
 
@@ -1146,7 +1201,7 @@
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="enrollSMSorEmail('emailotp', this)" type="button" style="
                         margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Save</button>
                         <div class="validation hidden" data-target="section-email-validation"></div>
-                        <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
+                        <div class="loader hidden" style="background-image: url('/sps/static/loader_light.gif');"></div>
                     </div>
                 </section>
 
@@ -1159,7 +1214,7 @@
                     </div>
                     <div class="layout-right small-layout">
                         <div class="welcome-illustrations">
-                            <img src="./static/design_images/setup_complete.svg"/>
+                            <img src="/sps/static/design_images/setup_complete.svg"/>
                         </div>
                     </div>
                 </section>
@@ -1175,7 +1230,7 @@
                         </div>
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="validateOtp('smsotp', this)" type="button" style="
                         margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Validate</button>
-                        <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
+                        <div class="loader hidden" style="background-image: url('/sps/static/loader_light.gif');"></div>
                     </div>
                 </section>
 
@@ -1190,7 +1245,7 @@
                         </div>
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="validateOtp('emailotp', this)" type="button" style="
                         margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Validate</button>
-                        <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
+                        <div class="loader hidden" style="background-image: url('/sps/static/loader_light.gif');"></div>
                     </div>
                 </section>
 
@@ -1202,7 +1257,7 @@
                         <input id="otp" class="ci-input" type="number" style="height:46px;margin-top:100px;width:40%;margin-left:auto;margin-right:auto;" oninput="checkValid(this, 'otp');" tabindex="1">
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="validateOtp('totp', this)" type="button" style="
                         margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Validate</button>
-                        <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
+                        <div class="loader hidden" style="background-image: url('/sps/static/loader_light.gif');"></div>
                     </div>
                 </section>
 

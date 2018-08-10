@@ -1,5 +1,101 @@
 importClass(Packages.com.tivoli.am.fim.trustserver.sts.utilities.IDMappingExtUtils);
 
+function checkLogin() {
+    var sessionUsername = getUsernameFromSession();
+    var username = getUsername();
+
+    // If we have the username from the WebSEAL session, return immediately.
+    if(sessionUsername != null) {
+        return sessionUsername;
+    }
+
+    // If we have no username from either session, state, or parameter, return 
+    // a login page.
+    if(username == null) {
+        page.setValue("/authsvc/authenticator/ci/login.html");
+        macros.put("@ERROR_MESSAGE@", errorMessages["user_not_found"]);
+        return null;
+    }
+
+    // We've been given the username. Check if username/password auth has already
+    // been done successfully for this session by fetching basicAuth from the
+    // state map.
+    var basicAuth = state.get("basicAuth");
+    var password = getPassword();
+
+    if(basicAuth != null && basicAuth == username) {
+        return username;
+    } else if(password != null) {
+        // If we were given the password as well, attempt auth.
+        var justAuthed = CiClient.basicAuthentication(conn, username, password, getLocale());
+        if(justAuthed) {
+            // If successful, save the just authed username as "basicAuth" in
+            // the state map.
+            state.put("basicAuth", username);
+            return username;
+        } else {
+            // The login request failed. Return an error page via our handleError
+            // method.
+            handleError(errorMessages["login_failed"], null);
+            return null;
+        }
+    } else if(username != null) {
+        // We have a username but no password. Return a login page.
+        macros.put("@USERNAME@", username);
+        page.setValue("/authsvc/authenticator/ci/login.html");
+        return null;
+    }
+}
+
+function getUserId(conn, username) {
+    var userId = state.get("userId");
+    if(userId == null) {
+        var user = CiClient.getUser(conn, username, getLocale());
+        if (user != null) {
+            // We've successfully gotten the user ID. Save it and the username
+            // in the state map.
+            var userObj = JSON.parse(user);
+            userId = userObj.id;
+            state.put("userId", userId);
+            state.put("username", username);
+
+            // Also fetch some details to display on the USC page.
+            var emails = userObj.emails;
+            if(emails != null && emails.length > 0) {
+                state.put("email", emails[0].value);
+                macros.put("@EMAIL@", emails[0].value);
+            }
+            // We have two options here for a nice display name for the
+            // user. We could use the givenName, or the formatted name. The
+            // formatted name can be manually modified by the CI
+            // administrator to be correct per the user's culture, but
+            // defaults to givenName lastName if not provided. So we will
+            // use givenName by default. To use the formatted name instead,
+            // change name.givenName to name.formatted
+            if(userObj.name != null && userObj.name.givenName != null) {
+                state.put("name", userObj.name.givenName);
+                macros.put("@NAME@", userObj.name.givenName);
+            }
+        } else {
+            // The request failed. Return an error page via our handleError
+            // method.
+            handleError(errorMessages["user_not_found"], null);
+        }
+    } else {
+        // If we already have the user ID, we should already have the email
+        // and name saved. Fetch them to display on the USC page.
+        var email = state.get("email");
+        var name = state.get("name");
+        if(email != null) {
+            macros.put("@EMAIL@", email);
+        }
+        if(name != null) {
+            macros.put("@NAME@", name);
+        }
+    }
+    return userId;
+}
+
 /**
  * Check the given response for an error message. Overwrite errMessage if it's
  * included.
@@ -114,6 +210,17 @@ function getId() {
 }
 
 /**
+ * Get the authenticator ID from the state or from the request.
+ */
+function getAuthenticatorId() {
+    var authenticatorId = state.get("authenticatorId");
+    if(authenticatorId == null) {
+        authenticatorId = context.get(Scope.REQUEST, "urn:ibm:security:asf:request:parameter", "authenticatorId");
+    }
+    return jsString(authenticatorId);
+}
+
+/**
  * Get the verification ID from the state or from the request.
  */
 function getVerificationId() {
@@ -171,7 +278,7 @@ function getUsernameFromSession() {
 function getUsername() {
     var username = state.get("username");
     if(username == null) {
-        username = context.get(Scope.SESSION, "urn:ibm:security:asf:response:token:attributes", "username");
+        username = getUsernameFromSession();
     }
     if(username == null) {
         username = context.get(Scope.REQUEST, "urn:ibm:security:asf:request:parameter", "username");

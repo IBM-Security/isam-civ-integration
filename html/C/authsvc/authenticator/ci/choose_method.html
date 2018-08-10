@@ -49,7 +49,7 @@
                 var illustration_div = document.createElement('div');
                 illustration_div.className = "method-illustration";
                 var image = document.createElement('img');
-                image.src = "./static/design_images/" + type + ".svg";
+                image.src = "static/design_images/" + type + ".svg";
                 image.alt = "illustration";
                 illustration_div.appendChild(image);
 
@@ -71,17 +71,18 @@
         for(var i = 0; i < signature_methods.length; i++) {
 
             var signature_method = signature_methods[i];
+            var id = signature_method['id'];
             var authenticator = signature_method["_embedded"];
-            var id = authenticator['id'];
+            var authenticatorId = authenticator['id'];
 
             var enabled = authenticator['enabled'];
             if(enabled) {
                 var type = signature_method["methodType"];
                 var subType = signature_method["subType"];
 
-                var imgsrc = "./static/design_images/" + subType +".svg";
+                var imgsrc = "static/design_images/" + subType +".svg";
                 if(subType == "eye" || subType == "iris" || subType == "retina") {
-                    imgsrc = "./static/design_images/face.svg";
+                    imgsrc = "static/design_images/face.svg";
                 }
 
                 var method_div = document.createElement('div');
@@ -114,11 +115,20 @@
                 method_div.appendChild(illustration_div);
 
                 var info_div = document.createElement('div');
-                info_div.className = "method-info";
+                info_div.classList.add("method-info");
+                info_div.classList.add("verify-method-info");
                 var info_title_div = document.createElement('div');
                 info_title_div.className = "method-title";
-                info_title_div.textContent = inMsg.ibmVerify + " - " + inMsg[subType];
+                info_title_div.textContent = inMsg.ibmVerify;
                 info_div.appendChild(info_title_div);
+                var method_info_div = document.createElement('div');
+                method_info_div.className = "sc-device-type";
+                method_info_div.textContent = inMsg[subType];
+                info_div.appendChild(method_info_div);
+                var device_info_div = document.createElement('div');
+                device_info_div.className = "sc-device-type";
+                device_info_div.textContent = authenticator.attributes.deviceName + ' (' + authenticator.attributes.deviceType + ')';
+                info_div.appendChild(device_info_div);
 
                 method_div.appendChild(info_div);
 
@@ -130,9 +140,9 @@
 
             var transient_method = transient_methods[i];
 
-            var imgsrc = "./static/design_images/emailotp.svg";
+            var imgsrc = "static/design_images/emailotp.svg";
             if(transient_method == "transientsms") {
-                imgsrc = "./static/design_images/smsotp.svg";
+                imgsrc = "static/design_images/smsotp.svg";
             }
 
             var method_div = document.createElement('div');

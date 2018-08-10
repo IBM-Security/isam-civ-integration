@@ -791,8 +791,8 @@
 }
  .main-container.choose-main-container {
      height: calc(100% - 45px);
-     left: calc((100% - 875px) / 2);
-     width: 875px;
+     left: calc((100% - 955px) / 2);
+     width: 955px;
      padding-bottom: 0px;
 }
  .header-container.choose-header-container {
@@ -808,9 +808,9 @@
      position: relative;
      display: block;
      float: left;
-     max-width: 180px;
+     max-width: 200px;
      width: 25%;
-     min-height: 180px;
+     min-height: 200px;
      margin-right: 30px;
      margin-bottom: 30px;
      box-sizing: border-box;
@@ -837,7 +837,7 @@
  .method-container .method .method-illustration {
      position: absolute;
      left: calc(50% - 70px);
-     bottom: 44px;
+     top: 26px;
      width: 140px;
 }
  .method-container .method .method-illustration img {
@@ -845,12 +845,15 @@
 }
  .method-container .method .method-info {
      position: absolute;
-     top: 126px;
+     top: 124px;
      left: 24px;
      margin-right:24px;
      font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
-     height: 40px;
+     height: 60px;
      display: flex;
+}
+ .method-container .method .verify-method-info {
+     display: inline;
 }
  .method-container .method .method-info .method-title {
      font-size: 14px;

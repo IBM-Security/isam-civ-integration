@@ -1,1 +1,1 @@
-{"qrCode":"@QRCODE@", "id": "@ID@", "mechanism": "@MECHANISM_ID@", "stateId": "@STATE@", "location": "@ACTION@"}
+{"qrCode":"@QRCODE@", "accountName": "@ACCOUNT_NAME@", "mechanism": "@MECHANISM_ID@", "stateId": "@STATE@", "location": "@ACTION@"}

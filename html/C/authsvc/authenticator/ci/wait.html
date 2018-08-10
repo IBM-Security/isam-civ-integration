@@ -8,18 +8,28 @@
     <link rel="stylesheet" type="text/css" href="/sps/static/ci.css"></link>
     <script src="/sps/static/ciI18n.js"></script>
     <script>
+
     function cancel() {
       document.getElementById("cancelForm").submit();
     }
+
     function populateStrings() {
         document.title = inMsg.ibmVerify;
         document.getElementsByClassName("pageTitle")[0].textContent = inMsg.ibmVerify;
         document.getElementById("instructions").textContent = inMsg.verifyInstructions;
         document.getElementById("cancel_button").value = inMsg.back;
     }
+
+    function startup() {
+        populateStrings();
+
+        setTimeout(function () {
+            document.getElementById("pollForm").submit();
+        }, 2000);
+    }
     </script>
   </head>
-  <body onload="populateStrings()">
+  <body onload="startup()">
     <div class="content">
       <div class="main-container">
         <div class="header-container ">
@@ -37,6 +47,10 @@
     <form id="cancelForm" method="post" action="@ACTION@" autocomplete="off">
         <input type="hidden" name="operation" value="verify" />
         <input type="hidden" name="action" value="initiate" />
+    </form>
+    <form id="pollForm" method="post" action="@ACTION@" autocomplete="off">
+        <input type="hidden" name="operation" value="verify" />
+        <input type="hidden" name="action" value="poll" />
     </form>
   </body>
 </html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="/sps/static/design.css"></link>
+    <link rel="stylesheet" type="text/css" href="/sps/static/ci.css"></link>
+    <link rel="stylesheet" type="text/css" href="/sps/static/ci-popup.css"></link>
+    <script src="/sps/static/ciI18n.js"></script>
+    <script src="/sps/mga/user/mgmt/html/common.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+    var deviceName = "@DEVICE_NAME@";
+    var type = "@TYPE@";
+
+    function submitDone() {
+        document.getElementById("doneForm").submit();
+    }
+
+    function populateStrings() {
+        document.title = ciMsg.ibmVerify;
+        document.querySelector('h3').textContent = ciMsg.success;
+        if(type == "verify" || type == "totp") {
+            document.querySelector('h1').textContent = ciMsg.deviceConnected;
+            if(deviceName != null && deviceName != "") {
+                document.querySelector('#done-section p').textContent = ciMsg.deviceReady.replace("DEVICE_NAME", deviceName)
+            } else {
+                document.querySelector('#done-section p').textContent = ciMsg.authenticatorReady;
+            }
+        } else if(type == "smsotp") {
+            document.querySelector('h1').textContent = ciMsg.mobileConnected;
+            document.querySelector('#done-section p').textContent = ciMsg.smsReady;
+        } else if(type == "emailotp") {
+            document.querySelector('h1').textContent = ciMsg.emailConnected;
+            document.querySelector('#done-section p').textContent = ciMsg.emailReady;
+        }
+        document.querySelector("#done-section .button-bottom").textContent = ciMsg.done;
+    }
+
+    function startup() {
+        populateStrings();
+    }
+    </script>
+
+    <style>
+        a {color: #0F6DFF !important;}
+    </style>
+  </head>
+  <body onload="startup()">
+    <div id="dialog" style="z-index: 2000; box-sizing: initial; display: block;">
+        <div class="dialog-window" style="z-index: 2000;">
+            <section id="done-section" class="dialog-content dialog-content--visible">
+                <div class="layout-large-right">
+                    <h3>Success!</h3>
+                    <h1>Your device is connected</h1>
+                    <p class="type-body-m">Now you can use DEVICE_NAME to verify your identity as a second step when signing in.</p>
+
+                    <button onclick="submitDone();" class="button-1 button-bottom" type="button" tabindex="1">Done</button>
+                </div>
+                <div class="layout-left" style="background-color:#ECECEC;">
+                    <div class="welcome-illustrations">
+                        <img src="./static/design_images/verify_approve.svg" class="launch-animation" />
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    <form id="doneForm" method="POST" action="@ACTION@">
+      <input type="hidden" name="action" value="done">
+      <input type="hidden" name="operation" value="verify">
+    </form>
+  </body>
+</html>

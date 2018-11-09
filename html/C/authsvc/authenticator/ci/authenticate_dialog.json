@@ -1,0 +1,1 @@
+{"methods": @AUTH_METHODS@, "signature_methods": @SIGNATURE_METHODS@, "transient_methods": @TRANSIENT_METHODS@, "mechanism": "@MECHANISM_ID@", "stateId": "@STATE@", "location": "@ACTION@"}

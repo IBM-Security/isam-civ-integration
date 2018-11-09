@@ -59,7 +59,7 @@
                 info_div.className = "method-info";
                 var info_title_div = document.createElement('div');
                 info_title_div.className = "method-title";
-                info_title_div.textContent = inMsg[type];
+                info_title_div.textContent = ciMsg[type];
                 info_div.appendChild(info_title_div);
 
                 method_div.appendChild(info_div);
@@ -119,11 +119,11 @@
                 info_div.classList.add("verify-method-info");
                 var info_title_div = document.createElement('div');
                 info_title_div.className = "method-title";
-                info_title_div.textContent = inMsg.ibmVerify;
+                info_title_div.textContent = ciMsg.ibmVerify;
                 info_div.appendChild(info_title_div);
                 var method_info_div = document.createElement('div');
                 method_info_div.className = "sc-device-type";
-                method_info_div.textContent = inMsg[subType];
+                method_info_div.textContent = ciMsg[subType];
                 info_div.appendChild(method_info_div);
                 var device_info_div = document.createElement('div');
                 device_info_div.className = "sc-device-type";
@@ -176,7 +176,7 @@
             info_div.className = "method-info";
             var info_title_div = document.createElement('div');
             info_title_div.className = "method-title";
-            info_title_div.textContent = inMsg[transient_method];
+            info_title_div.textContent = ciMsg[transient_method];
             info_div.appendChild(info_title_div);
 
             method_div.appendChild(info_div);
@@ -192,9 +192,9 @@
     }
 
     function populateStrings() {
-        document.title = inMsg.authMethodSelection;
-        document.getElementsByClassName("pageTitle")[0].textContent = inMsg.authenticate;
-        document.getElementsByClassName("empty-method-container")[0].textContent = inMsg.nothingConnected;
+        document.title = ciMsg.authMethodSelection;
+        document.getElementsByClassName("pageTitle")[0].textContent = ciMsg.authenticate;
+        document.getElementsByClassName("empty-method-container")[0].textContent = ciMsg.nothingConnected;
     }
 
     function startup() {
@@ -202,7 +202,6 @@
         createGrid();
     }
     </script>
- <head>
   </head>
   <body onload="startup()">
     <div class="content">

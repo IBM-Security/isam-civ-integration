@@ -9,11 +9,11 @@
     <script src="/sps/mga/user/mgmt/html/common.js" type="text/javascript"></script>
     <script type="text/javascript">
     function populateStrings() {
-        document.title = inMsg.login;
-        document.getElementById("header_text").textContent = inMsg.welcome;
-        document.getElementById("submit_button").value = inMsg.submit;
-        document.getElementById("username").placeholder = inMsg.username;
-        document.getElementById("password").placeholder = inMsg.password;
+        document.title = ciMsg.login;
+        document.getElementById("header_text").textContent = ciMsg.welcome;
+        document.getElementById("submit_button").value = ciMsg.submit;
+        document.getElementById("username").placeholder = ciMsg.username;
+        document.getElementById("password").placeholder = ciMsg.password;
     }
 
     function enableButton() {
@@ -32,7 +32,6 @@
         populateStrings();
     }
     </script>
- <head>
   </head>
   <body onload="startup()">
     <div class="content">

@@ -83,9 +83,11 @@
                     var creationDate = new Date(method['creationTime']);
                     var type = method['methodType'];
                     var enabled = method['isEnabled'];
+                    var enabledPretty = enabled ? ciMsg.enabled : ciMsg.disabled;
+                    var enablePretty = !enabled ? ciMsg.enable : ciMsg.disable;
 
                     if(type != "signature") {
-                        var enabled = method['isEnabled'] ? inMsg.enabled : inMsg.disabled;
+                        var enabled = method['isEnabled'] ? ciMsg.enabled : ciMsg.disabled;
 
                         var methodDiv = document.createElement('div');
                         methodDiv.className = "sc-device";
@@ -115,7 +117,7 @@
                         var remove = document.createElement('li');
                         remove.id = method.id;
                         remove.type = type;
-                        remove.textContent = inMsg.remove;
+                        remove.textContent = ciMsg.remove;
                         dropdownList.appendChild(remove);
 
                         remove.onclick = function () {
@@ -128,16 +130,68 @@
                             deleteRequest.setRequestHeader("Content-Type", "application/json");
 
                             deleteRequest.onreadystatechange = function() {
-                                if (deleteRequest.readyState == 4 && deleteRequest.status == 200) {
-                                    if (deleteRequest.responseText == "Not found") {} else {
-                                        var json = JSON.parse(deleteRequest.responseText);
-                                        actionLocation = json.location;
-                                        refreshList();
+                                if (deleteRequest.readyState == 4) {
+                                    ajaxActive = false;
+                                    manualRequest = null;
+                                    manualData = null;
+                                    var json = null;
+                                    if(deleteRequest.responseText) {
+                                        try {
+                                            json = JSON.parse(deleteRequest.responseText);
+                                        } catch (e) {
+                                            // probably not JSON -- handle in else.
+                                        }
+                                    }
+                                    if(deleteRequest.status == 200 && json != null) {
+                                        if(json.location != null && json.location != "") {
+                                            actionLocation = json.location;
+                                        }
+                                        var errorStr = null;
+                                        if(json.exceptionMsg != null && json.exceptionMsg != "") {
+                                            // An error was thrown!
+                                            errorStr = ciMsg.deleteFailed;
+                                        }
+                                        else if(json.errorMessage != null && json.errorMessage != "") {
+                                            // An error was thrown!
+                                            errorStr = ciMsg.deleteFailed;
+                                        }
+                                        else if(json.operation != null && json.operation != "") {
+                                            // WebSEAL is giving us a weird response.
+                                            errorStr = ciMsg.deleteFailed;
+                                        }
+                                        if(errorStr != null) {
+                                            showList();
+                                            notify(errorStr, true);
+                                        } else {
+                                            refreshList();
+                                        }
+                                    } else {
+                                        var errorStr = ciMsg.deleteFailedNoState;
+                                        if (json != null) {
+                                            if(json.location != null && json.location != "") {
+                                                actionLocation = json.location;
+                                            }
+                                            errorStr = ciMsg.deleteFailed;
+                                            if(json.error != null) {
+                                                errorStr = json.error;
+                                            }
+                                        }
+                                        showList();
+                                        notify(errorStr, true);
                                     }
                                 }
                             };
 
-                            deleteRequest.send(JSON.stringify(data));
+                            if (ajaxTimer != null) {
+                                window.clearTimeout(ajaxTimer);
+                            }
+                            if (!ajaxActive) {
+                                ajaxActive = true;
+                                deleteRequest.send(JSON.stringify(data));
+                            } else {
+                                manualRequest = deleteRequest;
+                                manualData = JSON.stringify(data);
+                            }
                         };
 
                         dropdownDiv.appendChild(dropdownList);
@@ -155,12 +209,25 @@
                         infoDiv.className = "sc-device-info";
                         var infoTitleDiv = document.createElement('div');
                         infoTitleDiv.className = "sc-device-title";
-                        infoTitleDiv.textContent = inMsg[type];
+                        infoTitleDiv.textContent = ciMsg[type];
                         infoDiv.appendChild(infoTitleDiv);
-                        var infoTitleDiv = document.createElement('div');
-                        infoTitleDiv.className = "sc-device-enabled";
-                        infoTitleDiv.textContent = enabled;
-                        infoDiv.appendChild(infoTitleDiv);
+                        if(type == "smsotp" || type == "emailotp") {
+                            var extraInfo = "";
+                            if(type == "emailotp") {
+                                extraInfo = method['attributes'].otpDeliveryEmailAddress;
+                            } else if(type == "smsotp") {
+                                extraInfo = method['attributes'].otpDeliveryMobileNumber;
+                            }
+                            extraInfo = extraInfo.replace(/\*/g, "•");
+                            var deviceInfoDiv = document.createElement('div');
+                            deviceInfoDiv.className = "sc-device-type";
+                            deviceInfoDiv.textContent = extraInfo;
+                            infoDiv.appendChild(deviceInfoDiv);
+                        }
+                        var enabledTitleDiv = document.createElement('div');
+                        enabledTitleDiv.className = "sc-device-enabled";
+                        enabledTitleDiv.textContent = enabled;
+                        infoDiv.appendChild(enabledTitleDiv);
                         methodDiv.appendChild(infoDiv);
                         deviceContainerDiv.appendChild(methodDiv);
                     }
@@ -172,8 +239,8 @@
                     var type = "verify";
                     var enabled = authenticator['enabled'];
                     var creationDate = new Date(authenticator['creationTime']);
-                    var enabledPretty = enabled ? inMsg.enabled : inMsg.disabled;
-                    var enablePretty = !enabled ? inMsg.enable : inMsg.disable;
+                    var enabledPretty = enabled ? ciMsg.enabled : ciMsg.disabled;
+                    var enablePretty = !enabled ? ciMsg.enable : ciMsg.disable;
                     var imgsrc = "static/design_images/fingerprint.svg";
 
                     var methodDiv = document.createElement('div');
@@ -210,7 +277,7 @@
                     var remove = document.createElement('li');
                     remove.id = id;
                     remove.type = type;
-                    remove.textContent = inMsg.remove;
+                    remove.textContent = ciMsg.remove;
                     dropdownList.appendChild(remove);
 
                     enable.onclick = function () {
@@ -221,15 +288,67 @@
                         updateRequest.setRequestHeader("Content-Type", "application/json");
 
                         updateRequest.onreadystatechange = function() {
-                            if (updateRequest.readyState == 4 && updateRequest.status == 200) {
-                                if (updateRequest.responseText == "Not found") {} else {
-                                    var json = JSON.parse(updateRequest.responseText);
-                                    actionLocation = json.location;
-                                    refreshList();
+                            if (updateRequest.readyState == 4) {
+                                ajaxActive = false;
+                                manualRequest = null;
+                                manualData = null;
+                                var json = null;
+                                if(updateRequest.responseText) {
+                                    try {
+                                        json = JSON.parse(updateRequest.responseText);
+                                    } catch (e) {
+                                        // probably not JSON -- handle in else.
+                                    }
+                                }
+                                if(updateRequest.status == 200 && json != null) {
+                                    if(json.location != null && json.location != "") {
+                                        actionLocation = json.location;
+                                    }
+                                    var errorStr = null;
+                                    if(json.exceptionMsg != null && json.exceptionMsg != "") {
+                                        // An error was thrown!
+                                        errorStr = ciMsg.updateFailed;
+                                    }
+                                    else if(json.errorMessage != null && json.errorMessage != "") {
+                                        // An error was thrown!
+                                        errorStr = ciMsg.updateFailed;
+                                    }
+                                    else if(json.operation != null && json.operation != "") {
+                                        // WebSEAL is giving us a weird response.
+                                        errorStr = ciMsg.updateFailed;
+                                    }
+                                    if(errorStr != null) {
+                                        showList();
+                                        notify(errorStr, true);
+                                    } else {
+                                        refreshList();
+                                    }
+                                } else {
+                                    var errorStr = ciMsg.updateFailedNoState;
+                                    if (json != null) {
+                                        if(json.location != null && json.location != "") {
+                                            actionLocation = json.location;
+                                        }
+                                        errorStr = ciMsg.updateFailed;
+                                        if(json.error != null) {
+                                            errorStr = json.error;
+                                        }
+                                    }
+                                    showList();
+                                    notify(errorStr, true);
                                 }
                             }
                         };
-                        updateRequest.send(JSON.stringify(data));
+                        if (ajaxTimer != null) {
+                            window.clearTimeout(ajaxTimer);
+                        }
+                        if (!ajaxActive) {
+                            ajaxActive = true;
+                            updateRequest.send(JSON.stringify(data));
+                        } else {
+                            manualRequest = updateRequest;
+                            manualData = JSON.stringify(data);
+                        }
                     };
                     remove.onclick = function () {
                         hideList();
@@ -241,16 +360,68 @@
                         deleteRequest.setRequestHeader("Content-Type", "application/json");
 
                         deleteRequest.onreadystatechange = function() {
-                            if (deleteRequest.readyState == 4 && deleteRequest.status == 200) {
-                                if (deleteRequest.responseText == "Not found") {} else {
-                                    var json = JSON.parse(deleteRequest.responseText);
-                                    actionLocation = json.location;
-                                    refreshList();
+                            if (deleteRequest.readyState == 4) {
+                                ajaxActive = false;
+                                manualRequest = null;
+                                manualData = null;
+                                var json = null;
+                                if(deleteRequest.responseText) {
+                                    try {
+                                        json = JSON.parse(deleteRequest.responseText);
+                                    } catch (e) {
+                                        // probably not JSON -- handle in else.
+                                    }
+                                }
+                                if(deleteRequest.status == 200 && json != null) {
+                                    if(json.location != null && json.location != "") {
+                                        actionLocation = json.location;
+                                    }
+                                    var errorStr = null;
+                                    if(json.exceptionMsg != null && json.exceptionMsg != "") {
+                                        // An error was thrown!
+                                        errorStr = ciMsg.deleteFailed;
+                                    }
+                                    else if(json.errorMessage != null && json.errorMessage != "") {
+                                        // An error was thrown!
+                                        errorStr = ciMsg.deleteFailed;
+                                    }
+                                    else if(json.operation != null && json.operation != "") {
+                                        // WebSEAL is giving us a weird response.
+                                        errorStr = ciMsg.updateFailed;
+                                    }
+                                    if(errorStr != null) {
+                                        showList();
+                                        notify(errorStr, true);
+                                    } else {
+                                        refreshList();
+                                    }
+                                } else {
+                                    var errorStr = ciMsg.deleteFailedNoState;
+                                    if (json != null) {
+                                        if(json.location != null && json.location != "") {
+                                            actionLocation = json.location;
+                                        }
+                                        errorStr = ciMsg.deleteFailed;
+                                        if(json.error != null) {
+                                            errorStr = json.error;
+                                        }
+                                    }
+                                    showList();
+                                    notify(errorStr, true);
                                 }
                             }
                         };
 
-                        deleteRequest.send(JSON.stringify(data));
+                        if (ajaxTimer != null) {
+                            window.clearTimeout(ajaxTimer);
+                        }
+                        if (!ajaxActive) {
+                            ajaxActive = true;
+                            deleteRequest.send(JSON.stringify(data));
+                        } else {
+                            manualRequest = deleteRequest;
+                            manualData = JSON.stringify(data);
+                        }
                     };
                     dropdownDiv.appendChild(dropdownList);
                     methodDiv.appendChild(dropdownDiv);
@@ -267,11 +438,11 @@
                     infoDiv.className = "sc-device-info";
                     var infoTitleDiv = document.createElement('div');
                     infoTitleDiv.className = "sc-device-title";
-                    infoTitleDiv.textContent = inMsg.ibmVerify;
+                    infoTitleDiv.textContent = ciMsg.ibmVerify;
                     infoDiv.appendChild(infoTitleDiv);
                     var deviceInfoDiv = document.createElement('div');
                     deviceInfoDiv.className = "sc-device-type";
-                    deviceInfoDiv.textContent = authenticator.attributes.deviceName + ' (' + authenticator.attributes.deviceType + ')';
+                    deviceInfoDiv.textContent = authenticator.attributes.deviceName + ' (' + authenticator.attributes.deviceType + " " + (authenticator.attributes.deviceType.startsWith("i") ? "iOS " : "Android ") + authenticator.attributes.osVersion + ')';
                     infoDiv.appendChild(deviceInfoDiv);
                     var enabledTitleDiv = document.createElement('div');
                     enabledTitleDiv.className = "sc-device-enabled";
@@ -301,10 +472,22 @@
                 request.setRequestHeader("Content-Type", "application/json");
 
                 request.onreadystatechange = function() {
-                    if (request.readyState == 4 && request.status == 200) {
-                        if (request.responseText == "Not found") {} else {
-                            var json = JSON.parse(request.responseText);
-                            actionLocation = json.location;
+                    if (request.readyState == 4) {
+                        ajaxActive = false;
+                        manualRequest = null;
+                        manualData = null;
+                        var json = null;
+                        if(request.responseText) {
+                            try {
+                                json = JSON.parse(request.responseText);
+                            } catch (e) {
+                                // probably not JSON -- handle in else.
+                            }
+                        }
+                        if(request.status == 200 && json != null && json.methods != null) {
+                            if(json.location != null && json.location != "") {
+                                actionLocation = json.location;
+                            }
                             methods = json.methods;
                             authenticators = json.authenticators;
                             document.getElementById("authenticatorsTotal").textContent = json.authenticators.length;
@@ -316,10 +499,33 @@
                             }
                             populateDevices();
                             showList();
+                        } else {
+                            var errorStr = ciMsg.refreshFailedNoState;
+                            if (json != null) {
+                                if(json.location != null && json.location != "") {
+                                    actionLocation = json.location;
+                                }
+                                errorStr = ciMsg.refreshFailed;
+                                if(json.error != null) {
+                                    errorStr = json.error;
+                                }
+                            }
+                            showList();
+                            notify(errorStr, true);
                         }
                     }
                 };
-                request.send(JSON.stringify(data));
+
+                if (ajaxTimer != null) {
+                    window.clearTimeout(ajaxTimer);
+                }
+                if (!ajaxActive) {
+                    ajaxActive = true;
+                    request.send(JSON.stringify(data));
+                } else {
+                    manualRequest = request;
+                    manualData = JSON.stringify(data);
+                }
             }
 
             function hideList() {
@@ -386,7 +592,7 @@
                     incomingSection = document.querySelector('[data-name="section-mobile-choose"]');
                     outgoingSection.querySelector('#otpDelivery').value = "";
                     outgoingSection.querySelector('#countryCode').textContent = "+1";
-                    outgoingSection.querySelector('#countryDropdown').textContent = inMsg.country;
+                    outgoingSection.querySelector('#countryDropdown').textContent = ciMsg.country;
                 }
 
                 var incomingSectionRightPane = incomingSection.querySelector('.layout-right');
@@ -587,10 +793,7 @@
             }
 
             function closeDialog() {
-                if(document.querySelector('.dialog-content--visible').getAttribute('data-name') == "section-connectaccount" ||
-                        document.querySelector('.dialog-content--visible').getAttribute('data-name') == "section-totp-validation") {
-                    resetQRCode();
-                }
+                resetQRCode();
 
                 if (document.querySelector('.overlay') != null){
                     document.querySelector('.overlay').classList.add('close-overlay');
@@ -634,7 +837,7 @@
 
                 document.querySelector('.sms-container #otpDelivery').value = "";
                 document.querySelector('.sms-container #countryCode').textContent = "+1";
-                document.querySelector('.sms-container #countryDropdown').textContent = inMsg.country;
+                document.querySelector('.sms-container #countryDropdown').textContent = ciMsg.country;
                 document.querySelector('.email-container #otpDelivery').value = "";
 
                 if(refreshRequired) {
@@ -644,9 +847,9 @@
                 pollCount = 0;
             }
 
-            var countries = [inMsg.AD, inMsg.AT, inMsg.AU, inMsg.BE, inMsg.BM, inMsg.CA, inMsg.CY, inMsg.CZ, inMsg.DK, inMsg.EE, inMsg.FO, inMsg.FI, inMsg.FR, inMsg.DE, inMsg.GR, inMsg.GL, inMsg.HK, inMsg.IS, inMsg.IN, inMsg.IE, inMsg.IL, inMsg.IT, inMsg.JP, inMsg.LI, inMsg.LU, inMsg.MT, inMsg.MC, inMsg.NL, inMsg.NZ, inMsg.NO, inMsg.PH, inMsg.PL, inMsg.PT, inMsg.SM, inMsg.SA, inMsg.SG, inMsg.SK, inMsg.SI, inMsg.ES, inMsg.SE, inMsg.CH, inMsg.TH, inMsg.AE, inMsg.GB, inMsg.US];
+            var countries = [ciMsg.AD, ciMsg.AT, ciMsg.AU, ciMsg.BE, ciMsg.BM, ciMsg.CA, ciMsg.CY, ciMsg.CZ, ciMsg.DK, ciMsg.EE, ciMsg.FO, ciMsg.FI, ciMsg.FR, ciMsg.DE, ciMsg.GR, ciMsg.GL, ciMsg.HK, ciMsg.IS, ciMsg.IN, ciMsg.IE, ciMsg.IL, ciMsg.IT, ciMsg.JP, ciMsg.LI, ciMsg.LU, ciMsg.MT, ciMsg.MC, ciMsg.NL, ciMsg.NZ, ciMsg.NO, ciMsg.PH, ciMsg.PL, ciMsg.PT, ciMsg.SM, ciMsg.SA, ciMsg.SG, ciMsg.SK, ciMsg.SI, ciMsg.ES, ciMsg.SE, ciMsg.CH, ciMsg.TH, ciMsg.AE, ciMsg.GB, ciMsg.US];
             //["Andorra","Austria","Australia","Belgium","Bermuda","Canada","Cyprus","Czech Republic","Denmark","Estonia","Faroe Islands","Finland","France","Germany","Greece","Greenland","Hong Kong","Iceland","India","Ireland","Israel","Italy","Japan","Liechtenstein","Luxembourg","Malta","Monaco","Netherlands","New Zealand","Norway","Philippines","Poland","Portugal","San Marino","Saudi Arabia","Singapore","Slovakia","Slovenia","Spain","Sweden","Switzerland","Thailand","United Arab Emirates","United Kingdom","United States"];
-            var phoneCodes = {}; phoneCodes[inMsg.AD] = "+376"; phoneCodes[inMsg.AT] = "+43"; phoneCodes[inMsg.AU] = "+61"; phoneCodes[inMsg.BE] = "+32"; phoneCodes[inMsg.BM] = "+809"; phoneCodes[inMsg.CA] = "+1"; phoneCodes[inMsg.CY] = "+357"; phoneCodes[inMsg.CZ] = "+420"; phoneCodes[inMsg.DK] = "+45"; phoneCodes[inMsg.EE] = "+372"; phoneCodes[inMsg.FO] = "+298"; phoneCodes[inMsg.FI] = "+358"; phoneCodes[inMsg.FR] = "+33"; phoneCodes[inMsg.DE] = "+49"; phoneCodes[inMsg.GR] = "+30"; phoneCodes[inMsg.GL] = "+299"; phoneCodes[inMsg.HK] = "+852"; phoneCodes[inMsg.IS] = "+354"; phoneCodes[inMsg.IN] = "+91"; phoneCodes[inMsg.IE] = "+353"; phoneCodes[inMsg.IL] = "+972"; phoneCodes[inMsg.IT] = "+39"; phoneCodes[inMsg.JP] = "+81"; phoneCodes[inMsg.LI] = "+423"; phoneCodes[inMsg.LU] = "+352"; phoneCodes[inMsg.MT] = "+356"; phoneCodes[inMsg.MC] = "+33"; phoneCodes[inMsg.NL] = "+31"; phoneCodes[inMsg.NZ] = "+64"; phoneCodes[inMsg.NO] = "+47"; phoneCodes[inMsg.PH] = "+63"; phoneCodes[inMsg.PL] = "+48"; phoneCodes[inMsg.PT] = "+351"; phoneCodes[inMsg.SM] = "+378"; phoneCodes[inMsg.SA] = "+966"; phoneCodes[inMsg.SG] = "+65"; phoneCodes[inMsg.SK] = "+421"; phoneCodes[inMsg.SI] = "+386"; phoneCodes[inMsg.ES] = "+34"; phoneCodes[inMsg.SE] = "+46"; phoneCodes[inMsg.CH] = "+41"; phoneCodes[inMsg.TH] = "+66"; phoneCodes[inMsg.AE] = "+971"; phoneCodes[inMsg.GB] = "+44"; phoneCodes[inMsg.US] = "+1";
+            var phoneCodes = {}; phoneCodes[ciMsg.AD] = "+376"; phoneCodes[ciMsg.AT] = "+43"; phoneCodes[ciMsg.AU] = "+61"; phoneCodes[ciMsg.BE] = "+32"; phoneCodes[ciMsg.BM] = "+809"; phoneCodes[ciMsg.CA] = "+1"; phoneCodes[ciMsg.CY] = "+357"; phoneCodes[ciMsg.CZ] = "+420"; phoneCodes[ciMsg.DK] = "+45"; phoneCodes[ciMsg.EE] = "+372"; phoneCodes[ciMsg.FO] = "+298"; phoneCodes[ciMsg.FI] = "+358"; phoneCodes[ciMsg.FR] = "+33"; phoneCodes[ciMsg.DE] = "+49"; phoneCodes[ciMsg.GR] = "+30"; phoneCodes[ciMsg.GL] = "+299"; phoneCodes[ciMsg.HK] = "+852"; phoneCodes[ciMsg.IS] = "+354"; phoneCodes[ciMsg.IN] = "+91"; phoneCodes[ciMsg.IE] = "+353"; phoneCodes[ciMsg.IL] = "+972"; phoneCodes[ciMsg.IT] = "+39"; phoneCodes[ciMsg.JP] = "+81"; phoneCodes[ciMsg.LI] = "+423"; phoneCodes[ciMsg.LU] = "+352"; phoneCodes[ciMsg.MT] = "+356"; phoneCodes[ciMsg.MC] = "+33"; phoneCodes[ciMsg.NL] = "+31"; phoneCodes[ciMsg.NZ] = "+64"; phoneCodes[ciMsg.NO] = "+47"; phoneCodes[ciMsg.PH] = "+63"; phoneCodes[ciMsg.PL] = "+48"; phoneCodes[ciMsg.PT] = "+351"; phoneCodes[ciMsg.SM] = "+378"; phoneCodes[ciMsg.SA] = "+966"; phoneCodes[ciMsg.SG] = "+65"; phoneCodes[ciMsg.SK] = "+421"; phoneCodes[ciMsg.SI] = "+386"; phoneCodes[ciMsg.ES] = "+34"; phoneCodes[ciMsg.SE] = "+46"; phoneCodes[ciMsg.CH] = "+41"; phoneCodes[ciMsg.TH] = "+66"; phoneCodes[ciMsg.AE] = "+971"; phoneCodes[ciMsg.GB] = "+44"; phoneCodes[ciMsg.US] = "+1";
 
             function countryDropdown(button) {
                 if(button.parentNode.children[1].style.display == "block") {
@@ -674,26 +877,53 @@
                     pollCount = 30;
                 } else {
                     data = {"action":"register", "type":"totp"};
+                    document.querySelector("[data-name=section-connectaccount] .button-1").classList.remove("hidden");
                 }
                 registerRequest = new XMLHttpRequest();
                 registerRequest.onreadystatechange = processRegisterRequest;
                 registerRequest.open("PUT", actionLocation, true);
                 registerRequest.setRequestHeader("Accept", "application/json");
                 registerRequest.setRequestHeader("Content-Type", "application/json");
-                registerRequest.send(JSON.stringify(data));
+
+                if (ajaxTimer != null) {
+                    window.clearTimeout(ajaxTimer);
+                }
+                if (!ajaxActive) {
+                    ajaxActive = true;
+                    registerRequest.send(JSON.stringify(data));
+                } else {
+                    manualRequest = registerRequest;
+                    manualData = JSON.stringify(data);
+                }
             }
 
             function processRegisterRequest() {
-                if (registerRequest.readyState == 4 && registerRequest.status == 200) {
-                    if (registerRequest.responseText == "Not found") {} else {
-                        var json = JSON.parse(registerRequest.responseText);
-                        actionLocation = json.location;
+                if (registerRequest.readyState == 4) {
+                    ajaxActive = false;
+                    manualRequest = null;
+                    manualData = null;
+                    var json = null;
+                    if(registerRequest.responseText) {
+                        try {
+                            json = JSON.parse(registerRequest.responseText);
+                        } catch (e) {
+                            // probably not JSON -- handle in else.
+                        }
+                    }
+                    if(registerRequest.status == 200 && json != null) {
+                        if(json.location != null && json.location != "") {
+                            actionLocation = json.location;
+                        }
                         if(json.exceptionMsg != null && json.exceptionMsg != "") {
                             // Error state!
                             displayQRCodeError(json.exceptionMsg);
                         }
                         else if(json.errorMessage != null && json.errorMessage != "") {
                             // Error state!
+                            displayQRCodeError(json.errorMessage);
+                        }
+                        else if(json.operation != null && json.operation != "") {
+                            // WebSEAL is giving us a weird response.
                             displayQRCodeError(json.errorMessage);
                         } else {
                             refreshRequired = true;
@@ -702,17 +932,40 @@
                             } else {
                                 displayQRCode(json.attributes.qrCode);
                             }
-                            pollEnrollment();
+                            if(type == "verify") {
+                                ajaxTimer = setTimeout(pollEnrollment, 2000);
+                            }
                         }
+                    } else {
+                        var errorStr = ciMsg.qrCodeError;
+                        if(json != null) {
+                            if(json.location != null && json.location != "") {
+                                actionLocation = json.location;
+                            }
+                            if(json.exceptionMsg != null && json.exceptionMsg != "") {
+                                // Error state!
+                                errorStr = json.exceptionMsg;
+                            }
+                            else if(json.errorMessage != null && json.errorMessage != "") {
+                                // Error state!
+                                errorStr = json.errorMessage;
+                            }
+                        }
+                        displayQRCodeError(errorStr);
                     }
                 }
             }
 
             var pollCount = 30;
+            var ajaxTimer = null; // points to the result of setTimeout, so that a pending poll can be canceled
+            var ajaxActive = false; // is an ajax operation to the apiauthsvc currently active
+            var manualRequest = null;
+            var manualData = null;
 
             function pollEnrollment() {
                 if(pollCount > 0) {
-                    var data = {"action":"pollEnrollment", "type":type};
+                    ajaxActive = true; 	
+                    var data = {"action":"pollEnrollment"};
                     var pollRequest = new XMLHttpRequest();
                     pollRequest.onreadystatechange =  function() {processPollRequest(pollRequest);};
                     pollRequest.open("PUT", actionLocation, true);
@@ -724,13 +977,23 @@
             }
 
             function processPollRequest(request) {
-                if (request.readyState == 4 && request.status == 200) {
-                    if (request.responseText == "Not found") {} else {
-                        var json = JSON.parse(request.responseText);
-                        actionLocation = json.location;
+                if (request.readyState == 4) {
+                    ajaxActive = false;
+                    var json = null;
+                    if(request.responseText) {
+                        try {
+                            json = JSON.parse(request.responseText);
+                        } catch (e) {
+                            // probably not JSON -- handle in else.
+                        }
+                    }
+                    if(request.status == 200 && json != null) {
+                        if(json.location != null && json.location != "") {
+                            actionLocation = json.location;
+                        }
                         if(json.status == "success") {
                             closeDialog();
-                        } else if(json.status == "successfulTOTP") {
+                        } else if(json.status == "successWithTOTP") {
                             if(document.getElementById("qrCode").classList.contains("hidden")) {
                                 // There was an error fetching the qr code. Don't prompt
                                 // for validation.
@@ -739,14 +1002,37 @@
                                 showContentSection(document.querySelector("[data-target='section-totp-validation']"));
                             }
                         } else if(json.status == "pending") {
-                            setTimeout(pollEnrollment, 2000);
+                            if (manualRequest == null && ajaxActive == false) {
+                                ajaxTimer = setTimeout(pollEnrollment, 2000);
+                            }
                         } else {
                             // We most likely got an error when trying to poll.
                             // Stop polling by setting pollCount to 0.
                             pollCount = 0;
                         }
+                    } else {
+                        // We most likely got an error when trying to poll.
+                        // Stop polling by setting pollCount to 0.
+                        pollCount = 0;
+                        if (json != null && json.location != null && json.location != "") {
+                            actionLocation = json.location;
+                        }
+                    }
+
+                    // If a button was pressed while we were doing the last ajax operation, 
+                    // act on it now
+                    if (manualRequest != null) {
+                        submitManualRequest();
                     }
                 }
+            }
+
+            function submitManualRequest() {
+                ajaxActive = true;
+                manualRequest.open("PUT", actionLocation, true);
+                manualRequest.setRequestHeader("Accept", "application/json");
+                manualRequest.setRequestHeader("Content-Type", "application/json");
+                manualRequest.send(manualData);
             }
 
             function displayQRCode(qrcode) {
@@ -760,8 +1046,8 @@
             function displayQRCodeError(message) {
                 Array.prototype.forEach.call(document.querySelectorAll('.qr-code-error'), function (error) {
                     if(message.includes("CSIAH0610E")) {
-                        error.querySelector('.scan b').textContent = inMsg.qrCodeErrorAlreadyEnroll;
-                        error.querySelector('.sm').textContent = inMsg.qrCodeErrorEnrollOnce;
+                        error.querySelector('.scan b').textContent = ciMsg.qrCodeErrorAlreadyEnroll;
+                        error.querySelector('.sm').textContent = ciMsg.qrCodeErrorEnrollOnce;
                     }
                     error.classList.remove('hidden');
                 });
@@ -776,8 +1062,8 @@
                 document.querySelector(".layout-right .loader").classList.remove('hidden');
                 Array.prototype.forEach.call(document.querySelectorAll('.qr-code-error'), function (error) {
                     error.classList.add('hidden');
-                    error.querySelector('.scan b').textContent = inMsg.qrCodeError;
-                    error.querySelector('.sm').textContent = inMsg.qrCodeErrorTryLater;
+                    error.querySelector('.scan b').textContent = ciMsg.qrCodeError;
+                    error.querySelector('.sm').textContent = ciMsg.qrCodeErrorTryLater;
                 });
             }
 
@@ -817,15 +1103,25 @@
                     enrollRequest.setRequestHeader("Content-Type", "application/json");
 
                     enrollRequest.onreadystatechange = function() {
-                        if (enrollRequest.readyState == 4 && enrollRequest.status == 200) {
+                        if (enrollRequest.readyState == 4) {
                             removeLoading(container, children, container.querySelector('.loader'));
 
-                            if (enrollRequest.responseText == "Not found") {} else {
-                                var json = JSON.parse(enrollRequest.responseText);
-                                actionLocation = json.location;
+                            var json = null;
+                            if(enrollRequest.responseText) {
+                                try {
+                                    json = JSON.parse(enrollRequest.responseText);
+                                } catch (e) {
+                                    // probably not JSON -- handle in else.
+                                }
+                            }
+                            if (enrollRequest.status == 200 && json != null) {
+                                if(json.location != null && json.location != "") {
+                                    actionLocation = json.location;
+                                }
 
                                 if((json.exceptionMsg != null && json.exceptionMsg != "") ||
-                                        (json.errorMessage != null && json.errorMessage != "")) {
+                                        (json.errorMessage != null && json.errorMessage != "") ||
+                                        (json.operation != null && json.operation != "")) {
                                     // Error state!
                                     container.classList.add('enrollment-failed');
 
@@ -835,7 +1131,7 @@
                                     container.querySelector('#otpDelivery').value = "";
                                     if(type == "smsotp") {
                                         container.querySelector('#countryCode').textContent = "+1";
-                                        container.querySelector('#countryDropdown').textContent = inMsg.country;
+                                        container.querySelector('#countryDropdown').textContent = ciMsg.country;
                                     }
 
                                     if(json.validationRequired == "true") {
@@ -846,6 +1142,12 @@
                                         showContentSection(button);
                                     }
                                 }
+                            } else {
+                                if (json != null && json.location != null && json.location != "") {
+                                    actionLocation = json.location;
+                                }
+                                // Error state!
+                                container.classList.add('enrollment-failed');
                             }
                         }
                     };
@@ -873,11 +1175,20 @@
                     validateRequest.setRequestHeader("Content-Type", "application/json");
 
                     validateRequest.onreadystatechange = function() {
-                        if (validateRequest.readyState == 4 && validateRequest.status == 200) {
+                        if (validateRequest.readyState == 4) {
                             removeLoading(container, children, container.children[2]);
-                            if (validateRequest.responseText == "Not found") {} else {
-                                var json = JSON.parse(validateRequest.responseText);
-                                actionLocation = json.location;
+                            var json = null;
+                            if(validateRequest.responseText) {
+                                try {
+                                    json = JSON.parse(validateRequest.responseText);
+                                } catch (e) {
+                                    // probably not JSON -- handle in else.
+                                }
+                            }
+                            if (validateRequest.status == 200 && json != null) {
+                                if(json.location != null && json.location != "") {
+                                    actionLocation = json.location;
+                                }
                                 container.querySelector('#otp').value = "";
 
                                 if(json.status == "success") {
@@ -888,6 +1199,11 @@
                                 } else {
                                     container.classList.add('validation-failed');
                                 }
+                            } else {
+                                if (json != null && json.location != null && json.location != "") {
+                                    actionLocation = json.location;
+                                }
+                                container.classList.add('validation-failed');
                             }
                         }
                     };
@@ -913,9 +1229,13 @@
                 }
                 if(type == "otp" || type == "smsotp") {
                     input.parentNode.parentNode.querySelector('[data-target="section-complete"]').disabled = !valid;
+                    input.parentNode.parentNode.classList.remove('validation-failed');
+                    input.parentNode.parentNode.classList.remove('enrollment-failed');
                 } else {
                     input.parentNode.querySelector('[data-target="section-complete"]').disabled = !valid;
+                    input.parentNode.classList.remove('enrollment-failed');
                 }
+
                 return valid;
             }
 
@@ -935,89 +1255,121 @@
                 loader.classList.add('hidden');
             }
 
+            function notify(message, sticky) {
+                var notificationRibbon = document.querySelectorAll('.intime-alert');
+
+                for (var i = 0; i < notificationRibbon.length; i ++) {
+                    var notificationText = notificationRibbon[i].querySelector('p');
+
+                    if (sticky == null){
+                        notificationText.textContent = message;
+                        notificationRibbon[i].classList.add('intime-alert--visible');
+                        removeNotify(notificationRibbon[i]);
+                    } else {
+                        notificationText = notificationRibbon[notificationRibbon.length - 1].querySelector('p');
+                        notificationText.textContent =  message;
+                        notificationText.innerHTML += ' <a href="javascript:void(0);" style="color:#000000" onclick="removeNotify(null, true)">' + ciMsg.okGotIt + '</a>';
+                        notificationRibbon[notificationRibbon.length - 1].classList.add('intime-alert--visible');
+                    }
+                }
+            }
+
+            function removeNotify(notificationRibbon, sticky){
+                if (sticky == null){
+                    setTimeout(function() {
+                        notificationRibbon.classList.remove('intime-alert--visible');
+                    }, 3000);
+                } else {
+                    var notificationRibbon = document.querySelectorAll('.intime-alert');
+                    for (var i = 0; i < notificationRibbon.length; i ++) {
+                        notificationRibbon[i].classList.remove('intime-alert--visible');
+                    }
+                }
+            }
+
             function populateStrings() {
-                document.title = inMsg.userSelfCare;
-                document.querySelector('.header h2').textContent = inMsg.userSelfCare;
-                document.querySelector('[data-name="section-welcome-authenticators"] .self-care-header h3').textContent = inMsg.twoStepVerification;
-                document.querySelector('[data-name="section-welcome-authenticators"] .self-care-header h1').textContent = inMsg.myAuthenticators;
-                document.querySelector('[data-name="section-welcome-authenticators"] .self-care-header .add-device').textContent = inMsg.add;
-                document.querySelector('[data-name="section-welcome"] h1#learn-more-title').textContent = inMsg.whatIsTwoStep;
+                document.title = ciMsg.userSelfCare;
+                document.querySelector('.header h2').textContent = ciMsg.userSelfCare;
+                document.querySelector('[data-name="section-welcome-authenticators"] .self-care-header h3').textContent = ciMsg.twoStepVerification;
+                document.querySelector('[data-name="section-welcome-authenticators"] .self-care-header h1').textContent = ciMsg.myAuthenticators;
+                document.querySelector('[data-name="section-welcome-authenticators"] .self-care-header .add-device').textContent = ciMsg.add;
+                document.querySelector('[data-name="section-welcome"] h1#learn-more-title').textContent = ciMsg.whatIsTwoStep;
                 
-                document.querySelector('.user-card .profile .email span').textContent = inMsg.emailColon;
-                document.querySelector('.user-card .profile .username span').textContent = inMsg.usernameColon;
-                document.querySelectorAll('.user-card .profile .extra span')[0].textContent = inMsg.deviceColon;
-                document.querySelectorAll('.user-card .profile .extra span')[2].textContent = inMsg.methodsColon;
+                document.querySelector('.user-card .profile .email span').textContent = ciMsg.emailColon;
+                document.querySelector('.user-card .profile .username span').textContent = ciMsg.usernameColon;
+                document.querySelectorAll('.user-card .profile .extra span')[0].textContent = ciMsg.deviceColon;
+                document.querySelectorAll('.user-card .profile .extra span')[2].textContent = ciMsg.methodsColon;
 
-                document.querySelectorAll('[data-name="section-welcome"] h2')[0].textContent = inMsg.whyYouNeedThis;
-                document.querySelectorAll('[data-name="section-welcome"] h2')[1].textContent = inMsg.howItWorks;
-                document.querySelectorAll('[data-name="section-welcome"] .unordered-list li')[0].textContent = inMsg.reason1;
-                document.querySelectorAll('[data-name="section-welcome"] .unordered-list li')[1].textContent = inMsg.reason2;
-                document.querySelectorAll('[data-name="section-welcome"] .unordered-list li')[2].textContent = inMsg.reason3;
-                document.querySelectorAll('[data-name="section-welcome"] .ordered-list li')[0].textContent = inMsg.how1;
-                document.querySelectorAll('[data-name="section-welcome"] .ordered-list li')[1].textContent = inMsg.how2;
-                document.querySelectorAll('[data-name="section-welcome"] .layout-large-left h3')[0].innerHTML = inMsg.welcomeName + "@NAME@";
-                document.querySelectorAll('[data-name="section-welcome"] .layout-large-left h1')[0].innerHTML = inMsg.strengthenYourAccount;
-                document.querySelectorAll('[data-name="section-welcome"] .layout-large-left .type-body-m')[0].textContent = inMsg.accountDesc1;
-                document.querySelectorAll('[data-name="section-welcome"] .layout-large-left .type-body-m')[1].innerHTML = inMsg.accountDesc2;
-                document.querySelector('.button-1.nav-sectionlink[data-target="section-mobile-choose"]').textContent = inMsg.getStartedMobile;
-                document.querySelector('.button-1.nav-sectionlink[data-target="section-email"]').textContent = inMsg.getStartedEmail;
-                document.querySelector('[data-name="section-welcome"] .learn-more-link').textContent = inMsg.learnMore;
+                document.querySelectorAll('[data-name="section-welcome"] h2')[0].textContent = ciMsg.whyYouNeedThis;
+                document.querySelectorAll('[data-name="section-welcome"] h2')[1].textContent = ciMsg.howItWorks;
+                document.querySelectorAll('[data-name="section-welcome"] .unordered-list li')[0].textContent = ciMsg.reason1;
+                document.querySelectorAll('[data-name="section-welcome"] .unordered-list li')[1].textContent = ciMsg.reason2;
+                document.querySelectorAll('[data-name="section-welcome"] .unordered-list li')[2].textContent = ciMsg.reason3;
+                document.querySelectorAll('[data-name="section-welcome"] .ordered-list li')[0].textContent = ciMsg.how1;
+                document.querySelectorAll('[data-name="section-welcome"] .ordered-list li')[1].textContent = ciMsg.how2;
+                document.querySelectorAll('[data-name="section-welcome"] .layout-large-left h3')[0].innerHTML = ciMsg.welcomeName + "@NAME@";
+                document.querySelectorAll('[data-name="section-welcome"] .layout-large-left h1')[0].innerHTML = ciMsg.strengthenYourAccount;
+                document.querySelectorAll('[data-name="section-welcome"] .layout-large-left .type-body-m')[0].textContent = ciMsg.accountDesc1;
+                document.querySelectorAll('[data-name="section-welcome"] .layout-large-left .type-body-m')[1].innerHTML = ciMsg.accountDesc2;
+                document.querySelector('.button-1.nav-sectionlink[data-target="section-mobile-choose"]').textContent = ciMsg.getStartedMobile;
+                document.querySelector('.button-1.nav-sectionlink[data-target="section-email"]').textContent = ciMsg.getStartedEmail;
+                document.querySelector('[data-name="section-welcome"] .learn-more-link').textContent = ciMsg.learnMore;
 
-                document.querySelector('[data-name="section-mobile-choose"] h1').textContent = inMsg.chooseMethod;
-                document.querySelector('[data-name="section-mobile-choose"] .type-body-m').textContent = inMsg.chooseDesc;
-                document.querySelector('[data-name="section-mobile-choose"] [next-target="verify"]').textContent = inMsg.mobilePush;
-                document.querySelector('[data-name="section-mobile-choose"] [next-target="totp"]').textContent = inMsg.totp;
-                document.querySelector('[data-name="section-mobile-choose"] [data-target="section-sms"]').textContent = inMsg.smsotp;
+                document.querySelector('[data-name="section-mobile-choose"] h1').textContent = ciMsg.chooseMethod;
+                document.querySelector('[data-name="section-mobile-choose"] .type-body-m').textContent = ciMsg.chooseDesc;
+                document.querySelector('[data-name="section-mobile-choose"] [next-target="verify"]').textContent = ciMsg.mobilePush;
+                document.querySelector('[data-name="section-mobile-choose"] [next-target="totp"]').textContent = ciMsg.totp;
+                document.querySelector('[data-name="section-mobile-choose"] [data-target="section-sms"]').textContent = ciMsg.smsotp;
 
-                document.querySelector('[data-name="section-download"] h1').textContent = inMsg.downloadApp;
-                document.querySelector('.download-app').alt = inMsg.downloadApp;
-                document.querySelectorAll('[data-name="section-download"] .ordered-list li')[0].innerHTML = inMsg.launchAppStore;
-                document.querySelectorAll('[data-name="section-download"] .ordered-list li')[1].textContent = inMsg.searchForVerify;
-                document.querySelectorAll('[data-name="section-download"] .ordered-list li')[2].textContent = inMsg.install;
-                document.querySelector('[data-target="section-connectaccount"]').textContent = inMsg.nextStepConnectAccount;
-                document.querySelector('[data-name="section-connectaccount"] h1').textContent = inMsg.connectYourAccount;
-                document.querySelector('[data-name="section-connectaccount"] .type-body-m').textContent = inMsg.connectYourAccountDesc;
-                document.querySelector('[data-name="section-connectaccount"] .ordered-list.qr-code').children[0].textContent = inMsg.launchIBMVerify;
-                document.querySelector('[data-name="section-connectaccount"] .ordered-list.qr-code').children[1].textContent = inMsg.tapConnectAccount;
-                document.querySelector('[data-name="section-connectaccount"] .ordered-list.qr-code').children[2].textContent = inMsg.scanQRCode;
-                document.querySelector('[data-name="section-connectaccount"] .qr-code#qrCode .scan b').textContent = inMsg.scanMe;
-                document.querySelector('[data-name="section-connectaccount"] .qr-code#qrCode .sm').textContent = inMsg.qrCodeDesc;
-                document.querySelector('[data-name="section-connectaccount"] .button-1').textContent = inMsg.finish;
-                document.querySelectorAll('[data-name="section-connectaccount"] .qr-code-error .scan b')[0].textContent = inMsg.qrCodeError;
-                document.querySelectorAll('[data-name="section-connectaccount"] .qr-code-error .sm')[0].textContent = inMsg.qrCodeErrorTryLater;
-                document.querySelectorAll('[data-name="section-connectaccount"] .qr-code-error .scan b')[1].textContent = inMsg.qrCodeError;
-                document.querySelectorAll('[data-name="section-connectaccount"] .qr-code-error .sm')[1].textContent = inMsg.qrCodeErrorTryLater;
+                document.querySelector('[data-name="section-download"] h1').textContent = ciMsg.downloadApp;
+                document.querySelector('.download-app').alt = ciMsg.downloadApp;
+                document.querySelectorAll('[data-name="section-download"] .ordered-list li')[0].innerHTML = ciMsg.launchAppStore;
+                document.querySelectorAll('[data-name="section-download"] .ordered-list li')[1].textContent = ciMsg.searchForVerify;
+                document.querySelectorAll('[data-name="section-download"] .ordered-list li')[2].textContent = ciMsg.install;
+                document.querySelector('[data-target="section-connectaccount"]').textContent = ciMsg.nextStepConnectAccount;
+                document.querySelector('[data-name="section-connectaccount"] h1').textContent = ciMsg.connectYourAccount;
+                document.querySelector('[data-name="section-connectaccount"] .type-body-m').textContent = ciMsg.connectYourAccountDesc;
+                document.querySelector('[data-name="section-connectaccount"] .ordered-list').children[0].textContent = ciMsg.launchIBMVerify;
+                document.querySelector('[data-name="section-connectaccount"] .ordered-list').children[1].textContent = ciMsg.tapConnectAccount;
+                document.querySelector('[data-name="section-connectaccount"] .ordered-list').children[2].textContent = ciMsg.scanQRCode;
+                document.querySelector('[data-name="section-connectaccount"] .qr-code#qrCode .scan b').textContent = ciMsg.scanMe;
+                document.querySelector('[data-name="section-connectaccount"] .qr-code#qrCode .sm').textContent = ciMsg.qrCodeDesc;
+                document.querySelector('[data-name="section-connectaccount"] .button-1').textContent = ciMsg.finish;
+                document.querySelectorAll('[data-name="section-connectaccount"] .qr-code-error .scan b')[0].textContent = ciMsg.qrCodeError;
+                document.querySelectorAll('[data-name="section-connectaccount"] .qr-code-error .sm')[0].textContent = ciMsg.qrCodeErrorTryLater;
+                document.querySelectorAll('[data-name="section-connectaccount"] .qr-code-error .scan b')[1].textContent = ciMsg.qrCodeError;
+                document.querySelectorAll('[data-name="section-connectaccount"] .qr-code-error .sm')[1].textContent = ciMsg.qrCodeErrorTryLater;
 
-                document.querySelector('[data-name="section-sms"] h1').textContent = inMsg.enterMobile;
-                document.querySelector('[data-name="section-sms"] #countryDropdown').textContent = inMsg.country;
-                document.querySelector('[data-name="section-sms"] .button-1').textContent = inMsg.save;
+                document.querySelector('[data-name="section-sms"] h1').textContent = ciMsg.enterMobile;
+                document.querySelector('[data-name="section-sms"] #countryDropdown').textContent = ciMsg.country;
+                document.querySelector('[data-name="section-sms"] .button-1').textContent = ciMsg.save;
                 
-                document.querySelector('[data-name="section-sms-validation"] h1').textContent = inMsg.letsMakeSure;
-                document.querySelector('[data-name="section-sms-validation"] .button-1').textContent = inMsg.validate;
+                document.querySelector('[data-name="section-sms-validation"] h1').textContent = ciMsg.letsMakeSure;
+                document.querySelector('[data-name="section-sms-validation"] .button-1').textContent = ciMsg.validate;
 
-                document.querySelector('[data-name="section-email"] h1').textContent = inMsg.enterEmail;
-                document.querySelector('[data-name="section-email"] .button-1').textContent = inMsg.save;
+                document.querySelector('[data-name="section-email"] h1').textContent = ciMsg.enterEmail;
+                document.querySelector('[data-name="section-email"] .button-1').textContent = ciMsg.save;
                 
-                document.querySelector('[data-name="section-email-validation"] h1').textContent = inMsg.letsMakeSure;
-                document.querySelector('[data-name="section-email-validation"] .button-1').textContent = inMsg.validate;
+                document.querySelector('[data-name="section-email-validation"] h1').textContent = ciMsg.letsMakeSure;
+                document.querySelector('[data-name="section-email-validation"] .button-1').textContent = ciMsg.validate;
                 
-                document.querySelector('[data-name="section-totp-validation"] h1').textContent = inMsg.letsCheck;
-                document.querySelector('[data-name="section-totp-validation"] .button-1').textContent = inMsg.validate;
+                document.querySelector('[data-name="section-totp-validation"] h1').textContent = ciMsg.letsCheck;
+                document.querySelector('[data-name="section-totp-validation"] .button-1').textContent = ciMsg.validate;
                 
-                document.querySelector('[data-name="section-complete"] h3').textContent = inMsg.success;
-                document.querySelector('[data-name="section-complete"] h1').textContent = inMsg.otpReady;
-                document.querySelector('[data-name="section-complete"] .type-body-m').textContent = inMsg.moreSecure;
-                document.querySelector('[data-name="section-complete"] .button-1').textContent = inMsg.finish;
-                document.querySelector('[data-name="section-complete"] .welcome-illustrations img').alt = inMsg.ibmVerify;
+                document.querySelector('[data-name="section-complete"] h3').textContent = ciMsg.success;
+                document.querySelector('[data-name="section-complete"] h1').textContent = ciMsg.otpReady;
+                document.querySelector('[data-name="section-complete"] .type-body-m').textContent = ciMsg.moreSecure;
+                document.querySelector('[data-name="section-complete"] .button-1').textContent = ciMsg.finish;
+                document.querySelector('[data-name="section-complete"] .welcome-illustrations img').alt = ciMsg.ibmVerify;
 
-                document.styleSheets[2].insertRule('.sms-container::after { content: "' + inMsg.smsDesc + '"; }', document.styleSheets[2].cssRules.length);
-                document.styleSheets[2].insertRule('.email-container::after { content: "' + inMsg.emailDesc + '"; }', document.styleSheets[2].cssRules.length);
-                document.styleSheets[2].insertRule('.sms-validate-container:after { content: "' + inMsg.smsOTPDesc + '"; }', document.styleSheets[2].cssRules.length);
-                document.styleSheets[2].insertRule('.email-validate-container:after { content: "' + inMsg.emailOTPDesc + '"; }', document.styleSheets[2].cssRules.length);
-                document.styleSheets[2].insertRule('.totp-validate-container:after { content: "' + inMsg.totpDesc + '"; }', document.styleSheets[2].cssRules.length);
-                document.styleSheets[2].insertRule('.enrollment-failed:after { content: "' + inMsg.enrollmentFailed + '" !important; }', document.styleSheets[2].cssRules.length);
-                document.styleSheets[2].insertRule('.validation-failed:after { content: "' + inMsg.validationFailed + '" !important; }', document.styleSheets[2].cssRules.length);
-                document.styleSheets[2].insertRule('.all-device-containers-empty:after { content: "'+inMsg.noEnrollments+'" !important; }', document.styleSheets[0].cssRules.length);
+                document.styleSheets[2].insertRule('.sms-container::after { content: "' + ciMsg.smsDesc + '"; }', document.styleSheets[2].cssRules.length);
+                document.styleSheets[2].insertRule('.email-container::after { content: "' + ciMsg.emailDesc + '"; }', document.styleSheets[2].cssRules.length);
+                document.styleSheets[2].insertRule('.sms-validate-container:after { content: "' + ciMsg.smsOTPDesc + '"; }', document.styleSheets[2].cssRules.length);
+                document.styleSheets[2].insertRule('.email-validate-container:after { content: "' + ciMsg.emailOTPDesc + '"; }', document.styleSheets[2].cssRules.length);
+                document.styleSheets[2].insertRule('.totp-validate-container:after { content: "' + ciMsg.totpDesc + '"; }', document.styleSheets[2].cssRules.length);
+                document.styleSheets[2].insertRule('.enrollment-failed:after { content: "' + ciMsg.enrollmentFailed + '" !important; }', document.styleSheets[2].cssRules.length);
+                document.styleSheets[2].insertRule('.validation-failed:after { content: "' + ciMsg.validationFailed + '" !important; }', document.styleSheets[2].cssRules.length);
+                document.styleSheets[2].insertRule('.all-device-containers-empty:after { content: "'+ciMsg.noEnrollments+'" !important; }', document.styleSheets[0].cssRules.length);
             }
             
             function configureEvent(inputSelector, buttonSelector) {
@@ -1082,7 +1434,7 @@
                     </div>
                     <div class="layout-right small-layout">
                         <div class="welcome-illustrations">
-                            <img src="/sps/static/design_images/welcome_illustration.svg" class="launch-animation" alt="IBM Verify" />
+                            <img src="./static/design_images/welcome_illustration.svg" class="launch-animation" alt="IBM Verify" />
                         </div>
                     </div>
                 </section>
@@ -1100,7 +1452,7 @@
                     </div>
                     <div class="layout-right small-layout">
                         <div class="welcome-illustrations">
-                            <img src="/sps/static/design_images/phone.svg" class="launch-animation" alt="IBM Verify" />
+                            <img src="./static/design_images/phone.svg" class="launch-animation" alt="IBM Verify" />
                         </div>
                     </div>
                 </section>
@@ -1119,10 +1471,10 @@
                     </div>
                     <div class="layout-right">
                         <div class="example-animation">
-                            <img src="/sps/static/design_images/download_the_app.svg" class="download-app" alt="" />
+                            <img src="./static/design_images/download_the_app.svg" class="download-app" alt="" />
                             <div class="app-store-links">
-                                <a href="https://itunes.apple.com/us/app/ibm-verify/id1162190392"><img src="/sps/static/design_images/apple_app_store.svg" alt="apple app store" /></a>
-                                <a href="https://play.google.com/store/apps/details?id=com.ibm.security.verifyapp"><img src="/sps/static/design_images/google_play_badge.svg" alt="google play store" /></a>
+                                <a href="https://itunes.apple.com/us/app/ibm-verify/id1162190392"><img src="./static/design_images/apple_app_store.svg" alt="apple app store" /></a>
+                                <a href="https://play.google.com/store/apps/details?id=com.ibm.security.verifyapp"><img src="./static/design_images/google_play_badge.svg" alt="google play store" /></a>
                             </div>
                         </div>
                     </div>
@@ -1140,12 +1492,12 @@
                             <div class="qr-code">
                                 <!-- Blue success check, is display:none by default, animates in when device is connected successfully -->
                                 <div class="success-check">
-                                    <img src="/sps/static/design_images/confirmation_check.svg" alt="confirmation" />
+                                    <img src="./static/design_images/confirmation_check.svg" alt="confirmation" />
                                 </div>
                                 <img class="center qr-img"></img>
                             </div>
                         </div>
-                        <ol class="ordered-list qr-code">
+                        <ol class="ordered-list">
                             <li>Launch IBM Verify</li>
                             <li>Tap "Connect an Account"</li>
                             <li>Scan the QR Code using your device's camera</li>
@@ -1167,7 +1519,7 @@
                             </div>
                         </div>
                         <div class="loader" style="position: absolute;left: calc(50% - 32px);top: calc(40% - 72px);
-                        background-image: url('/sps/static/loader_dark.gif');"></div>
+                        background-image: url('./static/loader_dark.gif');"></div>
                     </div>
                 </section>
 
@@ -1188,7 +1540,7 @@
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="enrollSMSorEmail('smsotp', this)" type="button" style="
                         margin-top: 140px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Save</button>
                         <div class="validation hidden" data-target="section-sms-validation"></div>
-                        <div class="loader hidden" style="background-image: url('/sps/static/loader_light.gif');"></div>
+                        <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
                     </div>
                 </section>
 
@@ -1201,7 +1553,7 @@
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="enrollSMSorEmail('emailotp', this)" type="button" style="
                         margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Save</button>
                         <div class="validation hidden" data-target="section-email-validation"></div>
-                        <div class="loader hidden" style="background-image: url('/sps/static/loader_light.gif');"></div>
+                        <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
                     </div>
                 </section>
 
@@ -1214,7 +1566,7 @@
                     </div>
                     <div class="layout-right small-layout">
                         <div class="welcome-illustrations">
-                            <img src="/sps/static/design_images/setup_complete.svg"/>
+                            <img src="./static/design_images/setup_complete.svg"/>
                         </div>
                     </div>
                 </section>
@@ -1230,7 +1582,7 @@
                         </div>
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="validateOtp('smsotp', this)" type="button" style="
                         margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Validate</button>
-                        <div class="loader hidden" style="background-image: url('/sps/static/loader_light.gif');"></div>
+                        <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
                     </div>
                 </section>
 
@@ -1245,7 +1597,7 @@
                         </div>
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="validateOtp('emailotp', this)" type="button" style="
                         margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Validate</button>
-                        <div class="loader hidden" style="background-image: url('/sps/static/loader_light.gif');"></div>
+                        <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
                     </div>
                 </section>
 
@@ -1254,10 +1606,10 @@
                         <h1>Let's check it works</h1>
                     </div>
                     <div class="totp-validate-container simple-container">
-                        <input id="otp" class="ci-input" type="number" style="height:46px;margin-top:100px;width:40%;margin-left:auto;margin-right:auto;" oninput="checkValid(this, 'otp');" tabindex="1">
+                        <div><input id="otp" class="ci-input" type="number" style="height:46px;margin-top:100px;width:40%;margin-left:auto;margin-right:auto;" oninput="checkValid(this, 'otp');" tabindex="1"></div>
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="validateOtp('totp', this)" type="button" style="
                         margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Validate</button>
-                        <div class="loader hidden" style="background-image: url('/sps/static/loader_light.gif');"></div>
+                        <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
                     </div>
                 </section>
 
@@ -1277,6 +1629,7 @@
                     <li class="extra"><span>No. Methods: </span><span id="methodsTotal">@METHOD_COUNT@</span></li>
                 </ul>
             </div>
+            <div class="intime-alert"><p class="light"></p></div>
 
             <div class = "wrapper-manage">
                 <section class="self-care-section" data-name="section-welcome-authenticators">

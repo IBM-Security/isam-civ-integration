@@ -1,12 +1,30 @@
 importClass(Packages.com.tivoli.am.fim.trustserver.sts.utilities.IDMappingExtUtils);
 
+// This function can be used to add prefixes or suffixes to the username provided by 
+// WebSEAL or the user. By default, it just returns the username;
+function usernameMapping(username) {
+    var mappedUsername = username;
+
+    // We could simply add an email suffix:
+    //mappedUsername += "@au1.ibm.com";
+
+    // Or we could even add a realmName for federated CI users
+    //mappedUsername += "@www.ibm.com";
+
+    state.put("originalUsername", username);
+    state.put("mappedUsername", mappedUsername);
+
+    return mappedUsername;
+}
+
 function checkLogin() {
+    IDMappingExtUtils.traceString("Check login");
     var sessionUsername = getUsernameFromSession();
     var username = getUsername();
 
     // If we have the username from the WebSEAL session, return immediately.
     if(sessionUsername != null) {
-        return sessionUsername;
+        return usernameMapping(sessionUsername);
     }
 
     // If we have no username from either session, state, or parameter, return 
@@ -26,13 +44,14 @@ function checkLogin() {
     if(basicAuth != null && basicAuth == username) {
         return username;
     } else if(password != null) {
+        var mappedUsername = usernameMapping(username);
         // If we were given the password as well, attempt auth.
-        var justAuthed = CiClient.basicAuthentication(conn, username, password, getLocale());
+        var justAuthed = CiClient.basicAuthentication(conn, mappedUsername, password, getLocale());
         if(justAuthed) {
             // If successful, save the just authed username as "basicAuth" in
             // the state map.
-            state.put("basicAuth", username);
-            return username;
+            state.put("basicAuth", mappedUsername);
+            return mappedUsername;
         } else {
             // The login request failed. Return an error page via our handleError
             // method.
@@ -40,6 +59,7 @@ function checkLogin() {
             return null;
         }
     } else if(username != null) {
+        IDMappingExtUtils.traceString("Username provided, but no password");
         // We have a username but no password. Return a login page.
         macros.put("@USERNAME@", username);
         page.setValue("/authsvc/authenticator/ci/login.html");
@@ -48,6 +68,7 @@ function checkLogin() {
 }
 
 function getUserId(conn, username) {
+    IDMappingExtUtils.traceString("Get user ID");
     var userId = state.get("userId");
     if(userId == null) {
         var user = CiClient.getUser(conn, username, getLocale());
@@ -65,6 +86,10 @@ function getUserId(conn, username) {
                 state.put("email", emails[0].value);
                 macros.put("@EMAIL@", emails[0].value);
             }
+
+            // This will store the user's mobile number.
+            getMobileNumber(userObj);
+
             // We have two options here for a nice display name for the
             // user. We could use the givenName, or the formatted name. The
             // formatted name can be manually modified by the CI
@@ -164,12 +189,12 @@ function getMobileNumber(user) {
  * Get the email address from the state or from the given user object.
  */
 function getEmailAddress(user) {
-    var otpDelivery = state.get("emailAddress");
+    var otpDelivery = state.get("email");
     if(otpDelivery == null) {
         if(user != null) {
             if(user.emails != null && user.emails.length > 0) {
                 otpDelivery = user.emails[0].value;
-                state.put("emailAddress", otpDelivery);
+                state.put("email", otpDelivery);
             }
         }
     }
@@ -298,7 +323,13 @@ function getPassword() {
  * Set the username into the session..
  */
 function setUsername(username) {
-    context.set(Scope.SESSION, "urn:ibm:security:asf:response:token:attributes", "username", username);
+    var originalUsername = state.get("originalUsername");
+    if(originalUsername != null && originalUsername != username) {
+        // If we mapped our username, we want to save the unmapped version.
+        context.set(Scope.SESSION, "urn:ibm:security:asf:response:token:attributes", "username", originalUsername);
+    } else {
+        context.set(Scope.SESSION, "urn:ibm:security:asf:response:token:attributes", "username", username);
+    }
 }
 
 /**
@@ -336,11 +367,142 @@ function setAuthStatus(status) {
 }
 
 /**
+ * Set the auth type into the session.
+ */
+function setAuthType(type) {
+    // Fetch existing types first.
+    var existingTypes = context.get(Scope.SESSION, "urn:ibm:security:asf:response:token:attributes", "ciAuthType");
+    if(existingTypes != null) {
+        // If we have existing types, and the list doesn't already include our new type,
+        // add it.
+        if(existingTypes.indexOf(type, 0) == -1) {
+            var types = [existingTypes, type];
+            context.set(Scope.SESSION, "urn:ibm:security:asf:response:token:attributes", "ciAuthType", jsString(types));
+        }
+    } else {
+        // No existing types. Add our type.
+        context.set(Scope.SESSION, "urn:ibm:security:asf:response:token:attributes", "ciAuthType", type);
+    }
+}
+
+/**
  * Get the locale from the request.
  */
 function getLocale() {
     var locale = context.get(Scope.REQUEST, "urn:ibm:security:asf:request:header", "Accept-Language");
     return jsString(locale);
+}
+
+/**
+ * Set the 'enrolling' flag in the state. This is used to keep track of what
+ * state a Verify registration is in.
+ */
+function setIsEnrolling(isEnrolling) {
+    state.put("enrollment", isEnrolling);
+}
+
+/**
+ * Get the 'enrolling' flag from the state or session.
+ */
+function getIsEnrolling() {
+    var isEnrolling = state.get("enrollment");
+    if(isEnrolling == null) {
+        isEnrolling = context.get(Scope.REQUEST, "urn:ibm:security:asf:request:parameter", "enrollment");
+    }
+    return jsString(isEnrolling);
+}
+
+/**
+ * Get authenticator by ID.
+ */
+function getAuthenticatorById(id) {
+    var authenticator = null;
+    var authenticators = JSON.parse(state.get("authenticators"));
+
+    if(authenticators == null || authenticators.length == 0) {
+        var resp = CiClient.getAuthenticator(conn, id, getLocale());
+        var json = getJSON(resp);
+        if (resp != null && resp.getCode() == 200 && json != null) {
+            authenticator = json;
+        }
+    } else {
+        for(j = 0; j < authenticators.length; j++) {
+            if(authenticators[j].id == id) {
+                authenticator = authenticators[j];
+                break;
+            }
+        }
+    }
+    return authenticator;
+}
+
+/**
+ * Get auth method by ID.
+ */
+function getAuthMethodById(id) {
+    var authMethod = null;
+    var authMethods = JSON.parse(state.get("authMethods"));
+
+    if(authMethods == null || authMethods.length == 0) {
+        var resp = CiClient.getAuthMethods(conn, userId, getLocale());
+        var json = getJSON(resp);
+        if (resp != null && resp.getCode() == 200 && json != null) {
+            authMethods = json.authnmethods;
+        }
+    }
+
+    if(authMethods != null && authMethods.length > 0) {
+        for(j = 0; j < authMethods.length; j++) {
+            if(authMethods[j].id == id) {
+                authMethod = authMethods[j];
+                break;
+            }
+        }
+    }
+    return authMethod;
+}
+
+/**
+ * Get signature method by ID.
+ */
+function getSignatureMethodById(id) {
+    var signatureMethod = null;
+    var signatureMethods = JSON.parse(state.get("signatureMethods"));
+
+    if(signatureMethods == null || signatureMethods.length == 0) {
+        var resp = CiClient.getRequest(conn, "/v1.0/authnmethods/signatures?search=owner%3D%22"+userId+"%22&_embedded=true", getLocale());
+        // This is a 9.0.6 function.
+        //var resp = CiClient.getSignatureAuthMethods(conn, userId, getLocale(), true);
+        var json = getJSON(resp);
+        if (resp != null && resp.getCode() == 200 && json != null) {
+            signatureMethods = json.signatures;
+        }
+    }
+
+    if(signatureMethods != null && signatureMethods.length > 0) {
+        for(j = 0; j < signatureMethods.length; j++) {
+            if(signatureMethods[j].id == id) {
+                signatureMethod = signatureMethods[j];
+                break;
+            }
+        }
+    }
+    return signatureMethod;
+}
+
+/**
+ * Get signature method by ID.
+ */
+function getTransientMethodById(id, type) {
+    var transientMethod = null;
+
+    var resp = CiClient.getRequest(conn, "/v1.0/authnmethods/" + type + "/transient/verification/" + id, getLocale());
+    var json = getJSON(resp);
+    if (resp != null && resp.getCode() == 200 && json != null) {
+        transientMethod = json;
+    }
+
+    return transientMethod;
 }
 
 /**
@@ -353,6 +515,7 @@ function cleanState() {
     state.remove("verificationId");
     state.remove("lastValidation");
     state.remove("correlation");
+    state.remove("authenticatorId");
 }
 
 /**
@@ -392,6 +555,125 @@ function objectValues(object) {
         }
     }
     return array;
+}
+
+/**
+ * Take an array of methods and mask any sensitive emails or mobile numbers.
+ */
+function maskSensitive(array) {
+    var newArray = JSON.parse(JSON.stringify(array))
+
+    for(var methodIndex in newArray) {
+        for(var key in newArray[methodIndex]) {
+
+            if(key == "transientsms") {
+                var mobile = newArray[methodIndex][key];
+                newArray[methodIndex][key] = maskPhone(mobile);
+
+            } else if(key == "transientemail") {
+                var email = newArray[methodIndex][key];
+                newArray[methodIndex][key] = maskEmail(email);
+
+            } else if(key == "attributes") {
+
+                var mobile = newArray[methodIndex][key]["otpDeliveryMobileNumber"];
+                if(mobile != null && mobile != "") {
+                    newArray[methodIndex][key]["otpDeliveryMobileNumber"] = maskPhone(mobile);
+                }
+
+                var email = newArray[methodIndex][key]["otpDeliveryEmailAddress"];
+                if(email != null && email != "") {
+                    newArray[methodIndex][key]["otpDeliveryEmailAddress"] = maskEmail(email);
+                }
+            }
+        }
+    }
+    return newArray;
+}
+
+/**
+ * Prune extra data from the authenticators array.
+ */
+function pruneAuthenticators(array) {
+    var newArray = JSON.parse(JSON.stringify(array))
+
+    for(var methodIndex in newArray) {
+        if(newArray[methodIndex]["clientId"]) {
+            delete newArray[methodIndex]["clientId"];
+        }
+        if(newArray[methodIndex]["attributes"]["pushToken"]) {
+            delete newArray[methodIndex]["attributes"]["pushToken"];
+        }
+        if(newArray[methodIndex]["attributes"]["deviceId"]) {
+            delete newArray[methodIndex]["attributes"]["deviceId"];
+        }
+        if(newArray[methodIndex]["attributes"]["applicationId"]) {
+            delete newArray[methodIndex]["attributes"]["applicationId"];
+        }
+    }
+    return newArray;
+}
+
+/**
+ * Prune extra data from the signatures array.
+ */
+function pruneSignatureMethods(array) {
+    var newArray = JSON.parse(JSON.stringify(array))
+
+    for(var methodIndex in newArray) {
+        if(newArray[methodIndex]["_embedded"]["clientId"]) {
+            delete newArray[methodIndex]["_embedded"]["clientId"];
+        }
+        if(newArray[methodIndex]["_embedded"]["attributes"]["pushToken"]) {
+            delete newArray[methodIndex]["_embedded"]["attributes"]["pushToken"];
+        }
+        if(newArray[methodIndex]["_embedded"]["attributes"]["deviceId"]) {
+            delete newArray[methodIndex]["_embedded"]["attributes"]["deviceId"];
+        }
+        if(newArray[methodIndex]["_embedded"]["attributes"]["applicationId"]) {
+            delete newArray[methodIndex]["_embedded"]["attributes"]["applicationId"];
+        }
+    }
+
+    return newArray;
+}
+
+/**
+ * Mask the given phone number.
+ */
+function maskPhone(number) {
+    var masked = "";
+    for(j = 0; j < number.length; j++) {
+        if(number[j] == "+") {
+            masked += number[j];
+        } else if(j > number.length - 4) {
+            masked += number[j];
+        } else {
+            masked += '*';
+        }
+    }
+    return masked;
+}
+
+/**
+ * Mask the given email.
+ */
+function maskEmail(email) {
+    var masked = "";
+    var atIndex = email.length;
+    for(j = 0; j < email.length; j++) {
+        if(email[j] == "@") {
+            atIndex = j;
+            masked += email[j];
+        } else if(j > atIndex) {
+            masked += email[j];
+        } else if(j < 3) {
+            masked += email[j];
+        } else {
+            masked += '*';
+        }
+    }
+    return masked;
 }
 
 /**

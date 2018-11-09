@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="/sps/static/design.css"></link>
+    <link rel="stylesheet" type="text/css" href="/sps/static/ci.css"></link>
+    <link rel="stylesheet" type="text/css" href="/sps/static/ci-popup.css"></link>
+    <script src="/sps/static/ciI18n.js"></script>
+    <script src="/sps/mga/user/mgmt/html/common.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+    var deviceName = "@DEVICE_NAME@";
+
+    function submitDone() {
+        document.getElementById("doneForm").action = actionLocation.replace("apiauthsvc", "authsvc");
+        document.getElementById("doneForm").submit();
+    }
+
+    var pollCount = 30;
+    var action = "@ACTION@";
+    var actionLocation = "";
+
+    function poll() {
+        if(pollCount > 0) {
+            var data = {"action":"poll"};
+            var pollRequest = new XMLHttpRequest();
+            pollRequest.onreadystatechange =  function() {processPollRequest(pollRequest);};
+            pollRequest.open("PUT", actionLocation, true);
+            pollRequest.setRequestHeader("Accept", "application/json");
+            pollRequest.setRequestHeader("Content-Type", "application/json");
+            pollRequest.send(JSON.stringify(data));
+            pollCount--;
+        }
+    }
+
+    function processPollRequest(request) {
+        if (request.readyState == 4) {
+            var json = null;
+            if(request.responseText) {
+                try {
+                    json = JSON.parse(request.responseText);
+                } catch (e) {
+                    // probably not JSON -- handle in else.
+                }
+            }
+            if(request.status == 200 && json != null) {
+                if(json.location != null && json.location != "") {
+                    actionLocation = json.location;
+                }
+                if(json.status == "success") {
+                    showDone();
+                } else if(json.status == "pending") {
+                    setTimeout(poll, 2000);
+                } else {
+                    // We most likely got an error when trying to poll.
+                    // Stop polling by setting pollCount to 0.
+                    pollCount = 0;
+                }
+            } else {
+                // We most likely got an error when trying to poll.
+                // Stop polling by setting pollCount to 0.
+                pollCount = 0;
+                if (json != null && json.location != null && json.location != "") {
+                    actionLocation = json.location;
+                }
+            }
+        }
+    }
+
+    function showDone() {
+        document.getElementById("try-section").classList.remove('dialog-content--visible');
+        document.getElementById("try-section").classList.add('dialog-content--hidden');
+        setTimeout(function () {
+            document.getElementById("try-section").style.left = '-100%';
+        }, 300);
+        document.getElementById("done-section").style.left = '';
+        document.getElementById("done-section").classList.add('dialog-content--visible');
+    }
+
+    function populateStrings() {
+        document.title = ciMsg.ibmVerify;
+        document.querySelector('#try-section h3').textContent = ciMsg.twoStepVeri;
+        document.querySelector('#try-section h1').textContent = ciMsg.letsTry;
+        document.querySelector('#try-section p').textContent = ciMsg.notificationSent.replace("DEVICE_NAME", "@DEVICE_NAME@");
+        document.querySelector('#done-section h3').textContent = ciMsg.success;
+        document.querySelector('#done-section h1').textContent = ciMsg.deviceConnected;
+        if(deviceName != null && deviceName != "") {
+            document.querySelector('#done-section p').textContent = ciMsg.deviceReady.replace("DEVICE_NAME", deviceName)
+        } else {
+            document.querySelector('#done-section p').textContent = ciMsg.authenticatorReady;
+        }
+        document.querySelector("#done-section .button-bottom").textContent = ciMsg.done;
+    }
+
+    function startup() {
+        populateStrings();
+
+        actionLocation = getJunctionName() + action;
+        actionLocation = actionLocation.replace("authsvc", "apiauthsvc");
+        setTimeout(poll, 2000);
+    }
+    </script>
+
+    <style>
+        a {color: #0F6DFF !important;}
+    </style>
+  </head>
+  <body onload="startup()">
+    <div id="dialog" style="z-index: 2000; box-sizing: initial; display: block;">
+        <div class="dialog-window notransition" style="z-index: 2000;">
+            <section id="try-section" class="dialog-content dialog-content--visible notransition">
+                <div class="layout-large-right">
+                    <h3>Set up two-step verification</h3>
+                    <h1>Let's try it out</h1>
+                    <p class="type-body-m">A notification was sent to @DEVICE_NAME@. Approve the sign-in to continue. If you haven't received it yet, open IBM Verify.</p>
+
+                </div>
+                <div class="layout-left" style="background-color:#ECECEC;">
+                    <div class="welcome-illustrations">
+                        <div class="loader" style="background-image: url('./static/loader_light.gif'); position:absolute; left:168px; top:-40px;"></div>
+                    </div>
+                </div>
+            </section>
+            <section id="done-section" class="dialog-content">
+                <div class="layout-large-right">
+                    <h3>Success!</h3>
+                    <h1>Your device is connected</h1>
+                    <p class="type-body-m">Now you can use DEVICE_NAME to verify your identity as a second step when signing in.</p>
+
+                    <button onclick="submitDone();" class="button-1 button-bottom" type="button" tabindex="1">Done</button>
+                </div>
+                <div class="layout-left" style="background-color:#ECECEC;">
+                    <div class="welcome-illustrations">
+                        <img src="./static/design_images/devices_verify.svg" class="launch-animation" />
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    <form id="doneForm" method="POST" action="@ACTION@">
+      <input type="hidden" name="action" value="done">
+      <input type="hidden" name="operation" value="verify">
+    </form>
+  </body>
+</html>

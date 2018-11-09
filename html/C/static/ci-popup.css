@@ -34,13 +34,11 @@
          -webkit-transform: scale(0.8);
          transform: scale(0.8);
          opacity: 0;
-
     }
      100% {
          -webkit-transform: scale(1);
          transform: scale(1);
          opacity: 1;
-         
     }
 }
  @keyframes window-launch {
@@ -48,13 +46,11 @@
          -webkit-transform: scale(0.8);
          transform: scale(0.8);
          opacity: 0;
-
     }
      100% {
          -webkit-transform: scale(1);
          transform: scale(1);
          opacity: 1;
-         
     }
 }
  #dialog .dialog-window.close-window {
@@ -83,7 +79,6 @@
          -webkit-transform: scale(0.8);
          transform: scale(0.8);
          opacity: 0;
-
     }
 }
  @keyframes window-close {
@@ -96,7 +91,6 @@
          -webkit-transform: scale(0.8);
          transform: scale(0.8);
          opacity: 0;
-
     }
 }
  @media (max-width: 1000px) {
@@ -117,7 +111,7 @@
      right: 0;
      width: 64px;
      height: 64px;
-     background-image: url("../static/design_images/close.svg");
+     background-image: url("./design_images/close.svg");
      background-repeat: no-repeat;
      background-position: center;
      cursor: pointer;
@@ -128,7 +122,7 @@
      transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
 }
  #dialog .dialog-window .dialog-close--dark {
-     background-image: url("../static/design_images/close_dark.svg");
+     background-image: url("./design_images/close_dark.svg");
 }
  #dialog .dialog-window .dialog-close--dark:hover, #dialog .dialog-window .dialog-close--dark:focus {
      background-color: #f4f4f4;
@@ -136,7 +130,7 @@
 }
  @media (max-width: 768px) {
      #dialog .dialog-window .dialog-close {
-         background-image: url("../static/design_images/close_dark.svg");
+         background-image: url("./design_images/close_dark.svg");
     }
      #dialog .dialog-window .dialog-close:hover, #dialog .dialog-window .dialog-close:focus {
          background-color: #f4f4f4;
@@ -156,7 +150,7 @@
      left: 0;
      width: 64px;
      height: 64px;
-     background-image: url("../static/design_images/back.svg");
+     background-image: url("./design_images/back.svg");
      background-repeat: no-repeat;
      background-position: center;
      cursor: pointer;
@@ -240,7 +234,7 @@
  .simple-container .sc-more-dropdown button.more-menu {
      background-position: calc(100% - .5rem) 50%;
      background-repeat: no-repeat;
-     background-image: url("../static/design_images/down_arrow.svg");
+     background-image: url("./design_images/down_arrow.svg");
      text-align: left;
      width: 100%;
      height: 34px;
@@ -281,6 +275,57 @@
      transition: all 100ms cubic-bezier(0.5, 0, 0.15, 1);
 }
  .simple-container .sc-more-dropdown ul.dropdown-list li:hover {
+     border-left: 4px solid #4178be;
+     background-color: #f4f4f4;
+     cursor: pointer;
+}
+ .layout-large-right .sc-more-dropdown {
+     width:60%;
+}
+ .layout-large-right .sc-more-dropdown button.more-menu {
+     background-position: calc(100% - .5rem) 50%;
+     background-repeat: no-repeat;
+     background-image: url("./design_images/down_arrow.svg");
+     text-align: left;
+     width: 100%;
+     height: 46px;
+     background-color: #ffffff;
+     border: 1px solid #c7c7c7;
+     outline: 0;
+     margin: 0;
+     font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+     font-size: 14px;
+     color: #121212;
+}
+ .layout-large-right .sc-more-dropdown button.more-menu:hover, .simple-container .sc-more-dropdown button.more-menu:focus {
+     cursor: pointer;
+     background-color: #f4f4f4;
+     transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ .layout-large-right .sc-more-dropdown ul.dropdown-list {
+     overflow: auto;
+     height: 250px;
+     display: none;
+     position: absolute;
+     width: 50%;
+     max-width: calc(100% - 10px);
+     padding: 0;
+     margin: 0;
+     list-style: none;
+     background-color: #ffffff;
+     font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
+     font-size: 14px;
+     box-shadow: 0 2px 2px 0 rgba(18, 18, 18, 0.2);
+     z-index: 10;
+}
+ .layout-large-right .sc-more-dropdown ul.dropdown-list li {
+     height: 32px;
+     padding: 0 12px 0 12px;
+     line-height: 32px;
+     border-left: 4px solid #ffffff;
+     transition: all 100ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ .layout-large-right .sc-more-dropdown ul.dropdown-list li:hover {
      border-left: 4px solid #4178be;
      background-color: #f4f4f4;
      cursor: pointer;
@@ -345,7 +390,7 @@
      overflow: auto;
 }
  #dialog .dialog-window .dialog-content .all-device-containers-empty {
-     background-image: url("../static/design_images/empty.svg");
+     background-image: url("./design_images/empty.svg");
      background-position: center 135px;
      background-size: 411px;
      background-repeat: no-repeat;
@@ -438,7 +483,7 @@
      height: 40px;
      right: 8px;
      top: 8px;
-     background-image: url("../static/design_images/menu.svg");
+     background-image: url("./design_images/menu.svg");
      background-repeat: no-repeat;
      background-position: center;
      background-color: #ffffff;
@@ -735,6 +780,34 @@
          width: calc(100% - 48px);
     }
 }
+ #dialog .dialog-window .dialog-content .layout-large-right {
+     position: absolute;
+     top: 0;
+     right: 0px;
+     width: calc(50% - 80px);
+     height: calc(100% - 144px);
+     padding: 80px 40px 64px 40px;
+     overflow: auto;
+     background-color: #ffffff;
+     transition: all 100ms cubic-bezier(0.1, 0.6, 0.15, 1);
+     box-sizing: initial;
+}
+ #dialog .dialog-window .dialog-content .layout-large-right--hidden {
+     left: -100%;
+     opacity: 0;
+     transition: none;
+}
+ @media (max-width: 768px) {
+     #dialog .dialog-window .dialog-content .layout-large-right {
+         width: calc(100% - 80px);
+    }
+}
+ @media (max-width: 400px) {
+     #dialog .dialog-window .dialog-content .layout-large-right {
+         padding: 80px 24px 64px 24px;
+         width: calc(100% - 48px);
+    }
+}
  #dialog .dialog-window .dialog-content .layout-left.large-layout, #dialog .dialog-window .dialog-content .layout-large-left.large-layout {
      width: calc(100% - 80px);
      padding: 64px 40px 64px 40px;
@@ -831,22 +904,31 @@
  #dialog .dialog-window .dialog-content .layout-right--hidden {
      opacity: 0;
 }
- #dialog .dialog-window .dialog-content .layout-right.small-layout {
+ #dialog .dialog-window .dialog-content .layout-left.small-layout, #dialog .dialog-window .dialog-content .layout-right.small-layout {
      background-color: transparent;
      width: 35%;
      overflow: visible;
 }
- #dialog .dialog-window .dialog-content .layout-right.small-layout .welcome-illustrations {
+ #dialog .dialog-window .dialog-content .layout-left .welcome-illustrations, #dialog .dialog-window .dialog-content .layout-left.small-layout .welcome-illustrations, #dialog .dialog-window .dialog-content .layout-right.small-layout .welcome-illustrations {
      width: 100%;
      min-width: 315px;
      position: absolute;
      top: 28%;
      left: -75px;
 }
- #dialog .dialog-window .dialog-content .layout-right.small-layout .welcome-illustrations img {
+ #dialog .dialog-window .dialog-content .layout-left .welcome-illustrations {
+     width: 400px;
+     top: 40%;
+     left: initial;
+}
+ #dialog .dialog-window .dialog-content .layout-left.small-layout .welcome-illustrations {
+     top: 40%;
+     left: 30px;
+}
+ #dialog .dialog-window .dialog-content .layout-left .welcome-illustrations img, #dialog .dialog-window .dialog-content .layout-left.small-layout .welcome-illustrations img, #dialog .dialog-window .dialog-content .layout-right.small-layout .welcome-illustrations img {
      width: 100%;
 }
- #dialog .dialog-window .dialog-content .layout-right .example-animation {
+ #dialog .dialog-window .dialog-content .layout-left .example-animation, #dialog .dialog-window .dialog-content .layout-right .example-animation {
      position: absolute;
      top: 0%;
      right: 0;
@@ -855,12 +937,12 @@
      opacity: 1;
      transition: all 0.3s cubic-bezier(0.1, 0.6, 0.15, 1);
 }
- #dialog .dialog-window .dialog-content .layout-right .example-animation--hidden {
+ #dialog .dialog-window .dialog-content .layout-left .example-animation--hidden, #dialog .dialog-window .dialog-content .layout-right .example-animation--hidden {
      top: 5%;
      opacity: 0;
      transition: all 0s cubic-bezier(0.1, 0.6, 0.15, 1);
 }
- #dialog .dialog-window .dialog-content .layout-right .example-animation .dynamic-message {
+ #dialog .dialog-window .dialog-content .layout-left .example-animation .dynamic-message, #dialog .dialog-window .dialog-content .layout-right .example-animation .dynamic-message {
      position: absolute;
      color: #ffffff;
      width: 216px;
@@ -1211,7 +1293,7 @@
      width: 135px;
      padding: 8px;
 }
- #dialog .dialog-window .dialog-content .layout-right .qr-code {
+ #dialog .dialog-window .dialog-content .layout-left .qr-code, #dialog .dialog-window .dialog-content .layout-right .qr-code {
      position: absolute;
      top: calc(50% - 132px);
      left: calc(50% - 100px);
@@ -1221,7 +1303,7 @@
      opacity: 1;
      transition: all 0.3s cubic-bezier(0.5, 0, 0.15, 1);
 }
- #dialog .dialog-window .dialog-content .layout-right .qr-code-error {
+ #dialog .dialog-window .dialog-content .layout-left .qr-code-error, #dialog .dialog-window .dialog-content .layout-right .qr-code-error {
      position: absolute;
      top: calc(50% - 132px);
      left: calc(50% - 175px);
@@ -1231,19 +1313,19 @@
      opacity: 1;
      transition: all 0.3s cubic-bezier(0.5, 0, 0.15, 1);
 }
- #dialog .dialog-window .dialog-content .layout-right .qr-code--hidden {
+ #dialog .dialog-window .dialog-content .layout-left .qr-code--hidden, #dialog .dialog-window .dialog-content .layout-right .qr-code--hidden {
      opacity: 0;
      top: 50%;
      visibility: hidden;
 }
- #dialog .dialog-window .dialog-content .layout-right .qr-code img {
+ #dialog .dialog-window .dialog-content .layout-left .qr-code img, #dialog .dialog-window .dialog-content .layout-right .qr-code img {
      position: relative;
      width: 100%;
      left: calc(50% - 100px);
      margin-bottom: 16px;
      margin-top: 16px;
 }
- #dialog .dialog-window .dialog-content .layout-right .qr-code span {
+ #dialog .dialog-window .dialog-content .layout-left .qr-code span, #dialog .dialog-window .dialog-content .layout-right .qr-code span {
      color: #ffffff;
      font-family: "Helvetica Neue for IBM", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", sans-serif;
      font-weight: 400;
@@ -1251,13 +1333,13 @@
      -webkit-font-smoothing: antialiased;
      -moz-osx-font-smoothing: grayscale;
 }
- #dialog .dialog-window .dialog-content .layout-right .qr-code-error span {
+ #dialog .dialog-window .dialog-content .layout-left .qr-code-error span, #dialog .dialog-window .dialog-content .layout-right .qr-code-error span {
      display: block;
 }
- #dialog .dialog-window .dialog-content .layout-right .qr-code span.sm {
+ #dialog .dialog-window .dialog-content .layout-left .qr-code span.sm, #dialog .dialog-window .dialog-content .layout-right .qr-code span.sm {
      font-size: 14px;
 }
- #dialog .dialog-window .dialog-content .layout-right .qr-code .success-check {
+ #dialog .dialog-window .dialog-content .layout-left .qr-code .success-check, #dialog .dialog-window .dialog-content .layout-right .qr-code .success-check {
      display: none;
      position: absolute;
      opacity: 0;
@@ -1902,7 +1984,6 @@
  @-webkit-keyframes overlayLaunch {
      0% {
          opacity: 0;
-
     }
      100% {
          opacity: .95;
@@ -1911,7 +1992,6 @@
  @keyframes overlayLaunch {
      0% {
          opacity: 0;
-
     }
      100% {
          opacity: .95;
@@ -1939,7 +2019,6 @@
     }
      100% {
          opacity: 0;
-
     }
 }
  @keyframes overlayClose {
@@ -1948,7 +2027,6 @@
     }
      100% {
          opacity: 0;
-
     }
 }
  .open-modal {

@@ -14,10 +14,10 @@
     }
 
     function populateStrings() {
-        document.title = inMsg.ibmVerify;
-        document.getElementsByClassName("pageTitle")[0].textContent = inMsg.ibmVerify;
-        document.getElementById("instructions").textContent = inMsg.verifyInstructions;
-        document.getElementById("cancel_button").value = inMsg.back;
+        document.title = ciMsg.ibmVerify;
+        document.getElementsByClassName("pageTitle")[0].textContent = ciMsg.ibmVerify;
+        document.getElementById("instructions").textContent = ciMsg.verifyInstructions;
+        document.getElementById("cancel_button").value = ciMsg.back;
     }
 
     function startup() {
@@ -36,6 +36,7 @@
           <h2 class="pageTitle"></h2>
             <div class="message-box">
               <p id="instructions"></p>
+              <div class="loader" style="background-image: url('./static/loader_light.gif');"></div>
               <div class="controls">
                 <input id="cancel_button" class="button-1 back-button" type="reset" value="" onClick="cancel();" />
               </div>

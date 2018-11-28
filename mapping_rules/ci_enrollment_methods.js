@@ -139,6 +139,13 @@ function enrollEmailOrSMS(conn, type, userId, username) {
                 // Also log an audit event for the successful register.
                 IDMappingExtUtils.logCISelfCareAuditEvent(username, "register" + type, macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", "");
             }
+
+            // If we have authMethods in the state, update it now.
+            var authMethods = JSON.parse(state.get("authMethods"));
+            if(authMethods != null && authMethods.length != 0) {
+                authMethods.push(json);
+                state.put("authMethods", JSON.stringify(authMethods));
+            }
         } else {
             // The request failed. Log an audit event for it.
             var code = resp != null ? "" + resp.getCode() : type + " registration failed";
@@ -184,6 +191,13 @@ function enrollTOTP(conn, userId, username) {
 
         // Also log an audit event for the successful register.
         IDMappingExtUtils.logCISelfCareAuditEvent(username, "register" + type, macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", "");
+
+        // If we have authMethods in the state, update it now.
+        var authMethods = JSON.parse(state.get("authMethods"));
+        if(authMethods == null || authMethods.length == 0) {
+            authMethods.push(json);
+            state.put("authMethods", JSON.stringify(authMethods));
+        }
     } else {
         // The request failed. Log an audit event for it.
         var code = resp != null ? "" + resp.getCode() : type + " registration failed";
@@ -362,6 +376,9 @@ function pollEnrollment(conn, userId) {
                         break;
                     }
                 }
+
+                // We have more authMethods than before. Update the state with the new list.
+                state.put("authMethods", JSON.stringify(authMethodJson.authnmethods));
             }
         }
     }

@@ -360,16 +360,14 @@ function pollEnrollment(conn, userId) {
     
     if(status == "success") {
         // Check if TOTP was also added.
-        var authMethodResp = CiClient.getRequest(conn, "/v1.0/authnmethods?search=owner%3D%22"+userId+"%22", getLocale());
-        // This is a 9.0.6 function.
-        //var authMethodResp = CiClient.getAuthMethods(conn, userId, getLocale());
+        var authMethodResp = CiClient.getAuthMethods(conn, userId, getLocale());
         var authMethodJson = getJSON(authMethodResp);
         if (authMethodResp != null && authMethodResp.getCode() == 200 && authMethodJson != null) {
 
             if(authMethodJson.authnmethods.length > authMethods.length) {
                 for(i = 0; i < authMethodJson.authnmethods.length; i++) {
                     if(authMethodJson.authnmethods[i].methodType == "totp") {
-                        if(JSON.stringify(authMethods).indexOf("totp", 0) == -1) {
+                        if(!JSON.stringify(authMethods).includes("totp")) {
                             status = "successWithTOTP";
                             state.put("id", authMethodJson.authnmethods[i].id);
                         }
@@ -386,9 +384,7 @@ function pollEnrollment(conn, userId) {
         // If status is still success, we didn't enroll in TOTP and we want to instead do
         // a push flow. Try and find a signature method for this enrollment.
         var signatureMethods = [];
-        var resp = CiClient.getRequest(conn, "/v1.0/authnmethods/signatures?search=owner%3D%22"+userId+"%22%26enabled%3Dtrue%26attributes%2FauthenticatorId%3D%22"+authenticatorId+"%22&_embedded=true", getLocale());
-        // This is a 9.0.6 function.
-        //var resp = CiClient.getSignatureAuthMethods(conn, userId, getLocale(), true, "enabled=true&attributes/authenticatorId=\""+authenticatorId+"\"");
+        var resp = CiClient.getSignatureAuthMethods(conn, userId, getLocale(), true, "enabled=true&attributes/authenticatorId=\""+authenticatorId+"\"");
         var json = getJSON(resp);
         if (resp != null && resp.getCode() == 200 && json != null) {
             signatureMethods = json.signatures;

@@ -13,7 +13,7 @@
             var methods = @AUTH_METHODS@;
             var authenticators = @AUTHENTICATORS@;
             var action = "@ACTION@";
-            var enabledMethods = @ENABLED_METHODS@;
+            var enabledMethods = '@ENABLED_METHODS@';
             var actionLocation = "";
 
             var refreshRequired = false;
@@ -22,6 +22,7 @@
                 populateDevices();
                 populateStrings();
 
+                enabledMethods = JSON.parse(enabledMethods.replace(/&quot;/g,'"'));
                 var includeTOTP = enabledMethods.indexOf("TOTP") != -1;
                 var includeSMS = enabledMethods.indexOf("SMSOTP") != -1;
                 var includeEmail = enabledMethods.indexOf("EmailOTP") != -1;

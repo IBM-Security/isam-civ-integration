@@ -375,7 +375,7 @@ function setAuthType(type) {
     if(existingTypes != null) {
         // If we have existing types, and the list doesn't already include our new type,
         // add it.
-        if(existingTypes.indexOf(type, 0) == -1) {
+        if(!existingTypes.includes(type)) {
             var types = [existingTypes, type];
             context.set(Scope.SESSION, "urn:ibm:security:asf:response:token:attributes", "ciAuthType", jsString(types));
         }
@@ -470,9 +470,7 @@ function getSignatureMethodById(id) {
     var signatureMethods = JSON.parse(state.get("signatureMethods"));
 
     if(signatureMethods == null || signatureMethods.length == 0) {
-        var resp = CiClient.getRequest(conn, "/v1.0/authnmethods/signatures?search=owner%3D%22"+userId+"%22&_embedded=true", getLocale());
-        // This is a 9.0.6 function.
-        //var resp = CiClient.getSignatureAuthMethods(conn, userId, getLocale(), true);
+        var resp = CiClient.getSignatureAuthMethods(conn, userId, getLocale(), true);
         var json = getJSON(resp);
         if (resp != null && resp.getCode() == 200 && json != null) {
             signatureMethods = json.signatures;
@@ -601,14 +599,16 @@ function pruneAuthenticators(array) {
         if(newArray[methodIndex]["clientId"]) {
             delete newArray[methodIndex]["clientId"];
         }
-        if(newArray[methodIndex]["attributes"]["pushToken"]) {
-            delete newArray[methodIndex]["attributes"]["pushToken"];
-        }
-        if(newArray[methodIndex]["attributes"]["deviceId"]) {
-            delete newArray[methodIndex]["attributes"]["deviceId"];
-        }
-        if(newArray[methodIndex]["attributes"]["applicationId"]) {
-            delete newArray[methodIndex]["attributes"]["applicationId"];
+        if(newArray[methodIndex]["attributes"]) {
+            if(newArray[methodIndex]["attributes"]["pushToken"]) {
+                delete newArray[methodIndex]["attributes"]["pushToken"];
+            }
+            if(newArray[methodIndex]["attributes"]["deviceId"]) {
+                delete newArray[methodIndex]["attributes"]["deviceId"];
+            }
+            if(newArray[methodIndex]["attributes"]["applicationId"]) {
+                delete newArray[methodIndex]["attributes"]["applicationId"];
+            }
         }
     }
     return newArray;
@@ -621,17 +621,21 @@ function pruneSignatureMethods(array) {
     var newArray = JSON.parse(JSON.stringify(array))
 
     for(var methodIndex in newArray) {
-        if(newArray[methodIndex]["_embedded"]["clientId"]) {
-            delete newArray[methodIndex]["_embedded"]["clientId"];
-        }
-        if(newArray[methodIndex]["_embedded"]["attributes"]["pushToken"]) {
-            delete newArray[methodIndex]["_embedded"]["attributes"]["pushToken"];
-        }
-        if(newArray[methodIndex]["_embedded"]["attributes"]["deviceId"]) {
-            delete newArray[methodIndex]["_embedded"]["attributes"]["deviceId"];
-        }
-        if(newArray[methodIndex]["_embedded"]["attributes"]["applicationId"]) {
-            delete newArray[methodIndex]["_embedded"]["attributes"]["applicationId"];
+        if(newArray[methodIndex]["_embedded"]) {
+            if(newArray[methodIndex]["_embedded"]["clientId"]) {
+                delete newArray[methodIndex]["_embedded"]["clientId"];
+            }
+            if(newArray[methodIndex]["_embedded"]["attributes"]) {
+                if(newArray[methodIndex]["_embedded"]["attributes"]["pushToken"]) {
+                    delete newArray[methodIndex]["_embedded"]["attributes"]["pushToken"];
+                }
+                if(newArray[methodIndex]["_embedded"]["attributes"]["deviceId"]) {
+                    delete newArray[methodIndex]["_embedded"]["attributes"]["deviceId"];
+                }
+                if(newArray[methodIndex]["_embedded"]["attributes"]["applicationId"]) {
+                    delete newArray[methodIndex]["_embedded"]["attributes"]["applicationId"];
+                }
+            }
         }
     }
 

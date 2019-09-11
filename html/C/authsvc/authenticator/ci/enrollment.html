@@ -92,22 +92,22 @@
     <div id="dialog" style="z-index: 2000; box-sizing: initial; display: block;">
         <div class="dialog-window" style="z-index: 2000;">
             <section id="validation-section" class="dialog-content dialog-content--visible" role="main">
-                <div class="layout-left" style="background-color:#ECECEC;">
+                <div class="layout-left" style="background-color:#1d3649;">
                     <div class="welcome-illustrations">
-                        <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
+                        <div class="loader hidden" style="background-image: url('./static/loader_dark.gif'); margin-top: 40px;"></div>
                         <img src="./static/design_images/welcome_illustration.svg" class="launch-animation" />
                     </div>
                 </div>
                 <div class="layout-large-right">
-                    <h3>Verify your mobile number</h3>
-                    <h1 style="margin-top:4px;">Let's try it out</h1>
-                    <p class="type-mody-m">A one-time access code was sent to your mobile number.</p>
-                    <p style="margin-top:40px;font-size:8pt;margin-bottom:8px;">Access Code</p>
+                    <h3></h3><!-- Verify your mobile number -->
+                    <h1 style="margin-top:4px;"></h1><!-- Let's try it out -->
+                    <p class="type-body-m"></p><!-- A one-time access code was sent to your mobile number. -->
+                    <p style="margin-top:40px;font-size:8pt;margin-bottom:8px;"></p><!-- Access Code -->
                     <div style="height:46px;width:70%;">
                         <div id="correlation" class="textbox-left" style="width:20%;padding-left:8px;padding-right:0px;height:46px;line-height:44px;"></div>
-                        <input id="otp" class="textbox-right" type="number" style="width:80%;height:46px;" placeholder="Enter access code" oninput="checkValid(this);" tabindex="1">
+                        <input id="otp" class="textbox-right" type="number" style="width:80%;height:46px;" oninput="checkValid(this);" tabindex="1">
                     </div>
-                    <button id="verify-button" class="button-1 button-bottom" onclick="validateOtp(this)" type="button" tabindex="1" disabled>Verify</button>
+                    <button id="verify-button" class="button-1 button-bottom" onclick="validateOtp(this)" type="button" tabindex="1" disabled></button><!-- Verify -->
                     <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
                 </div>
             </section>

@@ -10,6 +10,8 @@
     <script src="/sps/mga/user/mgmt/html/common.js" type="text/javascript"></script>
     <script type="text/javascript">
 
+    var errorMsg = "@ERROR_MESSAGE@";
+
     function showConnect() {
         document.getElementById("download-section").classList.remove('dialog-content--visible');
         document.getElementById("download-section").classList.add('dialog-content--hidden');
@@ -18,7 +20,6 @@
         }, 300);
         document.getElementById("connect-section").style.left = '';
         document.getElementById("connect-section").classList.add('dialog-content--visible');
-        setTimeout(pollEnrollment, 2000);
     }
 
     function validateOtp(button) {
@@ -27,6 +28,8 @@
         var otp = otpInput.value;
 
         if(checkValid(otpInput, "otp")) {
+            document.querySelector(".loader").classList.remove('hidden');
+            document.querySelector(".welcome-illustrations .launch-animation").classList.add('hidden');
             document.getElementById("validateForm").otp.value = otp;
             document.getElementById("validateForm").submit();
         }
@@ -40,6 +43,10 @@
         }, 300);
         document.getElementById("validation-section").style.left = '';
         document.getElementById("validation-section").classList.add('dialog-content--visible');
+
+        setTimeout(function () {
+            document.getElementById("otp").focus();
+        }, 300);
     }
 
     function checkValid(input) {
@@ -82,14 +89,23 @@
 
         document.querySelector('#validation-section h3').textContent = ciMsg.twoStepVeri;
         document.querySelector('#validation-section h1').textContent = ciMsg.letsTry;
-        document.querySelectorAll("#validation-section p")[0].textContent = ciMsg.totpVerificationInstructions;
-        document.querySelectorAll("#validation-section p")[1].textContent = ciMsg.accessCode;
+        document.getElementById("instructions").textContent = ciMsg.totpVerificationInstructions;
+        document.querySelectorAll("#validation-section p")[2].textContent = ciMsg.accessCode;
         document.getElementById("otp").placeholder = ciMsg.enterCode;
         document.querySelector("#validation-section .button-bottom").textContent = ciMsg.validate;
     }
 
     function startup() {
         populateStrings();
+
+        if(errorMsg != null && errorMsg != "") {
+            showValidation()
+            var errorDiv = document.getElementById("error-msg");
+            errorDiv.textContent = errorMsg.includes("CSIAH0619E") ? ciMsg.validationFailed : errorMsg;
+            errorDiv.style = "color: #dc0000;";
+            errorDiv.classList.remove("hidden");
+            document.getElementById("instructions").classList.add("hidden");
+        }
 
         var input = document.querySelector('#otp');
         input.addEventListener("keyup", function(event) {
@@ -111,68 +127,68 @@
         <div class="dialog-window" style="z-index: 2000;">
             <section id="download-section" class="dialog-content dialog-content--visible notransition">
                 <div class="layout-large-right">
-                    <h3>Set up two-step verification</h3>
-                    <h1>Download the app</h1>
-                    <p class="type-body-m">Follow these instructions or click next if you already have your preferred app downloaded on your device.</p>
+                    <h3></h3><!-- Set up two-step verification -->
+                    <h1></h1><!-- Download the app -->
+                    <p class="type-body-m"></p><!-- Follow these instructions or click next if you already have your preferred app downloaded on your device. -->
                     <ol class="ordered-list">
-                        <li>Launch the App Store&trade; (iOS&trade;) or Google Play&trade; Store (Android&trade;) app</li>
-                        <li>Search for your desired authenticator app that generates a time-based, one-time access code (e.g. "IBM Verify")</li>
-                        <li>Tap "Get" and "Install" to download the app</li>
+                        <li></li><!-- Launch the App Store&trade; (iOS&trade;) or Google Play&trade; Store (Android&trade;) app -->
+                        <li></li><!-- Search for your desired authenticator app that generates a time-based, one-time access code (e.g. "IBM Verify") -->
+                        <li></li><!-- Tap "Get" and "Install" to download the app -->
                     </ol>
-                    <button onclick="showConnect();" class="button-1 button-bottom" type="button" tabindex="1">Next: Connect your account</button>
+                    <button onclick="showConnect();" class="button-1 button-bottom" type="button" tabindex="1"></button><!-- Next: Connect your account -->
                 </div>
-                <div class="layout-left" style="background-color:#ECECEC;">
+                <div class="layout-left" style="background-color:#1d3649;">
                     <div class="welcome-illustrations">
-                        <img style="width:100%; margin-top:-50px; margin-bottom:16px;" src="./static/design_images/device-phone-ibm-verify.svg" class="download-app" alt="" />
-                        <div class="app-store-links" style="margin-left:46px;">
-                            <a href="https://itunes.apple.com/us/app/ibm-verify/id1162190392" style="margin-right:16px;"><img src="./static/design_images/apple_app_store.svg" alt="apple app store" /></a>
-                            <a href="https://play.google.com/store/apps/details?id=com.ibm.security.verifyapp"><img src="./static/design_images/google_play_badge.svg" alt="google play store" /></a>
+                        <img style="margin-top:-50px; margin-bottom:16px;" src="./static/design_images/device-phone-ibm-verify.svg" class="download-app"/>
+                        <div class="app-store-links" style="margin-left:32px;">
+                            <a href="https://itunes.apple.com/us/app/ibm-verify/id1162190392" style="margin-right:16px;"><img style="width:auto;" src="./static/design_images/apple_app_store.svg" /></a>
+                            <a href="https://play.google.com/store/apps/details?id=com.ibm.security.verifyapp"><img style="width:auto;" src="./static/design_images/google_play_badge.svg" /></a>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section id="connect-section" class="dialog-content dialog-content--visible" role="main">
+            <section id="connect-section" class="dialog-content" role="main">
                 <div class="layout-large-right">
-                    <h3>Set up two-step verification</h3>
-                    <h1 style="margin-top: 4px;">Connect your account</h1>
-                    <p class="type-body-m">Next, we need to connect the app to your account so it can do its magic. On your mobile device:</p>
+                    <h3></h3><!-- Set up two-step verification -->
+                    <h1 style="margin-top: 4px;"></h1><!-- Connect your account -->
+                    <p class="type-body-m"></p><!-- Next, we need to connect the app to your account so it can do its magic. On your mobile device: -->
                     <ol class="ordered-list">
-                        <li>Launch the authenticator app</li>
-                        <li>Tap to connect a new account</li>
-                        <li>Scan the QR Code using your device's camera</li>
+                        <li></li><!-- Launch the authenticator app -->
+                        <li></li><!-- Tap to connect a new account -->
+                        <li></li><!-- Scan the QR Code using your device's camera -->
                     </ol>
-                    <button class="button-1 button-bottom" onclick="showValidation()" type="button" tabindex="1">Next</button>
+                    <button class="button-1 button-bottom" onclick="showValidation()" type="button" tabindex="1"></button><!-- Next -->
                 </div>
-                <div class="layout-left" style="background-color:#ECECEC;">
+                <div class="layout-left" style="background-color:#1d3649;">
                     <div class="example-animation">
                         <div id="qrCode" class="qr-code">
                             <img class="qr-img" src="data:image/png;base64,@QRCODE@"></img>
-                            <span class="scan" style="color:#171717"><b>Scan me!</b></span>
+                            <span class="scan" style="color:#ffffff"><b></b></span><!-- Scan me! -->
                         </div>
                         <div id="qrCodeError" class="qr-code qr-code-error hidden">
-                            <span class="scan" style="color:#171717"><b>There was an error retrieving the QR Code.</b></span>
-                            <span class="sm" style="color:#171717">Please try again later.</span>
+                            <span class="scan" style="color:#ffffff"><b></b></span><!-- There was an error retrieving the QR Code. -->
+                            <span class="sm" style="color:#ffffff"></span><!-- Please try again later. -->
                         </div>
                     </div>
                 </div>
             </section>
 
             <section id="validation-section" class="dialog-content" role="main">
-                <div class="layout-left" style="background-color:#ECECEC;">
+                <div class="layout-left" style="background-color:#1d3649;">
                     <div class="welcome-illustrations">
+                        <div class="loader loader-dark hidden"></div>
                         <img src="./static/design_images/credentials_devices.svg" class="launch-animation" />
                     </div>
                 </div>
                 <div class="layout-large-right">
-                    <h3>Set up two-step verification</h3>
-                    <h1 style="margin-top:4px;">Let's try it out</h1>
-                    <p class="type-mody-m">Enter the access code generated by your authenticator app.</p>
-                    <p style="margin-top:40px;margin-bottom:8px;font-size:8pt">Access Code</p>
-                    <input id="otp" class="ci-input" type="number" placeholder="Enter access code" 
-                    style="height:46px;width:60%;padding-left:12px;" oninput="checkValid(this);" tabindex="1">
-                    <button id="validate-button" class="button-1 button-bottom" onclick="validateOtp(this)" type="button" tabindex="1" disabled>Validate</button>
-                    <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
+                    <h3></h3><!-- Set up two-step verification -->
+                    <h1 style="margin-top:4px;"></h1><!-- Let's try it out -->
+                    <p class="type-body-m" id="instructions"></p><!-- Enter the access code generated by your authenticator app. -->
+                    <p class="type-body-m"  id="error-msg" class="error-msg hidden"></p>
+                    <p style="margin-top:40px;margin-bottom:8px;font-size:8pt"></p><!-- Access Code -->
+                    <input id="otp" class="ci-input" type="number" style="height:46px;width:60%;padding-left:12px;" oninput="checkValid(this);" tabindex="1">
+                    <button id="validate-button" class="button-1 button-bottom" onclick="validateOtp(this)" type="button" tabindex="1" disabled></button><!-- Validate -->
                 </div>
             </section>
         </div>

@@ -53,6 +53,12 @@ var expandVerifyMethods = false;
 var jitEnrollment = true;
 macros.put("@JIT_ENROLLMENT@", jsString(jitEnrollment));
 
+// A flag that indicates if transient methods should be hidden if the corresponding method
+// is fully enrolled. I.e. hide transientemail is there is a validated email OTP
+// enrollment that can be used for runtime.
+var hideTransientIfEnrolled = true;
+macros.put("@HIDE_TRANSIENT_IF_ENROLL@", jsString(hideTransientIfEnrolled));
+
 IDMappingExtUtils.traceString("Entry CI_Authentication_Rule");
 
 // The possible error messages returned by this rule.
@@ -238,7 +244,21 @@ if(username != null) {
                 state.put("signatureMethods", JSON.stringify(signatureMethods));
                 macros.put("@TRANSIENT_METHODS@", JSON.stringify(maskSensitive(transientMethods)));
                 state.put("transientMethods", JSON.stringify(transientMethods));
-                page.setValue("/authsvc/authenticator/ci/authenticate_dialog.html");
+
+                var jitEnrolling = checkIfJITEnrolling();
+                if(methods.length == 0 && signatureMethods.length == 0 && jitEnrollment
+                        && jitEnrolling != "true") {
+                    macros.put("@ENABLED_METHODS@", JSON.stringify(enabledMethods));
+                    macros.put("@JIT_TYPE@", "");
+                    page.setValue("/authsvc/authenticator/ci/jit_enroll.html");
+                    setJITEnrolling("true");
+                } else {
+                    page.setValue("/authsvc/authenticator/ci/authenticate_dialog.html");
+                    if(jitEnrolling) {
+                        // We're already mid-JIT-enrollment, disable the macro
+                        macros.put("@JIT_ENROLLMENT@", "false");
+                    }
+                }
 
                 // Log all the methods we fetched.
                 IDMappingExtUtils.traceString("CI authentication methods: "+JSON.stringify(methods));
@@ -302,7 +322,7 @@ if(username != null) {
                             state.put("verificationId", json.id);
                             state.put("authenticatorId", json.authenticatorId);
 
-                            if(getIsEnrolling() != null && getIsEnrolling() == "true") {
+                            if(getIsVerifyEnrolling() != null && getIsVerifyEnrolling() == "true") {
                                 macros.put("@DEVICE_NAME@", state.get("deviceName"));
                                 page.setValue("/authsvc/authenticator/ci/try_push.html");
                             } else {
@@ -320,7 +340,7 @@ if(username != null) {
                     } else {
                         // Authenticated user does not match authenticator owner. Return
                         // an error page.
-                        handleError(errorMessages["verification_failed_colon"] + " " + errorMessages["create_transaction_failed"], resp);
+                        handleError(errorMessages["verification_failed_colon"] + " " + errorMessages["create_transaction_failed"], null);
                     }
                 } else {
                     // No ID was supplied. Return an error page via our handleError
@@ -352,6 +372,7 @@ if(username != null) {
                             // the type and correlation.
                             macros.put("@CORRELATION@", json.correlation);
                             macros.put("@TYPE@", type);
+                            macros.put("@ID@", id);
                             page.setValue("/authsvc/authenticator/ci/verify.html");
                         } else {
                             // The request failed. Return an error page via our handleError
@@ -361,7 +382,7 @@ if(username != null) {
                     } else {
                         // Authenticated user does not match auth method owner. Return
                         // an error page.
-                        handleError(errorMessages["verification_failed_colon"] + " " + errorMessages["create_verification_failed"], resp);
+                        handleError(errorMessages["verification_failed_colon"] + " " + errorMessages["create_verification_failed"], null);
                     }
                 } else {
                     // No ID was supplied. Return an error page via our handleError
@@ -465,7 +486,7 @@ if(username != null) {
                         } else {
                             // Authenticated user does not match auth method owner.
                             // Return an error page.
-                            handleError(errorMessages["verification_failed"], resp);
+                            handleError(errorMessages["verification_failed"], null);
                         }
                     } else {
                         // No ID was supplied. Return an error page via our handleError
@@ -503,12 +524,13 @@ if(username != null) {
                                 macros.put("@CORRELATION@", state.get("correlation"));
                                 macros.put("@TYPE@", type);
                                 macros.put("@ERROR_MESSAGE@", errorMessages["verification_failed"]);
+                                macros.put("@ID@", id);
                                 page.setValue("/authsvc/authenticator/ci/verify.html");
                             }
                         } else {
                             // Authenticated user does not match auth method owner.
                             // Return an error page.
-                            handleError(errorMessages["verification_failed"], resp);
+                            handleError(errorMessages["verification_failed"], null);
                         }
                     } else {
                         // Either no ID or no verification ID was supplied. Return
@@ -523,10 +545,6 @@ if(username != null) {
                     if(verificationId != null) {
                         var resp = CiClient.verifyTransientOTP(conn, mapTransientType(type), verificationId, JSON.stringify(verificationJson), getLocale());
                         if (resp != null && resp.getCode() == 200) {
-                            // Verification was a success! Set result to true so
-                            // we stop running this rule, set the username, and
-                            // log an audit event.
-                            result = true;
                             setUsername(username);
                             IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", true, "", "");
                             // set authStatus in the response token so it can be
@@ -534,6 +552,29 @@ if(username != null) {
                             setAuthStatus("success");
                             setAuthType(type);
                             cleanState();
+                            if(getJITEnrolling() != "true") {
+                                // Verification was a success! Set result to true so
+                                // we stop running this rule, set the username, and
+                                // log an audit event.
+                                result = true;
+                            } else {
+                                // Let's go back to the JIT page, depending on what the user chose.
+                                macros.put("@ENABLED_METHODS@", JSON.stringify(enabledMethods));
+                                var jitType = getJITType();
+                                macros.put("@JIT_TYPE@", jitType);
+
+                                if(jitType == "verify") {
+                                    enrollVerify(conn, userId, username);
+
+                                } else if(jitType == "totp") {
+                                    enrollTOTP(conn, userId, username);
+
+                                } else {
+                                    //Default to sms/email/choose
+                                    page.setValue("/authsvc/authenticator/ci/jit_enroll.html");
+                                }
+                                clearJITEnrollingState();
+                            }
                         } else {
                             // The request failed. Return an error page via our handleError
                             // method (defined in CI_Common.js).
@@ -573,7 +614,7 @@ if(username != null) {
                 if (resp != null && resp.getCode() == 200 && json != null && json.owner == userId) {
 
                     if(json.state == "VERIFY_SUCCESS") {
-                        if(getIsEnrolling() != null && getIsEnrolling() == "true") {
+                        if(getIsVerifyEnrolling() != null && getIsVerifyEnrolling() == "true") {
                             macros.put("@DEVICE_NAME@", state.get("deviceName"));
                             macros.put("@STATUS@", "success");
                             page.setValue("/authsvc/authenticator/ci/try_push.html");
@@ -593,7 +634,7 @@ if(username != null) {
                         }
                         cleanState();
                     } else if(json.state == "PENDING") {
-                        if(getIsEnrolling() != null && getIsEnrolling() == "true") {
+                        if(getIsVerifyEnrolling() != null && getIsVerifyEnrolling() == "true") {
                             macros.put("@DEVICE_NAME@", state.get("deviceName"));
                             macros.put("@STATUS@", "pending");
                             page.setValue("/authsvc/authenticator/ci/try_push.html");
@@ -619,6 +660,7 @@ if(username != null) {
         }
         else if(action == "enrollPrompt") {
             macros.put("@ENABLED_METHODS@", JSON.stringify(enabledMethods));
+            macros.put("@JIT_TYPE@", "");
             page.setValue("/authsvc/authenticator/ci/jit_enroll.html");
         }
         else if(action == "register") {
@@ -631,14 +673,6 @@ if(username != null) {
             // If the type is verify, this is a IBM Verify authenticator
             // registration.
             if(type == "verify") {
-                var authenticators = [];
-                var resp = CiClient.getAuthenticators(conn, userId, getLocale());
-                var json = getJSON(resp);
-                if (resp != null && resp.getCode() == 200 && json != null) {
-                    authenticators = json.authenticators;
-                }
-                state.put("authenticators", JSON.stringify(authenticators));
-
                 enrollVerify(conn, userId, username);
 
             } else if(type == "emailotp" || type == "smsotp") {
@@ -659,6 +693,7 @@ if(username != null) {
             pollEnrollment(conn, userId);
         }
         else if(action == "validateOTP") {
+            var type = getType();
             validateOTP(conn);
             if(state.get("status") != null && state.get("status") == "success") {
                 setUsername(username);
@@ -668,8 +703,19 @@ if(username != null) {
                 setAuthStatus("success");
                 setAuthType(type);
                 macros.put("@DEVICE_NAME@", state.get("deviceName"));
-                macros.put("@TYPE@", getType());
+                macros.put("@TYPE@", type);
                 page.setValue("/authsvc/authenticator/ci/device_connected.html");
+            } else {
+                // There was an error. Let the user try again.
+                IDMappingExtUtils.traceString(type);
+                if(type == "totp") {
+                    page.setValue("/authsvc/authenticator/ci/totp_enrollment.html");
+                } else if(type == "smsotp" || type == "emailotp") {
+                    macros.put("@CORRELATION@", state.get("correlation"));
+                    macros.put("@REQUIRE_VALIDATION@", jsString(true));
+                    macros.put("@LAST_VALIDATION@", state.get("lastValidation"));
+                    page.setValue("/authsvc/authenticator/ci/enrollment.html");
+                }
             }
         } else {
             var authStatus = getAuthStatus();

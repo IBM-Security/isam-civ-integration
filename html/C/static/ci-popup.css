@@ -2,6 +2,7 @@
      display: none;
 }
  #dialog .dialog-window {
+     border: 1px solid #e2e2e2;
      position: fixed;
      left: calc( 50% - 480px);
      top: calc( 50% - 307px);
@@ -158,6 +159,10 @@
 }
  #dialog .dialog-window .dialog-back:hover, #dialog .dialog-window .dialog-back:focus {
      background-color: #f4f4f4;
+     transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-back-light:hover, #dialog .dialog-window .dialog-back-light:focus {
+     background-color: #4178be;
      transition: all 150ms cubic-bezier(0.5, 0, 0.15, 1);
 }
  @media screen and (max-height: 600px) and (max-width: 768px) {
@@ -1362,6 +1367,61 @@
      animation-play-state: running;
      -webkit-animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
      animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+ #dialog .dialog-window .dialog-content .layout-top {
+     color: #ffffff;
+     height: 60%;
+     overflow: auto;
+     background-color: #ffffff;
+     padding: 0 40px;
+     transition: all 100ms cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-content .layout-bottom {
+     height: 40%;
+     overflow: auto;
+     background-color: #ffffff;
+     padding: 0 30px;
+     transition: all 100ms cubic-bezier(0.1, 0.6, 0.15, 1);
+}
+ #dialog .dialog-window .dialog-content .layout-top .welcome-illustrations {
+     float: right;
+     padding-right: 30px;
+     top: -40px;
+     position: relative;
+}
+ #dialog .dialog-window .dialog-content .layout-top .type-body-m {
+     width: 60%;
+}
+ #dialog .dialog-window .dialog-content .layout-top h1, #dialog .dialog-window .dialog-content .layout-top h3, #dialog .dialog-window .dialog-content .layout-top .type-body-m {
+     color: #ffffff;
+}
+ #dialog .dialog-window .dialog-content .layout-top--hidden, #dialog .dialog-window .dialog-content .layout-bottom--hidden {
+     left: -100%;
+     opacity: 0;
+     transition: none;
+}
+ #dialog .dialog-window .dialog-content .layout-bottom .method-box {
+     width: 280px;
+     height: 164px;
+     margin: auto;
+     border: 1px solid #e0e0e0;
+     padding: 12px 16px;
+     box-sizing: border-box;
+     text-align: center;
+}
+ #dialog .dialog-window .dialog-content .layout-bottom .method-box:hover {
+     background-color: #f4f4f4;
+}
+ #dialog .dialog-window .dialog-content .layout-bottom .method-box .line-method {
+     font-size: 11pt;
+     margin: 4px;
+}
+ #dialog .dialog-window .dialog-content .layout-bottom .method-box p {
+     font-size: 9pt;
+     margin: 4px 0px;
+}
+ #dialog .dialog-window .dialog-content .layout-bottom .method-box img {
+     height: 42px;
 }
  @-webkit-keyframes successAnimation {
      0% {

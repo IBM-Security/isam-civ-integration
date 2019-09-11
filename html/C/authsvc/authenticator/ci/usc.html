@@ -1384,6 +1384,9 @@
                 });
             }
         </script>
+        <style>
+                #dialog .dialog-window { border: 0px !important; }
+        </style>
     </head>
     <body onload="startup()" style="line-height:1.5">
         <div class="row" style="margin:0px">
@@ -1392,7 +1395,7 @@
                     <div class="logo">
                         IBM <b>Security Access Manager</b>
                     </div>
-                    <h2 class="light">User Self Care</h2>
+                    <h2 class="light"></h2><!-- User Self Care -->
                 </div>
             </header>
         </div>
@@ -1403,34 +1406,34 @@
                 <a href="#" class="dialog-close" title="Close" onclick="closeDialog();" role="navigation" tabindex="51"></a>
                 <section class="dialog-content" role="main" aria-label="Instructions for this step" data-name="section-welcome">
                     <div class="layout-learn-more" aria-role="region" aria-labeledby="learn-more-title">
-                        <h1 class="light" id="learn-more-title">What is 2-step verification?</h1>
+                        <h1 class="light" id="learn-more-title"></h1><!-- What is 2-step verification? -->
                         <div class="content-float">
-                            <h2 class="light">Why you need this</h2>
+                            <h2 class="light"></h2><!-- Why you need this -->
                             <ul class="unordered-list light">
-                                <li>Passwords are no longer secure enough</li>
-                                <li>Carry piece of mind knowing your account is protected with an extra layer of security: your mobile device</li>
-                                <li>Know anytime, anywhere when someone tries to sign in to your account</li>
+                                <li></li><!-- Passwords are no longer secure enough -->
+                                <li></li><!-- Carry piece of mind knowing your account is protected with an extra layer of security: your mobile device -->
+                                <li></li><!-- Know anytime, anywhere when someone tries to sign in to your account -->
                             </ul>
                         </div>
                         <div class="content-float">
-                            <h2 class="light">How it works</h2>
+                            <h2 class="light"></h2><!-- How it works -->
                             <ol class="ordered-list light">
-                                <li>Next time you sign in, you'll enter your password as usual</li>
-                                <li>You'll be asked to verify on your mobile device</li>
+                                <li></li><!-- Next time you sign in, you'll enter your password as usual -->
+                                <li></li><!-- You'll be asked to verify on your mobile device -->
                             </ol>
                         </div>
                     </div>
                     <div class="layout-large-left large-layout">
-                        <h3 class="launch-animation">Welcome, <!-- DYNAMIC | FIRST NAME -->@NAME@<!-- END --></h3>
-                        <h1 class="launch-animation">Signing in is now more secure</h1>
-                        <p class="type-body-m launch-animation">Want extra account protection? You can use your mobile device or email to verify your identity when signing in. Even if your password is stolen, your account is still safe.</p>
-                        <p class="type-body-m launch-animation">Set up will take about 2 minutes and may require your iOS&trade; or Android&trade; device.</p>
+                        <h3 class="launch-animation"></h3><!-- Welcome, DYNAMIC | FIRST NAME @NAME@ -->
+                        <h1 class="launch-animation"></h1><!-- Signing in is now more secure -->
+                        <p class="type-body-m launch-animation"></p><!-- Want extra account protection? You can use your mobile device or email to verify your identity when signing in. Even if your password is stolen, your account is still safe. -->
+                        <p class="type-body-m launch-animation"></p><!-- Set up will take about 2 minutes and may require your iOS&trade; or Android&trade; device. -->
                         <button class="button-1 nav-sectionlink" data-target="section-mobile-choose" type="button" tabindex="1" style="
-                            margin-top: 10px;" onclick="showContentSection(this);">Get started with your mobile device</button>
+                            margin-top: 10px;" onclick="showContentSection(this);"></button><!-- Get started with your mobile device -->
                         <button class="button-1 nav-sectionlink" data-target="section-email" type="button" tabindex="2" style="
-                            margin-top:10px; display:block;" onclick="showContentSection(this);">Get started with your email</button>
+                            margin-top:10px; display:block;" onclick="showContentSection(this);"></button><!-- Get started with your email -->
                         <p class="type-body-m launch-animation" style="margin-top: 10px;">
-                            <a href="#" class="learn-more-link" tabindex="3" onclick="learnMore();">Learn More</a>
+                            <a href="#" class="learn-more-link" tabindex="3" onclick="learnMore();"></a><!-- Learn More -->
                         </p>
                     </div>
                     <div class="layout-right small-layout">
@@ -1442,14 +1445,14 @@
 
                 <section class="dialog-content" role="main" aria-label="Instructions for this step" data-name="section-mobile-choose">
                     <div class="layout-left">
-                        <h1 class="launch-animation">Choose your method</h1>
-                        <p class="type-body-m launch-animation" style="margin-bottom:50px;">There are multiple ways you can use your mobile to protect your account. You can choose between IBM Verify with Mobile Push, Authenticator Code, or Text Message One-Time Passwords!</p>
+                        <h1 class="launch-animation"></h1><!-- Choose your method -->
+                        <p class="type-body-m launch-animation" style="margin-bottom:50px;"></p><!-- There are multiple ways you can use your mobile to protect your account. You can choose between IBM Verify with Mobile Push, Authenticator Code, or Text Message One-Time Passwords! -->
                         <button class="button-1 nav-sectionlink" data-target="section-download" next-target="verify" type="button" tabindex="1" style="
-                            margin-top: 10px; width:250px; margin-left:55px;" onclick="showContentSection(this);">IBM Verify (Mobile Push)</button>
+                            margin-top: 10px; width:250px; margin-left:55px;" onclick="showContentSection(this);"></button><!-- IBM Verify (Mobile Push) -->
                         <button class="button-1 nav-sectionlink" data-target="section-download" next-target="totp" type="button" tabindex="2" style="
-                            margin-top:10px; display:block; width:250px; margin-left:55px;" onclick="showContentSection(this);">Authenticator Code</button>
+                            margin-top:10px; display:block; width:250px; margin-left:55px;" onclick="showContentSection(this);"></button><!-- Authenticator Code -->
                         <button class="button-1 nav-sectionlink" data-target="section-sms" type="button" tabindex="3" style="
-                            margin-top:10px; display:block; width:250px; margin-left:55px;" onclick="showContentSection(this);">Text Message</button>
+                            margin-top:10px; display:block; width:250px; margin-left:55px;" onclick="showContentSection(this);"></button><!-- Text Message -->
                     </div>
                     <div class="layout-right small-layout">
                         <div class="welcome-illustrations">
@@ -1460,15 +1463,15 @@
 
                 <section class="dialog-content" role="main" aria-label="Instructions for this step" data-name="section-download" next-target="">
                     <div class="layout-left">
-                        <h1>Download the app</h1>
+                        <h1></h1><!-- Download the app -->
                         <p class="type-body-m">
                             <ol class="ordered-list">
-                                <li>Launch the App Store&trade; (iOS&trade;) or Google Play&trade; Store (Android&trade;) app</li>
-                                <li>Search for "IBM Verify"</li>
-                                <li>Tap "Get" and "Install" to download the app</li>
+                                <li></li><!-- Launch the App Store&trade; (iOS&trade;) or Google Play&trade; Store (Android&trade;) app -->
+                                <li></li><!-- Search for "IBM Verify" -->
+                                <li></li><!-- Tap "Get" and "Install" to download the app -->
                             </ol>
                         </p>
-                        <button onclick="registerAuthenticatorOrTOTP(this);" class="button-1 nav-sectionlink" data-target="section-connectaccount" type="button" tabindex="1">Next Step: Connect Your Account</button>
+                        <button onclick="registerAuthenticatorOrTOTP(this);" class="button-1 nav-sectionlink" data-target="section-connectaccount" type="button" tabindex="1"></button><!-- Next Step: Connect Your Account -->
                     </div>
                     <div class="layout-right">
                         <div class="example-animation">
@@ -1483,12 +1486,12 @@
 
                 <section class="dialog-content" role="main" aria-label="Instructions for this step" data-name="section-connectaccount" next-target="">
                     <div class="layout-left">
-                        <h1>Connect your account</h1>
-                        <p class="type-body-m">Next, we need to connect the app to your account so it can do its magic. On your mobile device:</p>
+                        <h1></h1><!-- Connect your account -->
+                        <p class="type-body-m"></p><!-- Next, we need to connect the app to your account so it can do its magic. On your mobile device: -->
                         <div class="layout-embed">
                             <div class="qr-code qr-code-error hidden">
-                                <span class="scan" style="display: block;"><b>There was an error retrieving the QR Code.</b></span>
-                                <span class="sm">Please try again later.</span>
+                                <span class="scan" style="display: block;"><b></b></span><!-- There was an error retrieving the QR Code. -->
+                                <span class="sm"></span><!-- Please try again later. -->
                             </div>
                             <div class="qr-code">
                                 <!-- Blue success check, is display:none by default, animates in when device is connected successfully -->
@@ -1499,24 +1502,24 @@
                             </div>
                         </div>
                         <ol class="ordered-list">
-                            <li>Launch IBM Verify</li>
-                            <li>Tap "Connect an Account"</li>
-                            <li>Scan the QR Code using your device's camera</li>
+                            <li></li><!-- Launch IBM Verify -->
+                            <li></li><!-- Tap "Connect an Account" -->
+                            <li></li><!-- Scan the QR Code using your device's camera -->
                         </ol>
                         <button class="button-1" type="button" tabindex="1" style="
-                            display:block; width:230px; bottom:40px; position:absolute;" onclick="closeOrTotpValidation(this);">Finish</button>
+                            display:block; width:230px; bottom:40px; position:absolute;" onclick="closeOrTotpValidation(this);"></button><!-- Finish -->
                         <div class="validation hidden" data-target="section-totp-validation"></div>
                     </div>
                     <div class="layout-right">
                         <div class="example-animation">
                             <div id="qrCode" class="qr-code hidden">
-                                <span class="scan"><b>Scan me!</b></span>
+                                <span class="scan"><b></b></span><!-- Scan me! -->
                                 <img class="center qr-img"></img>
-                                <span class="sm">This QR Code contains your account information</span>
+                                <span class="sm"></span><!-- This QR Code contains your account information -->
                             </div>
                             <div id="qrCodeError" class="qr-code qr-code-error hidden">
-                                <span class="scan"><b>There was an error retrieving the QR Code.</b></span>
-                                <span class="sm">Please try again later.</span>
+                                <span class="scan"><b></b></span><!-- There was an error retrieving the QR Code. -->
+                                <span class="sm"></span><!-- Please try again later. -->
                             </div>
                         </div>
                         <div class="loader" style="position: absolute;left: calc(50% - 32px);top: calc(40% - 72px);
@@ -1526,11 +1529,11 @@
 
                 <section class="dialog-content" data-name="section-sms">
                     <div class="simple-header">
-                        <h1>Enter your mobile number</h1>
+                        <h1></h1><!-- Enter your mobile number -->
                     </div>
                     <div class="sms-container simple-container">
                         <div class="sc-more-dropdown">
-                            <button id="countryDropdown" class="more-menu" onclick="countryDropdown(this);">Country</button>
+                            <button id="countryDropdown" class="more-menu" onclick="countryDropdown(this);"></button><!-- Country -->
                             <ul class="dropdown-list">
                             </ul>
                         </div>
@@ -1539,7 +1542,7 @@
                             <input id="otpDelivery" style="width:79%;max-width:212px;height:100%;" type="number" class="textbox-right" oninput="checkValid(this, 'smsotp');" tabindex="1">
                         </div>
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="enrollSMSorEmail('smsotp', this)" type="button" style="
-                        margin-top: 140px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Save</button>
+                        margin-top: 140px;margin-left: auto;margin-right: auto;" tabindex="2" disabled></button><!-- Save -->
                         <div class="validation hidden" data-target="section-sms-validation"></div>
                         <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
                     </div>
@@ -1547,12 +1550,12 @@
 
                 <section class="dialog-content" data-name="section-email">
                     <div class="simple-header">
-                        <h1>Enter your email</h1>
+                        <h1></h1><!-- Enter your email -->
                     </div>
                     <div class="email-container simple-container">
                         <input id="otpDelivery" class="ci-input" type="email" style="height:46px;margin-top:100px;width:40%;margin-left:auto;margin-right:auto;" oninput="checkValid(this, 'emailotp');" tabindex="1">
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="enrollSMSorEmail('emailotp', this)" type="button" style="
-                        margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Save</button>
+                        margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled></button><!-- Save -->
                         <div class="validation hidden" data-target="section-email-validation"></div>
                         <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
                     </div>
@@ -1560,10 +1563,10 @@
 
                 <section class="dialog-content" role="main" data-name="section-complete">
                     <div class="layout-large-left large-layout">
-                        <h3>Success!</h3>
-                        <h1>Your OTP is ready to go!</h1>
-                        <p class="type-body-m">You’ve made your online account even more secure.</p>
-                        <button class="button-1" type="button" onclick="closeDialog();" tabindex="1">Finish</button>
+                        <h3></h3><!-- Success! -->
+                        <h1></h1><!-- Your OTP is ready to go! -->
+                        <p class="type-body-m"></p><!-- You’ve made your online account even more secure. -->
+                        <button class="button-1" type="button" onclick="closeDialog();" tabindex="1"></button><!-- Finish -->
                     </div>
                     <div class="layout-right small-layout">
                         <div class="welcome-illustrations">
@@ -1574,7 +1577,7 @@
 
                 <section class="dialog-content" role="main" data-name="section-sms-validation">
                     <div class="simple-header">
-                        <h1>Let's make sure it's you</h1>
+                        <h1></h1><!-- Let's make sure it's you -->
                     </div>
                     <div class="sms-validate-container simple-container">
                         <div style="height:40px;margin-top:100px;width:29%;margin-left:auto;margin-right:auto;display:block;">
@@ -1582,14 +1585,14 @@
                             <input id="otp" class="textbox-right" type="number" style="width:auto;" oninput="checkValid(this, 'otp');" tabindex="1">
                         </div>
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="validateOtp('smsotp', this)" type="button" style="
-                        margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Validate</button>
+                        margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled></button><!-- Validate -->
                         <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
                     </div>
                 </section>
 
                 <section class="dialog-content" role="main" data-name="section-email-validation">
                     <div class="simple-header">
-                        <h1>Let's make sure it's you</h1>
+                        <h1></h1><!-- Let's make sure it's you -->
                     </div>
                     <div class="email-validate-container simple-container">
                         <div style="height:40px;margin-top:100px;width:29%;margin-left:auto;margin-right:auto;display:block;">
@@ -1597,19 +1600,19 @@
                             <input id="otp" class="textbox-right" type="number" style="width:auto;" oninput="checkValid(this, 'otp');" tabindex="1">
                         </div>
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="validateOtp('emailotp', this)" type="button" style="
-                        margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Validate</button>
+                        margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled></button><!-- Validate -->
                         <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
                     </div>
                 </section>
 
                 <section class="dialog-content" role="main" data-name="section-totp-validation">
                     <div class="simple-header">
-                        <h1>Let's check it works</h1>
+                        <h1></h1><!-- Let's check it works -->
                     </div>
                     <div class="totp-validate-container simple-container">
                         <div><input id="otp" class="ci-input" type="number" style="height:46px;margin-top:100px;width:40%;margin-left:auto;margin-right:auto;" oninput="checkValid(this, 'otp');" tabindex="1"></div>
                         <button class="button-1 nav-sectionlink" data-target="section-complete" onclick="validateOtp('totp', this)" type="button" style="
-                        margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled>Validate</button>
+                        margin-top: 204px;margin-left: auto;margin-right: auto;" tabindex="2" disabled></button><!-- Validate -->
                         <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
                     </div>
                 </section>
@@ -1624,10 +1627,10 @@
             <div class="user-card">
                 <ul class="profile">
                     <li class="name">@NAME@</li>
-                    <li class="email"><span>Email: </span>@EMAIL@</li>
-                    <li class="username"><span>Username: </span>@USERNAME@</li>
-                    <li class="extra"><span>No. Devices: </span><span id="authenticatorsTotal">@DEVICE_COUNT@</span></li>
-                    <li class="extra"><span>No. Methods: </span><span id="methodsTotal">@METHOD_COUNT@</span></li>
+                    <li class="email"><span></span>@EMAIL@</li><!-- Email:  -->
+                    <li class="username"><span></span>@USERNAME@</li><!-- Username:  -->
+                    <li class="extra"><span></span><span id="authenticatorsTotal">@DEVICE_COUNT@</span></li><!-- No. Devices:  -->
+                    <li class="extra"><span></span><span id="methodsTotal">@METHOD_COUNT@</span></li><!-- No. Methods:  -->
                 </ul>
             </div>
             <div class="intime-alert"><p class="light"></p></div>
@@ -1636,9 +1639,9 @@
                 <section class="self-care-section" data-name="section-welcome-authenticators">
 
                     <div class="self-care-header">
-                        <h3>Two-Step Verification Settings</h3>
-                        <h1>My Authenticators and OTPs</h1>
-                        <button class="button-1 add-device" onclick='launchRegisterDialog()'>Add</button>
+                        <h3></h3><!-- Two-Step Verification Settings -->
+                        <h1></h1><!-- My Authenticators and OTPs -->
+                        <button class="button-1 add-device" onclick='launchRegisterDialog()'></button><!-- Add -->
                     </div>
                     <div id="noDevicesContainer" class="no-devices-container"></div>
                     <div id="deviceContainer" class="device-container hidden">

@@ -6,50 +6,57 @@
     <title>IBM Verify</title>
     <link rel="stylesheet" type="text/css" href="/sps/static/design.css"></link>
     <link rel="stylesheet" type="text/css" href="/sps/static/ci.css"></link>
+    <link rel="stylesheet" type="text/css" href="/sps/static/ci-popup.css"></link>
     <script src="/sps/static/ciI18n.js"></script>
     <script>
+    var pollTimer = null;
 
     function cancel() {
-      document.getElementById("cancelForm").submit();
+        if (pollTimer != null) {
+            window.clearTimeout(pollTimer);
+        }
+        document.getElementById("cancelForm").submit();
     }
 
     function populateStrings() {
         document.title = ciMsg.ibmVerify;
-        document.getElementsByClassName("pageTitle")[0].textContent = ciMsg.ibmVerify;
+        document.querySelector('h3').textContent = ciMsg.twoStepVeri;
+        document.querySelector('h1').textContent = ciMsg.letsMakeSure;
         document.getElementById("instructions").textContent = ciMsg.verifyInstructions;
-        document.getElementById("cancel_button").value = ciMsg.back;
     }
 
     function startup() {
         populateStrings();
 
-        setTimeout(function () {
+        pollTimer = setTimeout(function () {
             document.getElementById("pollForm").submit();
         }, 2000);
     }
     </script>
   </head>
   <body onload="startup()">
-    <div class="content">
-      <div class="main-container">
-        <div class="header-container ">
-          <h2 class="pageTitle"></h2>
-            <div class="message-box">
-              <p id="instructions"></p>
-              <div class="loader" style="background-image: url('./static/loader_light.gif');"></div>
-              <div class="controls">
-                <input id="cancel_button" class="button-1 back-button" type="reset" value="" onClick="cancel();" />
-              </div>
-            </div>
-          </div>
+    <div id="dialog" style="z-index: 2000; box-sizing: initial; display: block;">
+        <div class="dialog-window notransition" style="z-index: 2000;">
+            <section id="try-section" class="dialog-content dialog-content--visible notransition">
+                <div class="layout-large-right">
+                    <h3></h3><!-- Two-step verification -->
+                    <h1></h1><!-- Let's make sure it's you -->
+                    <p id="instructions" class="type-body-m"></p><!-- We’ve sent a notification to your device. Simply approve the Sign-in to continue. If you haven’t received it yet, open IBM Verify. -->
+                </div>
+                <div class="layout-left" style="background-color:#1d3649;">
+                    <a href="#" class="dialog-back dialog-back-light nav-sectionlink-back" title="Back" role="navigation" tabindex="50" onclick="cancel();" style="background-image: url('./static/design_images/back-light.svg');"></a>
+                    <div class="welcome-illustrations">
+                        <div class="loader loader-dark"></div>
+                    </div>
+                </div>
+            </section>
         </div>
-      </div>
     </div>
-    <form id="cancelForm" method="post" action="@ACTION@" autocomplete="off">
+    <form id="cancelForm" method="POST" action="@ACTION@" autocomplete="off">
         <input type="hidden" name="operation" value="verify" />
         <input type="hidden" name="action" value="initiate" />
     </form>
-    <form id="pollForm" method="post" action="@ACTION@" autocomplete="off">
+    <form id="pollForm" method="POST" action="@ACTION@" autocomplete="off">
         <input type="hidden" name="operation" value="verify" />
         <input type="hidden" name="action" value="poll" />
     </form>

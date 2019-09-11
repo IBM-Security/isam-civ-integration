@@ -6,31 +6,36 @@
     <title></title>
     <link rel="stylesheet" type="text/css" href="/sps/static/design.css"></link>
     <link rel="stylesheet" type="text/css" href="/sps/static/ci.css"></link>
+    <link rel="stylesheet" type="text/css" href="/sps/static/ci-popup.css"></link>
     <script src="/sps/static/ciI18n.js"></script>
   <script>
     function cancel() {
-      document.getElementById("cancelForm").submit();
+        document.querySelector(".loader").classList.remove('hidden');
+        document.getElementById("verification_img").classList.add('hidden');
+        document.getElementById("cancelForm").submit();
     }
     function populateStrings() {
         document.title = ciMsg.errorLabel;
-        document.getElementsByClassName("pageTitle")[0].textContent = ciMsg.errorLabel;
-        document.getElementById("cancel_button").value = ciMsg.back;
+        document.querySelector("h1").textContent = ciMsg.errorLabel;
     }
   </script>
   </head>
   <body onload="populateStrings()">
-    <div class="content">
-      <div class="main-container">
-        <div class="header-container ">
-          <h2 class="pageTitle error"></h2>
-            <div class="message-box">@ERROR_MESSAGE@
-              <div class="controls">
-                <input id="cancel_button" class="button-1 back-button" type="reset" value="" onClick="cancel();" />
-              </div>
-            </div>
-          </div>
+    <div id="dialog" style="z-index: 2000; box-sizing: initial; display: block;">
+        <div class="dialog-window notransition" style="z-index: 2000;">
+            <section id="try-section" class="dialog-content dialog-content--visible notransition">
+                <div class="layout-large-right">
+                    <h1></h1><!-- Error -->
+                    <p class="type-body-m">@ERROR_MESSAGE@</p>
+                </div>
+                <div class="layout-left" style="background-color:#1d3649;">
+                    <a href="#" class="dialog-back dialog-back-light nav-sectionlink-back" title="Back" role="navigation" tabindex="50" onclick="cancel();" style="background-image: url('./static/design_images/back-light.svg');"></a>
+                    <div class="welcome-illustrations">
+                        <img src="./static/design_images/verify_deny.svg" class="launch-animation" />
+                    </div>
+                </div>
+            </section>
         </div>
-      </div>
     </div>
     <form id="cancelForm" method="post" action="@ACTION@" autocomplete="off">
         <input type="hidden" name="operation" value="verify" />

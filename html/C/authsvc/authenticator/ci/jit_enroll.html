@@ -13,6 +13,8 @@
     //["Andorra","Austria","Australia","Belgium","Bermuda","Canada","Cyprus","Czech Republic","Denmark","Estonia","Faroe Islands","Finland","France","Germany","Greece","Greenland","Hong Kong","Iceland","India","Ireland","Israel","Italy","Japan","Liechtenstein","Luxembourg","Malta","Monaco","Netherlands","New Zealand","Norway","Philippines","Poland","Portugal","San Marino","Saudi Arabia","Singapore","Slovakia","Slovenia","Spain","Sweden","Switzerland","Thailand","United Arab Emirates","United Kingdom","United States"];
     var phoneCodes = {}; phoneCodes[ciMsg.AD] = "+376"; phoneCodes[ciMsg.AT] = "+43"; phoneCodes[ciMsg.AU] = "+61"; phoneCodes[ciMsg.BE] = "+32"; phoneCodes[ciMsg.BM] = "+809"; phoneCodes[ciMsg.CA] = "+1"; phoneCodes[ciMsg.CY] = "+357"; phoneCodes[ciMsg.CZ] = "+420"; phoneCodes[ciMsg.DK] = "+45"; phoneCodes[ciMsg.EE] = "+372"; phoneCodes[ciMsg.FO] = "+298"; phoneCodes[ciMsg.FI] = "+358"; phoneCodes[ciMsg.FR] = "+33"; phoneCodes[ciMsg.DE] = "+49"; phoneCodes[ciMsg.GR] = "+30"; phoneCodes[ciMsg.GL] = "+299"; phoneCodes[ciMsg.HK] = "+852"; phoneCodes[ciMsg.IS] = "+354"; phoneCodes[ciMsg.IN] = "+91"; phoneCodes[ciMsg.IE] = "+353"; phoneCodes[ciMsg.IL] = "+972"; phoneCodes[ciMsg.IT] = "+39"; phoneCodes[ciMsg.JP] = "+81"; phoneCodes[ciMsg.LI] = "+423"; phoneCodes[ciMsg.LU] = "+352"; phoneCodes[ciMsg.MT] = "+356"; phoneCodes[ciMsg.MC] = "+33"; phoneCodes[ciMsg.NL] = "+31"; phoneCodes[ciMsg.NZ] = "+64"; phoneCodes[ciMsg.NO] = "+47"; phoneCodes[ciMsg.PH] = "+63"; phoneCodes[ciMsg.PL] = "+48"; phoneCodes[ciMsg.PT] = "+351"; phoneCodes[ciMsg.SM] = "+378"; phoneCodes[ciMsg.SA] = "+966"; phoneCodes[ciMsg.SG] = "+65"; phoneCodes[ciMsg.SK] = "+421"; phoneCodes[ciMsg.SI] = "+386"; phoneCodes[ciMsg.ES] = "+34"; phoneCodes[ciMsg.SE] = "+46"; phoneCodes[ciMsg.CH] = "+41"; phoneCodes[ciMsg.TH] = "+66"; phoneCodes[ciMsg.AE] = "+971"; phoneCodes[ciMsg.GB] = "+44"; phoneCodes[ciMsg.US] = "+1";
 
+    var jitType = "@JIT_TYPE@";
+
     function unhideMethods() {
         var enabledMethods = '@ENABLED_METHODS@';
 
@@ -34,39 +36,49 @@
                 document.getElementById("email-method-container").classList.remove("hidden");
             }
             if(includeVerify) {
-                document.getElementById("verify-method-container").classList.remove("hidden");
-                document.getElementById("other-desc").classList.remove("hidden");
+                document.getElementById("verify-button").disabled = false;
             }
         }
     }
 
     function enroll(type) {
-        if(type == "verify" || type == "totp") {
-            document.querySelectorAll(".loader")[0].classList.remove('hidden');
-            document.querySelectorAll(".welcome-illustrations .launch-animation")[0].classList.add('hidden');
-        } else if(type == "emailotp" || type == "smsotp") {
-            var otpDeliveryInput = document.getElementById(type + "-input");
-            var otpDelivery = otpDeliveryInput.value;
+        if(jitType != null && jitType != "") {
+            if(type == "emailotp" || type == "smsotp") {
+                var otpDeliveryInput = document.getElementById(type + "-input");
+                var otpDelivery = otpDeliveryInput.value;
 
-            if(type == "smsotp") {
-                document.querySelectorAll(".loader")[2].classList.remove('hidden');
-                document.querySelectorAll(".welcome-illustrations .launch-animation")[2].classList.add('hidden');
-                var countryArray = document.getElementById("countryDropdown").textContent.split(" ");
-                var code = countryArray[countryArray.length - 1];
-                otpDelivery = code + otpDelivery;
+                if(type == "smsotp") {
+                    document.querySelectorAll(".loader")[2].classList.remove('hidden');
+                    document.querySelectorAll(".welcome-illustrations .launch-animation")[2].classList.add('hidden');
+                    var countryArray = document.getElementById("countryDropdown").textContent.split(" ");
+                    var code = countryArray[countryArray.length - 1];
+                    otpDelivery = code + otpDelivery;
+                } else {
+                    document.querySelectorAll(".loader")[1].classList.remove('hidden');
+                    document.querySelectorAll(".welcome-illustrations .launch-animation")[1].classList.add('hidden');
+                }
+                var input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "otpDelivery";
+                input.value = otpDelivery;
+                document.getElementById("enrollForm").appendChild(input);
+                document.getElementById("enrollForm").otpDelivery.value = otpDelivery;
             } else {
-                document.querySelectorAll(".loader")[1].classList.remove('hidden');
-                document.querySelectorAll(".welcome-illustrations .launch-animation")[1].classList.add('hidden');
+                if(type == "verify") {
+                    document.getElementById("verify-button").disabled = true;
+                }
+                document.querySelectorAll(".loader")[0].classList.remove('hidden');
             }
-            var input = document.createElement("input");
-            input.type = "hidden";
-            input.name = "otpDelivery";
-            input.value = otpDelivery;
-            document.getElementById("enrollForm").appendChild(input);
-            document.getElementById("enrollForm").otpDelivery.value = otpDelivery;
+            document.getElementById("enrollForm").type.value = type;
+            document.getElementById("enrollForm").submit();
+        } else {
+            document.getElementById("secondFactorForm").jitType.value = type;
+            document.getElementById("secondFactorForm").submit();
+            if(type == "verify") {
+                document.getElementById("verify-button").disabled = true;
+            }
+            document.querySelectorAll(".loader")[0].classList.remove('hidden');
         }
-        document.getElementById("enrollForm").type.value = type;
-        document.getElementById("enrollForm").submit();
     }
 
     function showEmailPrompt() {
@@ -75,6 +87,7 @@
         document.getElementById("enroll-section").classList.add('dialog-content--hidden');
         setTimeout(function () {
             document.getElementById("enroll-section").style.left = '-100%';
+            document.querySelectorAll(".loader")[0].classList.add('hidden');
         }, 300);
         document.getElementById("email-section").style.left = '';
         document.getElementById("email-section").classList.add('dialog-content--visible');
@@ -95,9 +108,24 @@
         document.getElementById("enroll-section").classList.add('dialog-content--hidden');
         setTimeout(function () {
             document.getElementById("enroll-section").style.left = '-100%';
+            document.querySelectorAll(".loader")[0].classList.add('hidden');
         }, 300);
         document.getElementById("sms-section").style.left = '';
         document.getElementById("sms-section").classList.add('dialog-content--visible');
+    }
+
+    function back() {
+        document.getElementById("sms-section").classList.remove('dialog-content--visible');
+        setTimeout(function () {
+            document.getElementById("sms-section").style.left = '100%';
+        }, 300);
+        document.getElementById("email-section").classList.remove('dialog-content--visible');
+        setTimeout(function () {
+            document.getElementById("email-section").style.left = '100%';
+        }, 300);
+        document.getElementById("enroll-section").style.left = '';
+        document.getElementById("enroll-section").classList.remove('dialog-content--hidden');
+        document.getElementById("enroll-section").classList.add('dialog-content--visible');
     }
 
     function checkValid(input, buttonId) {
@@ -129,12 +157,10 @@
     function populateStrings() {
         document.title = ciMsg.chooseMethod;
         document.getElementById("countryDropdown").textContent = ciMsg.US + " " + phoneCodes[ciMsg.US];
-        document.querySelector('#enroll-section h3').textContent = ciMsg.setupTwoStep;
-        document.querySelector('#enroll-section h2').textContent = ciMsg.chooseMethod;
-        document.querySelector("#enroll-section #verify-method-container b").textContent = ciMsg.ibmVerifyAppRecommended;
-        document.querySelector("#enroll-section #verify-method-container p").innerHTML = ciMsg.verifyEnrollDesc;
+        document.querySelector("#enroll-section h3").textContent = ciMsg.recommended;
+        document.querySelector("#enroll-section h1").textContent = ciMsg.setupIBMVerify;
+        document.querySelector("p").innerHTML = ciMsg.verifyEnrollDesc;
         document.querySelector("#enroll-section #verify-button").textContent = ciMsg.setUp;
-        document.querySelector("#enroll-section #other-desc").textContent = ciMsg.otherOptions;
         document.querySelector("#enroll-section #totp-method-container b").textContent = ciMsg.mobileApp;
         document.querySelector("#enroll-section #totp-method-container p").textContent = ciMsg.totpEnrollDesc;
         document.querySelector("#enroll-section #totp-button").textContent = ciMsg.setUp;
@@ -184,17 +210,27 @@
         });
         configureEvent('#email-section input', '#email-section #email-code-button');
         configureEvent('#sms-section input', '#sms-section #sms-code-button');
+        
+        if(jitType != null && jitType != "") {
+            if(jitType == "smsotp") {
+                showSMSPrompt();
+            } else if(jitType == "emailotp") {
+                showEmailPrompt();
+            }
+        }
     }
     </script>
 
     <style>
         .type-body-m {
-            margin-left:12px !important;
-            margin-top: 12px !important;
-            line-height: 18px !important;
-            width:80%
+            line-height: 20px !important;
         }
-        a {color: #0F6DFF !important;}
+        a {
+            color: #3277bf !important;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 10pt;
+        }
     </style>
   </head>
   <body onload="startup()">
@@ -202,102 +238,79 @@
     <div id="dialog" style="z-index: 2000; box-sizing: initial; display: block;">
         <div id="dialog-window" class="dialog-window notransition" style="z-index: 2000;">
             <section id="enroll-section" class="dialog-content dialog-content--visible notransition">
-                <div class="layout-left" style="background-color: #ECECEC;">
+                <div class="layout-top" style="background-color: #1d3649;">
+                    <h3 style="padding-top: 80px;"></h3><!-- Recommended -->
+                    <h1></h1><!-- Set up IBM Verify -->
+                    <p class="type-body-m" style="font-size:12pt"></p><!-- Faster, more secure and easy to set up! Verify your identity with a simple tap on your iOS or Android device using the IBM Verify app. -->
+                    <button id="verify-button" class="button-1" onclick="enroll('verify')" type="button" tabindex="0" disabled></button><!-- Set Up -->
                     <div class="welcome-illustrations">
-                        <div class="loader hidden" style="background-image: url('./static/loader_light.gif'); position:absolute; left:168px; top:-40px;"></div>
-                        <img src="./static/design_images/devices_verify.svg" class="launch-animation" />
+                        <img style="height:120px;" src="./static/design_images/devices_verify.svg" class="launch-animation" />
                     </div>
+                    <div class="loader loader-dark hidden"></div>
                 </div>
-                <div class="layout-large-right">
-                    <h3 style="margin-left:12px;">Set up two-step verification</h3>
-                    <h2 style="margin-top:4px; margin-left:12px;">Choose your method</h2>
-                    <div id="verify-method-container" class="line-method-container hidden" style="margin: 25px 0px; border: 1px solid #DCDCDC;">
+                <div class="layout-bottom" style="display:flex;">
+                    <div id="totp-method-container" class="method-box hidden">
+                        <img src="./static/design_images/credentials_devices.svg" class="launch-animation" />
                         <div class="line-method">
-                            <img src="./static/design_images/device_phone_verify.svg" style="height:120px;" class="launch-animation" />
-                            <div>
-                                <b style="margin-left:12px;">IBM Verify app (recommended)</b>
-                                <p class="type-body-m" style="font-size:9pt">
-                                    Faster, more secure and easy to set up! Verify your identity with a simple tap on your iOS or Android device using the IBM Verify app.
-                                </p>
-                                <a id="verify-button" class="method-link" href="javascript:void(0);" style="margin-left:12px;" onclick="enroll('verify')">Set up</a>
-                            </div>
+                            <b></b><!-- Generated Code -->
                         </div>
+                        <p></p><!-- Time-based, one-time access code generated by an authenticator app on your smart phone or tablet. -->
+                        <a id="totp-button" class="method-link" href="javascript:void(0);" onclick="enroll('totp')"></a><!-- Set up -->
                     </div>
-                    <p id="other-desc" class="type-body-m hidden" style="font-size:10pt">
-                        Other options to verify your identity
-                    </p>
-                    <div id="totp-method-container" class="line-method-container hidden">
+                    <div id="sms-method-container" class="method-box hidden">
+                        <img src="./static/design_images/credentials_bubble.svg" class="launch-animation" />
                         <div class="line-method">
-                            <b>Mobile authenticator app</b>
-                            <a id="totp-button" class="method-link" href="javascript:void(0);" onclick="enroll('totp')">Set up</a>
+                            <b></b><!-- Text message -->
                         </div>
-                        <p class="type-body-m" style="font-size:9pt">
-                            Time-based, one-time access code generated by an authenticator app on your smart phone or tablet.
-                        </p>
-                        <hr>
+                        <p></p><!-- One-time access code sent to your mobile phone via SMS text. Standard message rates apply. -->
+                        <a id="sms-button" class="method-link" href="javascript:void(0);" onclick="enroll('smsotp')"></a><!-- Set up -->
                     </div>
-                    <div id="sms-method-container" class="line-method-container hidden">
+                    <div id="email-method-container" class="method-box hidden">
+                        <img src="./static/design_images/envelope-open.svg" class="launch-animation" />
                         <div class="line-method">
-                            <b>Text message</b>
-                            <a id="sms-button" class="method-link" href="javascript:void(0);" onclick="showSMSPrompt()">Set up</a>
+                            <b>Email</b><!-- Email -->
                         </div>
-                        <p class="type-body-m" style="font-size:9pt">
-                            One-time access code sent to your mobile phone via SMS text. Standard message rates apply.
-                        </p>
-                        <hr>
-                    </div>
-                    <div id="email-method-container" class="line-method-container hidden">
-                        <div class="line-method">
-                            <b>Email</b>
-                            <a id="email-button" class="method-link" href="javascript:void(0);" onclick="showEmailPrompt()">Set up</a>
-                        </div>
-                        <p class="type-body-m" style="font-size:9pt">
-                            One-time access code sent to your email address.
-                        </p>
-                        <hr>
+                        <p></p><!-- One-time access code sent to your email address. -->
+                        <a id="email-button" style="position:relative;bottom:-16px;" class="method-link" href="javascript:void(0);" onclick="enroll('emailotp')"></a><!-- Set up -->
                     </div>
                 </div>
             </section>
 
             <section id="email-section" class="dialog-content" role="main">
-                <div class="layout-left" style="background-color:#ECECEC;">
+                <div class="layout-left" style="background-color:#1d3649;">
                     <div class="welcome-illustrations">
-                        <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
+                        <div class="loader loader-dark hidden"></div>
                         <img src="./static/design_images/envelope-open.svg" class="launch-animation" />
                     </div>
                 </div>
                 <div class="layout-large-right">
-                    <h1>Enter your email</h1>
-                    <p class="type-mody-m">This email will be used for two-step verification. A one-time access code will be sent to your email.</p>
-                    <p style="margin-top:40px;margin-bottom:8px;font-size:8pt">Email address</p>
-                    <input id="emailotp-input" class="ci-input" type="email" placeholder="Enter email address" 
-                    style="height:46px;min-width:60%;max-width:400px;padding-left:12px;" oninput="checkValid(this, 'email-code-button');" tabindex="0">
-                    <button id="email-code-button" class="button-1 button-bottom" onclick="enroll('emailotp')" type="button"
-                    tabindex="0" disabled>Send access code</button>
+                    <h1></h1><!-- Enter your email -->
+                    <p class="type-body-m"></p><!-- This email will be used for two-step verification. A one-time access code will be sent to your email. -->
+                    <p style="margin-top:40px;margin-bottom:8px;font-size:8pt"></p><!-- Email address -->
+                    <input id="emailotp-input" class="ci-input" type="email" style="height:46px;min-width:60%;max-width:400px;padding-left:12px;" oninput="checkValid(this, 'email-code-button');" tabindex="0">
+                    <button id="email-code-button" class="button-1 button-bottom" onclick="enroll('emailotp')" type="button" tabindex="0" disabled></button><!-- Send access code -->
                 </div>
             </section>
 
             <section id="sms-section" class="dialog-content" role="main">
-                <div class="layout-left" style="background-color:#ECECEC;">
+                <div class="layout-left" style="background-color:#1d3649;">
                     <div class="welcome-illustrations">
-                        <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
+                        <div class="loader loader-dark hidden"></div>
                         <img src="./static/design_images/credentials_bubble.svg" class="launch-animation" />
                     </div>
                 </div>
                 <div class="layout-large-right">
-                    <h1>Enter your mobile number</h1>
-                    <p class="type-mody-m">This number will be used for two-step verification. A one-time access code will be sent to your phone via SMS.</p>
-                    <p style="margin-top:40px;margin-bottom:8px;font-size:8pt">Country</p>
+                    <h1></h1><!-- Enter your mobile number -->
+                    <p class="type-body-m"></p><!-- This number will be used for two-step verification. A one-time access code will be sent to your phone via SMS. -->
+                    <p style="margin-top:40px;margin-bottom:8px;font-size:8pt"></p><!-- Country -->
                     <div class="sc-more-dropdown">
                         <button id="countryDropdown" class="more-menu" onclick="countryDropdown(this);"></button>
                         <ul class="dropdown-list">
                         </ul>
                     </div>
-                    <p style="margin-top:20px;margin-bottom:8px;font-size:8pt">Mobile number</p>
-                    <input id="smsotp-input" class="ci-input" type="number" placeholder="Enter number with area code" 
-                    style="height:46px;min-width:60%;max-width:400px;padding-left:12px;" oninput="checkValid(this, 'sms-code-button');" tabindex="0">
-                    <button id="sms-code-button" class="button-1 button-bottom" onclick="enroll('smsotp')" type="button"
-                    tabindex="0" disabled>Send access code</button>
+                    <p style="margin-top:20px;margin-bottom:8px;font-size:8pt"></p><!-- Mobile number -->
+                    <input id="smsotp-input" class="ci-input" type="number" style="height:46px;min-width:60%;max-width:400px;padding-left:12px;" oninput="checkValid(this, 'sms-code-button');" tabindex="0">
+                    <button id="sms-code-button" class="button-1 button-bottom" onclick="enroll('smsotp')" type="button" tabindex="0" disabled></button><!-- Send access code -->
                 </div>
             </section>
         </div>
@@ -305,6 +318,11 @@
     <form id="enrollForm" method="POST" action="@ACTION@">
       <input type="hidden" name="action" value="register">
       <input type="hidden" name="type" value="">
+      <input type="hidden" name="operation" value="verify">
+    </form>
+    <form id="secondFactorForm" method="POST" action="@ACTION@">
+      <input type="hidden" name="action" value="initiate">
+      <input type="hidden" name="jitType" value="">
       <input type="hidden" name="operation" value="verify">
     </form>
   </body>

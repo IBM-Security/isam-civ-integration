@@ -253,7 +253,7 @@ if(username != null ||
                     } else {
                         // Authenticated user does not match authenticator owner. Return
                         // an error page.
-                        handleError(errorMessages["removal_failed"], resp);
+                        handleError(errorMessages["removal_failed"], null);
                     }
                 } else if(type == "smsotp" || type == "emailotp" || type == "totp") {
                     // If type is anything else, delete the method.
@@ -278,7 +278,7 @@ if(username != null ||
                     } else {
                         // Authenticated user does not match auth method owner. Return
                         // an error page.
-                        handleError(errorMessages["removal_failed"], resp);
+                        handleError(errorMessages["removal_failed"], null);
                     }
                 } else {
                     // No type was supplied. Return an error page via our
@@ -321,7 +321,7 @@ if(username != null ||
                     } else {
                         // Authenticated user does not match authenticator owner. Return
                         // an error page.
-                        handleError(errorMessages["update_failed"], resp);
+                        handleError(errorMessages["update_failed"], null);
                     }
                 } else {
                     // No type was supplied. Return an error page via our

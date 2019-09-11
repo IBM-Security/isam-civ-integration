@@ -38,6 +38,18 @@ var errorMessages = {
  * Get the email address from the state or from the given user object.
  */
 function enrollVerify(conn, userId, username) {
+
+    // Check now to make sure we've saved a list of existing authenticators.
+    var authenticators = JSON.parse(state.get("authenticators"));
+    if(authenticators == null || authenticators.length == 0) {
+        var resp = CiClient.getAuthenticators(conn, userId, getLocale());
+        var authenticatorsJson = getJSON(resp);
+        if (resp != null && resp.getCode() == 200 && authenticatorsJson != null) {
+            authenticators = authenticatorsJson.authenticators;
+        }
+        state.put("authenticators", JSON.stringify(authenticators));
+    }
+
     // The registration payload is the owner and the Verify
     // client ID (configured on the mechanism).
     var registrationJson = {"owner": userId, "clientId": jsString(macros.get("@VERIFY_CLIENT@")), "accountName": username};
@@ -130,6 +142,7 @@ function enrollEmailOrSMS(conn, type, userId, username) {
                 // the state map.
                 if (validationResp != null && validationResp.getCode() && validationJson != null) {
                     macros.put("@CORRELATION@", validationJson.correlation);
+                    state.put("correlation", validationJson.correlation);
                 }
                 macros.put("@IS_ENABLED@", jsString(json.isEnabled));
                 macros.put("@CREATION_TIME@", json.creationTime);
@@ -146,6 +159,7 @@ function enrollEmailOrSMS(conn, type, userId, username) {
                 authMethods.push(json);
                 state.put("authMethods", JSON.stringify(authMethods));
             }
+
         } else {
             // The request failed. Log an audit event for it.
             var code = resp != null ? "" + resp.getCode() : type + " registration failed";
@@ -171,7 +185,7 @@ function enrollTOTP(conn, userId, username) {
 
     // The payload has owner, enabled, and the owner display name.
     var enrollmentJson = {"owner": userId, "isEnabled": true, "ownerDisplayName": username};
-    var resp = CiClient.enrollAuthMethod(conn, type, JSON.stringify(enrollmentJson), true, getLocale());
+    var resp = CiClient.enrollAuthMethod(conn, "totp", JSON.stringify(enrollmentJson), true, getLocale());
     var json = getJSON(resp);
     if (resp != null && resp.getCode() == 201 && json != null) {
         // We got the enrollment QR code. Return it to the end
@@ -190,7 +204,7 @@ function enrollTOTP(conn, userId, username) {
         page.setValue("/authsvc/authenticator/ci/totp_enrollment.html");
 
         // Also log an audit event for the successful register.
-        IDMappingExtUtils.logCISelfCareAuditEvent(username, "register" + type, macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", "");
+        IDMappingExtUtils.logCISelfCareAuditEvent(username, "registertotp", macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", "");
 
         // If we have authMethods in the state, update it now.
         var authMethods = JSON.parse(state.get("authMethods"));
@@ -200,8 +214,8 @@ function enrollTOTP(conn, userId, username) {
         }
     } else {
         // The request failed. Log an audit event for it.
-        var code = resp != null ? "" + resp.getCode() : type + " registration failed";
-        IDMappingExtUtils.logCISelfCareAuditEvent(username, "register" + type, macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", code);
+        var code = resp != null ? "" + resp.getCode() : "totp registration failed";
+        IDMappingExtUtils.logCISelfCareAuditEvent(username, "registertotp", macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", code);
         // Return an error page via our handleError method
         // (defined in CI_Common.js).
         handleError(errorMessages["registration_failed"], resp);
@@ -292,7 +306,7 @@ function validateOTP(conn) {
                 } else {
                     // Authenticated user does not match auth method owner.
                     // Return an error page.
-                    handleError(errorMessages["validation_failed"], resp);
+                    handleError(errorMessages["validation_failed"], null);
                 }
             } else {
                 // No ID was supplied. Return an error page via our
@@ -412,7 +426,7 @@ function pollEnrollment(conn, userId) {
             }
             if(highestPriorityMethodId != null) {
                 state.put("id", highestPriorityMethodId);
-                setIsEnrolling("true");
+                setIsVerifyEnrolling("true");
             }
         }
     }

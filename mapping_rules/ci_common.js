@@ -397,19 +397,66 @@ function getLocale() {
  * Set the 'enrolling' flag in the state. This is used to keep track of what
  * state a Verify registration is in.
  */
-function setIsEnrolling(isEnrolling) {
-    state.put("enrollment", isEnrolling);
+function setIsVerifyEnrolling(isEnrolling) {
+    state.put("verifyEnrolling", isEnrolling);
 }
 
 /**
  * Get the 'enrolling' flag from the state or session.
  */
-function getIsEnrolling() {
-    var isEnrolling = state.get("enrollment");
+function getIsVerifyEnrolling() {
+    var isEnrolling = state.get("verifyEnrolling");
     if(isEnrolling == null) {
         isEnrolling = context.get(Scope.REQUEST, "urn:ibm:security:asf:request:parameter", "enrollment");
     }
     return jsString(isEnrolling);
+}
+
+/**
+ * Set the 'jitEnrolling' flag in the state. This is used to keep track that we're in a
+ * JIT enrollment flow when performing stepup before registration.
+ */
+function setJITEnrolling(jitEnrolling) {
+    state.put("jitEnrolling", jitEnrolling);
+}
+
+/**
+ * Get the 'jitEnrolling' flag from the state.
+ */
+function getJITEnrolling() {
+    var jitEnrolling = state.get("jitEnrolling");
+    return jsString(jitEnrolling);
+}
+
+/**
+ * Fetch the 'jitEnrolling' flag from the state, and also pull jitType from the request,
+ * and store it in state.
+ */
+function checkIfJITEnrolling() {
+    var jitEnrolling = state.get("jitEnrolling");
+
+    var jitType = context.get(Scope.REQUEST, "urn:ibm:security:asf:request:parameter", "jitType");
+    if(jitType != null) {
+        state.put("jitType", jitType);
+    }
+
+    return jsString(jitEnrolling);
+}
+
+/**
+ * Clear the JIT enrolling vars from the state.
+ */
+function clearJITEnrollingState() {
+    state.remove("jitEnrolling");
+    state.remove("jitType");
+}
+
+/**
+ * Get the 'jitType' from the state.
+ */
+function getJITType() {
+    var jitType = state.get("jitType");
+    return jsString(jitType);
 }
 
 /**
@@ -514,6 +561,7 @@ function cleanState() {
     state.remove("lastValidation");
     state.remove("correlation");
     state.remove("authenticatorId");
+    state.remove("verifyEnrolling");
 }
 
 /**
@@ -652,8 +700,9 @@ function maskPhone(number) {
             masked += number[j];
         } else if(j > number.length - 4) {
             masked += number[j];
-        } else {
-            masked += '*';
+        } else if(!masked.includes('*')) {
+            // Lets not indicate how long the phone number is
+            masked += '******';
         }
     }
     return masked;
@@ -673,8 +722,9 @@ function maskEmail(email) {
             masked += email[j];
         } else if(j < 3) {
             masked += email[j];
-        } else {
-            masked += '*';
+        } else if(!masked.includes('*')) {
+            // Lets not indicate how long the email is
+            masked += '******';
         }
     }
     return masked;

@@ -201,7 +201,7 @@
                         var illustrationDiv = document.createElement('div');
                         illustrationDiv.className = "sc-device-illustration";
                         var image = document.createElement('img');
-                        image.src = "static/design_images/" + type + ".svg";
+                        image.src = getJunctionName() + "/sps/static/design_images/" + type + ".svg";
                         image.alt = "illustration";
                         illustrationDiv.appendChild(image);
                         methodDiv.appendChild(illustrationDiv);
@@ -242,7 +242,7 @@
                     var creationDate = new Date(authenticator['creationTime']);
                     var enabledPretty = enabled ? ciMsg.enabled : ciMsg.disabled;
                     var enablePretty = !enabled ? ciMsg.enable : ciMsg.disable;
-                    var imgsrc = "static/design_images/fingerprint.svg";
+                    var imgsrc = getJunctionName() + "/sps/static/design_images/fingerprint.svg";
 
                     var methodDiv = document.createElement('div');
                     methodDiv.className = "sc-device";
@@ -1393,7 +1393,7 @@
             <header role="banner" >
                 <div class="header">
                     <div class="logo">
-                        IBM <b>Security Access Manager</b>
+                        IBM <b>Security Verify Access</b>
                     </div>
                     <h2 class="light"></h2><!-- User Self Care -->
                 </div>
@@ -1438,7 +1438,7 @@
                     </div>
                     <div class="layout-right small-layout">
                         <div class="welcome-illustrations">
-                            <img src="./static/design_images/welcome_illustration.svg" class="launch-animation" alt="IBM Verify" />
+                            <img src="@JUNCTION@/sps/static/design_images/welcome_illustration.svg" class="launch-animation" alt="IBM Verify" />
                         </div>
                     </div>
                 </section>
@@ -1456,7 +1456,7 @@
                     </div>
                     <div class="layout-right small-layout">
                         <div class="welcome-illustrations">
-                            <img src="./static/design_images/phone.svg" class="launch-animation" alt="IBM Verify" />
+                            <img src="@JUNCTION@/sps/static/design_images/phone.svg" class="launch-animation" alt="IBM Verify" />
                         </div>
                     </div>
                 </section>
@@ -1475,10 +1475,10 @@
                     </div>
                     <div class="layout-right">
                         <div class="example-animation">
-                            <img src="./static/design_images/download_the_app.svg" class="download-app" alt="" />
+                            <img src="@JUNCTION@/sps/static/design_images/download_the_app.svg" class="download-app" alt="" />
                             <div class="app-store-links">
-                                <a href="https://itunes.apple.com/us/app/ibm-verify/id1162190392"><img src="./static/design_images/apple_app_store.svg" alt="apple app store" /></a>
-                                <a href="https://play.google.com/store/apps/details?id=com.ibm.security.verifyapp"><img src="./static/design_images/google_play_badge.svg" alt="google play store" /></a>
+                                <a href="https://itunes.apple.com/us/app/ibm-verify/id1162190392"><img src="@JUNCTION@/sps/static/design_images/apple_app_store.svg" alt="apple app store" /></a>
+                                <a href="https://play.google.com/store/apps/details?id=com.ibm.security.verifyapp"><img src="@JUNCTION@/sps/static/design_images/google_play_badge.svg" alt="google play store" /></a>
                             </div>
                         </div>
                     </div>
@@ -1496,7 +1496,7 @@
                             <div class="qr-code">
                                 <!-- Blue success check, is display:none by default, animates in when device is connected successfully -->
                                 <div class="success-check">
-                                    <img src="./static/design_images/confirmation_check.svg" alt="confirmation" />
+                                    <img src="@JUNCTION@/sps/static/design_images/confirmation_check.svg" alt="confirmation" />
                                 </div>
                                 <img class="center qr-img"></img>
                             </div>
@@ -1570,7 +1570,7 @@
                     </div>
                     <div class="layout-right small-layout">
                         <div class="welcome-illustrations">
-                            <img src="./static/design_images/setup_complete.svg"/>
+                            <img src="@JUNCTION@/sps/static/design_images/setup_complete.svg"/>
                         </div>
                     </div>
                 </section>

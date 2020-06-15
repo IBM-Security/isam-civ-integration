@@ -7,6 +7,9 @@ importMappingRule("CI_Common");
 // it out scenarios.
 var verifyMethodPriority = ["face", "fingerprint", "userPresence"];
 
+// Whether important events are audited
+var auditEvents = false;
+
 // The possible error messages returned by this rule.
 var errorMessages = {
     "invalid_action"            : macros.get("@INVALID_ACTION@"), // "The action provided was invalid for this mechanism."
@@ -68,12 +71,16 @@ function enrollVerify(conn, userId, username) {
         // are cleared.
         cleanState();
 
-        // Also log an audit event for the successful register.
-        IDMappingExtUtils.logCISelfCareAuditEvent(username, "registerVerify", macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", "");
+        if(auditEvents) {
+            // Also log an audit event for the successful register.
+            IDMappingExtUtils.logCISelfCareAuditEvent(username, "registerVerify", macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", "");
+        }
     } else {
         // The request failed. Log an audit event for it.
         var code = resp != null ? "" + resp.getCode() : "Verify Registration failed";
-        IDMappingExtUtils.logCISelfCareAuditEvent(username, "registerVerify", macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", code);
+        if(auditEvents) {
+            IDMappingExtUtils.logCISelfCareAuditEvent(username, "registerVerify", macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", code);
+        }
         // Return an error page via our handleError method
         // (defined in CI_Common.js).
         handleError(errorMessages["registration_failed"], resp);
@@ -149,8 +156,10 @@ function enrollEmailOrSMS(conn, type, userId, username) {
                 macros.put("@REQUIRE_VALIDATION@", jsString(true));
                 macros.put("@LAST_VALIDATION@", json.lastValidation);
                 state.put("lastValidation", json.lastValidation);
-                // Also log an audit event for the successful register.
-                IDMappingExtUtils.logCISelfCareAuditEvent(username, "register" + type, macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", "");
+                if(auditEvents) {
+                    // Also log an audit event for the successful register.
+                    IDMappingExtUtils.logCISelfCareAuditEvent(username, "register" + type, macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", "");
+                }
             }
 
             // If we have authMethods in the state, update it now.
@@ -163,7 +172,9 @@ function enrollEmailOrSMS(conn, type, userId, username) {
         } else {
             // The request failed. Log an audit event for it.
             var code = resp != null ? "" + resp.getCode() : type + " registration failed";
-            IDMappingExtUtils.logCISelfCareAuditEvent(username, "register" + type, macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", code);
+            if(auditEvents) {
+                IDMappingExtUtils.logCISelfCareAuditEvent(username, "register" + type, macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", code);
+            }
             // Return an error page via our handleError method
             // (defined in CI_Common.js).
             handleError(errorMessages["registration_failed"], resp);
@@ -203,8 +214,10 @@ function enrollTOTP(conn, userId, username) {
         state.put("id", json.id);
         page.setValue("/authsvc/authenticator/ci/totp_enrollment.html");
 
-        // Also log an audit event for the successful register.
-        IDMappingExtUtils.logCISelfCareAuditEvent(username, "registertotp", macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", "");
+        if(auditEvents) {
+            // Also log an audit event for the successful register.
+            IDMappingExtUtils.logCISelfCareAuditEvent(username, "registertotp", macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", "");
+        }
 
         // If we have authMethods in the state, update it now.
         var authMethods = JSON.parse(state.get("authMethods"));
@@ -215,7 +228,9 @@ function enrollTOTP(conn, userId, username) {
     } else {
         // The request failed. Log an audit event for it.
         var code = resp != null ? "" + resp.getCode() : "totp registration failed";
-        IDMappingExtUtils.logCISelfCareAuditEvent(username, "registertotp", macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", code);
+        if(auditEvents) {
+            IDMappingExtUtils.logCISelfCareAuditEvent(username, "registertotp", macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", code);
+        }
         // Return an error page via our handleError method
         // (defined in CI_Common.js).
         handleError(errorMessages["registration_failed"], resp);

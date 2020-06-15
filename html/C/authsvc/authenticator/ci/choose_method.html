@@ -80,9 +80,9 @@
                 var type = signature_method["methodType"];
                 var subType = signature_method["subType"];
 
-                var imgsrc = "static/design_images/" + subType +".svg";
+                var imgsrc = getJunctionName() + "/sps/static/design_images/" + subType +".svg";
                 if(subType == "eye" || subType == "iris" || subType == "retina") {
-                    imgsrc = "static/design_images/face.svg";
+                    imgsrc = getJunctionName() + "/sps/static/design_images/face.svg";
                 }
 
                 var method_div = document.createElement('div');
@@ -140,9 +140,9 @@
 
             var transient_method = transient_methods[i];
 
-            var imgsrc = "static/design_images/emailotp.svg";
+            var imgsrc = getJunctionName() + "/sps/static/design_images/emailotp.svg";
             if(transient_method == "transientsms") {
-                imgsrc = "static/design_images/smsotp.svg";
+                imgsrc = getJunctionName() + "/sps/static/design_images/smsotp.svg";
             }
 
             var method_div = document.createElement('div');

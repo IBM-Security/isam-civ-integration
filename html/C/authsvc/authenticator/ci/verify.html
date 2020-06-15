@@ -33,7 +33,7 @@
             document.getElementById("correlation").className = "textbox-left";
             document.getElementById("otp").className = "textbox-right";
 
-            document.getElementById("verification_img").src = "./static/design_images/credentials_bubble.svg";
+            document.getElementById("verification_img").src = getJunctionName() + "/sps/static/design_images/credentials_bubble.svg";
 
             document.querySelector("a").classList.remove("hidden");
         } else if("@TYPE@" == "emailotp" || "@TYPE@" == "transientemail") {
@@ -43,7 +43,7 @@
             document.getElementById("correlation").className = "textbox-left";
             document.getElementById("otp").className = "textbox-right";
 
-            document.getElementById("verification_img").src = "./static/design_images/envelope-open.svg";
+            document.getElementById("verification_img").src = getJunctionName() + "/sps/static/design_images/envelope-open.svg";
 
             document.querySelector("a").classList.remove("hidden");
         } else if("@TYPE@" == "totp") {
@@ -146,7 +146,7 @@
                     <a href="#" class="dialog-back dialog-back-light nav-sectionlink-back" title="Back" role="navigation" tabindex="50" onclick="cancel();" style="background-image: url('./static/design_images/back-light.svg');"></a>
                     <div class="welcome-illustrations">
                         <div class="loader loader-dark hidden"></div>
-                        <img id="verification_img" src="./static/design_images/credentials_devices.svg" class="launch-animation" />
+                        <img id="verification_img" src="@JUNCTION@/sps/static/design_images/credentials_devices.svg" class="launch-animation" />
                     </div>
                 </div>
             </section>

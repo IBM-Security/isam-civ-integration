@@ -10,9 +10,7 @@
     <script src="/sps/static/ciI18n.js"></script>
   <script>
     function cancel() {
-        document.querySelector(".loader").classList.remove('hidden');
-        document.getElementById("verification_img").classList.add('hidden');
-        document.getElementById("cancelForm").submit();
+        document.getElementById("cancelForm").submit(); 
     }
     function populateStrings() {
         document.title = ciMsg.errorLabel;
@@ -31,7 +29,7 @@
                 <div class="layout-left" style="background-color:#1d3649;">
                     <a href="#" class="dialog-back dialog-back-light nav-sectionlink-back" title="Back" role="navigation" tabindex="50" onclick="cancel();" style="background-image: url('./static/design_images/back-light.svg');"></a>
                     <div class="welcome-illustrations">
-                        <img src="./static/design_images/verify_deny.svg" class="launch-animation" />
+                        <img src="@JUNCTION@/sps/static/design_images/verify_deny.svg" class="launch-animation" />
                     </div>
                 </div>
             </section>

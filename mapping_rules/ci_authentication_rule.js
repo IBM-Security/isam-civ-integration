@@ -5,7 +5,7 @@ importMappingRule("CI_Common");
 importMappingRule("CI_Enrollment_Methods");
 
 /**
- * This mapping rule allows a Cloud Identity user to authenticate using an already
+ * This mapping rule allows a IBM Security Verify user to authenticate using an already
  * registered authentication method.
  *
  * Updates to this file will also be made available at:
@@ -58,6 +58,9 @@ macros.put("@JIT_ENROLLMENT@", jsString(jitEnrollment));
 // enrollment that can be used for runtime.
 var hideTransientIfEnrolled = true;
 macros.put("@HIDE_TRANSIENT_IF_ENROLL@", jsString(hideTransientIfEnrolled));
+
+// Whether important events are audited
+var auditEvents = false;
 
 IDMappingExtUtils.traceString("Entry CI_Authentication_Rule");
 
@@ -114,7 +117,7 @@ var someAuthnMethodsEnabled = includeTOTP || includeSMS || includeEmail;
 // to a page requesting it and the password.
 var username = checkLogin();
 
-// If the user just authed with basicAuth, or authed with ISAM, or the user
+// If the user just authed with basicAuth, or authed with ISVA, or the user
 // just performed a CI auth, you may pass!
 if(username != null) {
 
@@ -140,16 +143,17 @@ if(username != null) {
             // Check the function definition to confirm which state variables
             // are cleared.
             cleanState();
-            var methods = [];
+
+            var methods = state.get("authMethods") ? JSON.parse(state.get("authMethods")) : [];
 
             // Only make a request to CI to fetch standard auth methods if at
             // least one of either TOTP, SMS OTP or Email OTP is included in
-            // enabledMethods
-            if(someAuthnMethodsEnabled) {
-                var resp = CiClient.getAuthMethods(conn, userId, getLocale(), "isValidated=true");
+            // enabledMethods, and we don't have methods from state.
+            if(methods.length == 0 && someAuthnMethodsEnabled) {
+                var resp = CiClient.getFactors(conn, userId, getLocale(), "validated=true");
                 var json = getJSON(resp);
                 if (resp != null && resp.getCode() == 200 && json != null) {
-                    methods = json.authnmethods;
+                    methods = json.factors;
                 } else {
                     // The request failed. Return an error page via our handleError
                     // method (defined in CI_Common.js).
@@ -162,20 +166,35 @@ if(username != null) {
             // user presence (approve/deny). Signature methods verification is
             // performed by IBM Verify signing a transaction with a previously
             // registered key pair, hence the name.
-            var signatureMethods = [];
-            if(enabledMethods.indexOf("Verify") != -1) {
-                // Again, only fetch signature methods from CI if Verify is in 
-                // the enabledMethods array.
-                var resp = CiClient.getSignatureAuthMethods(conn, userId, getLocale(), true, "enabled=true");
-                var json = getJSON(resp);
-                if (resp != null && resp.getCode() == 200 && json != null) {
-                    signatureMethods = json.signatures;
-                } else {
-                    // The request failed. Return an error page via our handleError
-                    // method (defined in CI_Common.js).
-                    handleError(errorMessages["auth_method_get_failed"], null);
+            var signatureMethods = state.get("signatureMethods") ? JSON.parse(state.get("signatureMethods")) : [];
+            if(signatureMethods.length == 0 && enabledMethods.indexOf("Verify") != -1) {
+                signatureMethods = methods.filter(method => {return method.type === "signature";});
+
+                if(signatureMethods.length > 0) {
+                    var resp = CiClient.getAuthenticators(conn, userId, getLocale());
+                    var json = getJSON(resp);
+                    if (resp != null && resp.getCode() == 200 && json != null) {
+                        var authenticators = json.authenticators;
+
+                        for(k = 0; k < signatureMethods.length; k++) {
+                            // Find the authenticator that matches this signature method.
+                            var authenticator = authenticators.filter(authenticator => {
+                                return authenticator.id === signatureMethods[k]["references"]["authenticatorId"];
+                            });
+                            // If found, add it to _embedded data
+                            if(authenticator.length > 0) {
+                                signatureMethods[k]["_embedded"] = authenticator[0];
+                            }
+                        }
+                    } else {
+                        // The request failed. Return an error page via our handleError
+                        // method (defined in CI_Common.js).
+                        handleError(errorMessages["auth_method_get_failed"], null);
+                    }
                 }
             }
+
+            methods = methods.filter(method => {return method.type !== "signature";});
 
             // expandVerifyMethods will be false if we only want each Verify
             // authenticator to show as one button. If any signature methods 
@@ -283,9 +302,9 @@ if(username != null) {
 
                     // Check for ownership and get authenticator ID.
                     var signatureMethod = getSignatureMethodById(id);
-                    if(signatureMethod != null && signatureMethod.owner == userId) {
+                    if(signatureMethod != null && signatureMethod.userId == userId) {
                         if(authenticatorId == null) {
-                            authenticatorId = signatureMethod.attributes.authenticatorId;
+                            authenticatorId = signatureMethod.references.authenticatorId;
                         }
 
                         // This is what our transaction payload looks like.
@@ -354,7 +373,7 @@ if(username != null) {
 
                     // Check method ownership.
                     var authMethod = getAuthMethodById(id);
-                    if(authMethod != null && authMethod.owner == userId) {
+                    if(authMethod != null && authMethod.userId == userId) {
                         // For this types, we only need to send the correlation to
                         // create a verification transaction. And the correlation is
                         // optional, and will be generated by CI if not provided.
@@ -449,7 +468,6 @@ if(username != null) {
             var id = getId();
             var verificationId = getVerificationId();
             var otp = getOTP();
-
             if(otp != null) {
                 if(type == "totp") {
                     // Type is TOTP. There's no verification ID, and the
@@ -458,17 +476,19 @@ if(username != null) {
 
                         // Check method ownership.
                         var authMethod = getAuthMethodById(id);
-                        if(authMethod != null && authMethod.owner == userId) {
-                            var verificationJson = {"totp": otp};
+                        if(authMethod != null && authMethod.userId == userId) {
+                            var verificationJson = {"otp": otp};
 
-                            var resp = CiClient.verifyTOTP(conn, id, JSON.stringify(verificationJson), getLocale());
-                            if (resp != null && resp.getCode() == 200) {
+                            var resp = CiClient.postRequest(conn, "/v2.0/factors/totp/"+id, JSON.stringify(verificationJson), getLocale());
+                            if (resp != null && resp.getCode() == 204) {
                                 // Verification was a success! Set result to true so
                                 // we stop running this rule, set the username, and
                                 // log an audit event.
                                 result = true;
                                 setUsername(username);
-                                IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", true, "", "");
+                                if(auditEvents) {
+                                    IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", true, "", "");
+                                }
                                 // set authStatus in the response token so it can be
                                 // read by other rules (function defined in CI_Common.js)
                                 setAuthStatus("success");
@@ -477,7 +497,9 @@ if(username != null) {
                             } else {
                                 // The request failed.
                                 var code = resp != null ? "" + resp.getCode() : "";
-                                IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", false, code, "");
+                                if(auditEvents) {
+                                    IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", false, code, "");
+                                }
                                 macros.put("@CORRELATION@", "");
                                 macros.put("@TYPE@", type);
                                 macros.put("@ERROR_MESSAGE@", errorMessages["verification_failed"]);
@@ -499,7 +521,7 @@ if(username != null) {
 
                         // Check method ownership.
                         var authMethod = getAuthMethodById(id);
-                        if(authMethod != null && authMethod.owner == userId) {
+                        if(authMethod != null && authMethod.userId == userId) {
                             var verificationJson = {"otp": otp};
 
                             var resp = CiClient.verifyOTP(conn, type, id, verificationId, JSON.stringify(verificationJson), getLocale());
@@ -509,7 +531,9 @@ if(username != null) {
                                 // log an audit event.
                                 result = true;
                                 setUsername(username);
-                                IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", true, "", "");
+                                if(auditEvents) {
+                                    IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", true, "", "");
+                                }
                                 // set authStatus in the response token so it can be
                                 // read by other rules (function defined in CI_Common.js)
                                 setAuthStatus("success");
@@ -520,7 +544,9 @@ if(username != null) {
                                 // method (defined in CI_Common.js).
                                 var correlation = state.get("correlation") != null ? "" + state.get("correlation") : "";
                                 var code = resp != null ? "" + resp.getCode() : "";
-                                IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", false, code, correlation);
+                                if(auditEvents) {
+                                    IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", false, code, correlation);
+                                }
                                 macros.put("@CORRELATION@", state.get("correlation"));
                                 macros.put("@TYPE@", type);
                                 macros.put("@ERROR_MESSAGE@", errorMessages["verification_failed"]);
@@ -546,7 +572,9 @@ if(username != null) {
                         var resp = CiClient.verifyTransientOTP(conn, mapTransientType(type), verificationId, JSON.stringify(verificationJson), getLocale());
                         if (resp != null && resp.getCode() == 200) {
                             setUsername(username);
-                            IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", true, "", "");
+                            if(auditEvents) {
+                                IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", true, "", "");
+                            }
                             // set authStatus in the response token so it can be
                             // read by other rules (function defined in CI_Common.js)
                             setAuthStatus("success");
@@ -580,7 +608,9 @@ if(username != null) {
                             // method (defined in CI_Common.js).
                             var correlation = state.get("correlation") != null ? "" + state.get("correlation") : "";
                             var code = resp != null ? "" + resp.getCode() : "";
-                            IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", false, code, correlation);
+                            if(auditEvents) {
+                                IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", false, code, correlation);
+                            }
                             macros.put("@CORRELATION@", state.get("correlation"));
                             macros.put("@TYPE@", type);
                             macros.put("@ERROR_MESSAGE@", errorMessages["verification_failed"]);
@@ -623,7 +653,9 @@ if(username != null) {
                         }
 
                         setUsername(username);
-                        IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", true, "", "");
+                        if(auditEvents) {
+                            IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", true, "", "");
+                        }
                         // set authStatus in the response token so it can be
                         // read by other rules (function defined in CI_Common.js)
                         setAuthStatus("success");
@@ -642,13 +674,17 @@ if(username != null) {
                             page.setValue("/authsvc/authenticator/ci/wait.html");
                         }
                     } else {
-                        IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", false, code, correlation);
+                        if(auditEvents) {
+                            IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", false, code, correlation);
+                        }
                         handleError(errorMessages["verification_failed"], resp);
                     }
                 } else {
                     // The request failed. Return an error page via our handleError
                     // method (defined in CI_Common.js).
-                    IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", false, code, correlation);
+                    if(auditEvents) {
+                        IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", false, code, correlation);
+                    }
                     handleError(errorMessages["verification_failed"], resp);
                 }
             } else {
@@ -697,7 +733,9 @@ if(username != null) {
             validateOTP(conn);
             if(state.get("status") != null && state.get("status") == "success") {
                 setUsername(username);
-                IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", true, "", "");
+                if(auditEvents) {
+                    IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", true, "", "");
+                }
                 // set authStatus in the response token so it can be
                 // read by other rules (function defined in CI_Common.js)
                 setAuthStatus("success");

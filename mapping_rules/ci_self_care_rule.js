@@ -5,7 +5,7 @@ importMappingRule("CI_Common");
 importMappingRule("CI_Enrollment_Methods");
 
 /**
- * This mapping rule allows a Cloud Identity user to add or modify
+ * This mapping rule allows a IBM Security Verify user to add or modify
  * authentication methods.
  *
  * Updates to this file will also be made available at:
@@ -89,7 +89,7 @@ var authStatus = getAuthStatus();
 // to a page requesting it and the password.
 var username = checkLogin();
 
-// If the user just authed with basicAuth, or authed with ISAM, or the user
+// If the user just authed with basicAuth, or authed with ISVA, or the user
 // just performed a CI auth, you may pass!
 if(username != null ||
     (authStatus != null && (authStatus == "success" || authStatus == "read"))) {

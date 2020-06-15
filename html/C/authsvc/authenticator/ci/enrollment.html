@@ -58,11 +58,11 @@
         if("@TYPE@" == "smsotp") {
             document.querySelector('#validation-section h3').textContent = ciMsg.verifyMobile;
             document.querySelector('#validation-section p').textContent = ciMsg.smsCodeDesc;
-            document.querySelector("img").src = "./static/design_images/credentials_bubble.svg";
+            document.querySelector("img").src = getJunctionName() + "/sps/static/design_images/credentials_bubble.svg";
         } else {
             document.querySelector('#validation-section h3').textContent = ciMsg.verifyEmail;
             document.querySelector('#validation-section p').textContent = ciMsg.emailCodeDesc;
-            document.querySelector("img").src = "./static/design_images/envelope-open.svg";
+            document.querySelector("img").src = getJunctionName() + "/sps/static/design_images/envelope-open.svg";
         }
         document.querySelector('#validation-section h1').textContent = ciMsg.letsTry;
         document.querySelectorAll("#validation-section p")[1].textContent = ciMsg.accessCode;
@@ -95,7 +95,7 @@
                 <div class="layout-left" style="background-color:#1d3649;">
                     <div class="welcome-illustrations">
                         <div class="loader hidden" style="background-image: url('./static/loader_dark.gif'); margin-top: 40px;"></div>
-                        <img src="./static/design_images/welcome_illustration.svg" class="launch-animation" />
+                        <img src="@JUNCTION@/sps/static/design_images/welcome_illustration.svg" class="launch-animation" />
                     </div>
                 </div>
                 <div class="layout-large-right">

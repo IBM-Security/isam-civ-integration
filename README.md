@@ -1,5 +1,5 @@
 # Verify Access + Verify SaaS integration
-[Verify SaaS](http://www.ibm.com/security/identity-access-management/cloud-identity) is the SaaS IBM offering that supports several multi-factor authentication types including IBM Verify. One advantage of leveraging authentication methods from the cloud is that the methods can be updated with newer technology more rapidly, and new methods can be adopted without the need for an IBM Security Verify Access update.
+[Verify SaaS](http://www.ibm.com/security/identity-access-management/cloud-identity) is the SaaS IBM offering that supports several multi-factor authentication types including the IBM Verify app. One advantage of leveraging authentication methods from the cloud is that the methods can be updated with newer technology more rapidly, and new methods can be adopted without the need for an IBM Security Verify Access update.
 
 A second advantage is that Verify SaaS supplies both an email gateway and an SMS gateway, for SMS and Email OTP methods.
 

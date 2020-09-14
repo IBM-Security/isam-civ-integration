@@ -19,7 +19,7 @@ Upload the HTML files and CSS rules from [html](/html) to Verify Access via temp
 
 ### Applying updates for IBM Verify to 9.0.5
 
-Some manual steps are required to enable the IBM Verify app on ISAM 9.0.5. Follow the steps [here](how_to_update_905) to update your ISAM 9.0.5 installation.
+Some manual steps are required to enable the IBM Verify app on ISAM 9.0.5. Follow the steps [here](how_to_update_905.md) to update your ISAM 9.0.5 installation.
 
 # License
 ```

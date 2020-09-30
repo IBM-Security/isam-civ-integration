@@ -1,6 +1,6 @@
 importClass(Packages.com.tivoli.am.fim.trustserver.sts.utilities.IDMappingExtUtils);
 
-// This function can be used to add prefixes or suffixes to the username provided by 
+// This function can be used to add prefixes or suffixes to the username provided by
 // WebSEAL or the user. By default, it just returns the username;
 function usernameMapping(username) {
     var mappedUsername = username;
@@ -27,7 +27,7 @@ function checkLogin() {
         return usernameMapping(sessionUsername);
     }
 
-    // If we have no username from either session, state, or parameter, return 
+    // If we have no username from either session, state, or parameter, return
     // a login page.
     if(username == null) {
         page.setValue("/authsvc/authenticator/ci/login.html");
@@ -175,7 +175,9 @@ function getMobileNumber(user) {
                 for(var i = 0; i < user.phoneNumbers.length; i++) {
                     if(user.phoneNumbers[i].type == "mobile") {
                         otpDelivery = user.phoneNumbers[i].value;
-                        state.put("mobileNumber", otpDelivery);
+                        if(otpDelivery != null && otpDelivery != "") {
+                            state.put("mobileNumber", otpDelivery);
+                        }
                         break;
                     }
                 }

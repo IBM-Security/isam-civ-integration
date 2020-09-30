@@ -150,7 +150,7 @@ if(username != null) {
             // least one of either TOTP, SMS OTP or Email OTP is included in
             // enabledMethods, and we don't have methods from state.
             if(methods.length == 0 && someAuthnMethodsEnabled) {
-                var resp = CiClient.getFactors(conn, userId, getLocale(), "validated=true");
+                var resp = CiClient.getFactors(conn, userId, getLocale(), "");
                 var json = getJSON(resp);
                 if (resp != null && resp.getCode() == 200 && json != null) {
                     methods = json.factors;
@@ -161,14 +161,14 @@ if(username != null) {
                 }
             }
 
-            // Signature methods are the methods that can be enrolled with an 
+            // Signature methods are the methods that can be enrolled with an
             // IBM Verify authenticator. They can include biometric methods or
             // user presence (approve/deny). Signature methods verification is
             // performed by IBM Verify signing a transaction with a previously
             // registered key pair, hence the name.
             var signatureMethods = state.get("signatureMethods") ? JSON.parse(state.get("signatureMethods")) : [];
             if(signatureMethods.length == 0 && enabledMethods.indexOf("Verify") != -1) {
-                signatureMethods = methods.filter(method => {return method.type === "signature";});
+                signatureMethods = methods.filter(method => {return method.type === "signature" || method.type === "signatures";});
 
                 if(signatureMethods.length > 0) {
                     var resp = CiClient.getAuthenticators(conn, userId, getLocale());
@@ -194,10 +194,10 @@ if(username != null) {
                 }
             }
 
-            methods = methods.filter(method => {return method.type !== "signature";});
+            methods = methods.filter(method => {return method.type !== "signature" && method.type !== "signatures" && method.validated == true;});
 
             // expandVerifyMethods will be false if we only want each Verify
-            // authenticator to show as one button. If any signature methods 
+            // authenticator to show as one button. If any signature methods
             // were found, we want to do some extra processing now so that only
             // one is displayed per authenticator.
             if(!expandVerifyMethods && signatureMethods.length > 0) {
@@ -308,7 +308,7 @@ if(username != null) {
                         }
 
                         // This is what our transaction payload looks like.
-                        // "authenticationMethodIds" can hold multiple method IDs. 
+                        // "authenticationMethodIds" can hold multiple method IDs.
                         // But we only want to use one. If multiple IDs are supplied,
                         // "logic" can be used to define which methods must be done
                         // to have the transaction succeed. If set to 'OR', only one
@@ -450,7 +450,7 @@ if(username != null) {
                         handleError(errorMessages["verification_failed_colon"] + " " + errorMessages["create_verification_failed"], resp);
                     }
                 } else {
-                    // No mobile number or email was supplied. Return an error 
+                    // No mobile number or email was supplied. Return an error
                     // page via our handleError method (defined in CI_Common.js).
                     handleError(errorMessages["verification_failed_colon"] + " " + errorMessages["no_otp_delivery"], null);
                 }

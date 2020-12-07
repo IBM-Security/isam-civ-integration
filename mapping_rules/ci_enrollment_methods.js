@@ -93,10 +93,10 @@ function enrollVerify(conn, userId, username) {
     // Check now to make sure we've saved whether TOTP has already been registered.
     var authMethods = JSON.parse(state.get("authMethods"));
     if(authMethods == null || authMethods.length == 0) {
-        var authMethodResp = CiClient.getAuthMethods(conn, userId, getLocale());
+        var authMethodResp = CiClient.getFactors(conn, "userId=\"" + userId + "\"&type!=\"signature\"", getLocale());
         var authMethodJson = getJSON(authMethodResp);
         if (authMethodResp != null && authMethodResp.getCode() == 200 && authMethodJson != null) {
-            state.put("authMethods", JSON.stringify(authMethodJson.authnmethods));
+            state.put("authMethods", JSON.stringify(authMethodJson.factors));
         }
     }
 }
@@ -107,59 +107,42 @@ function enrollEmailOrSMS(conn, type, userId, username) {
     // an OTP delivery method in the request.
     var otpDelivery = getOTPDelivery();
     if(otpDelivery != null) {
-        var enrollmentJson = {"owner": userId, "isEnabled": true, "attributes": {}};
+        var enrollmentJson = {"userId": userId, "enabled": true};
         if(type == "smsotp") {
-            enrollmentJson.attributes["otpDeliveryMobileNumber"] = otpDelivery;
+            enrollmentJson["phoneNumber"] = otpDelivery;
         } else {
-            enrollmentJson.attributes["otpDeliveryEmailAddress"] = otpDelivery;
+            enrollmentJson["emailAddress"] = otpDelivery;
         }
-        var resp = CiClient.enrollAuthMethod(conn, type, JSON.stringify(enrollmentJson), false, getLocale());
+        var resp = CiClient.enrollFactor(conn, type, JSON.stringify(enrollmentJson), false, getLocale());
         var json = getJSON(resp);
         if (resp != null && (resp.getCode() == 201 || resp.getCode() == 202) && json != null) {
             // Save the enrollment details to send back to the
             // USC page.
             macros.put("@ID@", json.id);
-            macros.put("@LAST_VALIDATION@", "");
+            state.put("id", json.id);
+            macros.put("@VERIFICATION_ID@", "");
             macros.put("@TYPE@", type);
             macros.put("@CORRELATION@", "");
             page.setValue("/authsvc/authenticator/ci/enrollment.html");
 
-            // If lastValidation is included, we probably have to
-            // do a validation before the user can do an
-            // authentication/verification.
-            if(json.lastValidation == null) {
-                // No last validation, no problem.
-                macros.put("@REQUIRE_VALIDATION@", jsString(false));
-                // Clean the state. cleanState is defined in CI_Common.js
-                // Check the function definition to confirm which state variables
-                // are cleared.
-                cleanState();
-            } else {
-                // Last validation is of the format: /smsotp/06b59d44-4746-41e9-a9fb-05a9eb6d5e9a/validator/8981148e-2cb5-4ca9-9178-3d1da725bcf8
-                // After split we have 5 parts, the first of which is empty. So we want part 4 as the validation IDs.
-                var validationParts = json.lastValidation.split("/");
-                var validationId = validationParts[4];
+            // Always perform a verification after enrollment.
+            var verificationReq = {"correlation": jsString(Math.floor(1000 + Math.random() * 9000))};
+            var verificationResp = CiClient.createFactorVerification(conn, type, json.id, JSON.stringify(verificationReq), getLocale());
+            var verificationJson = getJSON(verificationResp);
 
-                // We have to do a get on the validation to get
-                // the CI generated correlation.
-                var validationResp = CiClient.getValidation(conn, type, json.id, validationId, getLocale());
-                var validationJson = getJSON(validationResp);
-
-                // Add all our new variables into macros and
-                // the state map.
-                if (validationResp != null && validationResp.getCode() && validationJson != null) {
-                    macros.put("@CORRELATION@", validationJson.correlation);
-                    state.put("correlation", validationJson.correlation);
-                }
-                macros.put("@IS_ENABLED@", jsString(json.isEnabled));
-                macros.put("@CREATION_TIME@", json.creationTime);
+            if (verificationResp != null && verificationResp.getCode() == 201 && verificationJson != null) {
+                macros.put("@CORRELATION@", verificationJson.correlation);
+                state.put("correlation", verificationJson.correlation);
+                macros.put("@VERIFICATION_ID@", verificationJson.id);
+                state.put("verificationId", verificationJson.id);
                 macros.put("@REQUIRE_VALIDATION@", jsString(true));
-                macros.put("@LAST_VALIDATION@", json.lastValidation);
-                state.put("lastValidation", json.lastValidation);
-                if(auditEvents) {
-                    // Also log an audit event for the successful register.
-                    IDMappingExtUtils.logCISelfCareAuditEvent(username, "register" + type, macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", "");
-                }
+            }
+            macros.put("@IS_ENABLED@", jsString(json.enabled));
+            macros.put("@CREATION_TIME@", json.created);
+
+            if(auditEvents) {
+                // Also log an audit event for the successful register.
+                IDMappingExtUtils.logCISelfCareAuditEvent(username, "register" + type, macros.get("@SERVER_CONNECTION@"), "CI_Self_Care_Rule", "");
             }
 
             // If we have authMethods in the state, update it now.
@@ -195,18 +178,18 @@ function enrollTOTP(conn, userId, username) {
     // has to be scanned by the user.
 
     // The payload has owner, enabled, and the owner display name.
-    var enrollmentJson = {"owner": userId, "isEnabled": true, "ownerDisplayName": username};
-    var resp = CiClient.enrollAuthMethod(conn, "totp", JSON.stringify(enrollmentJson), true, getLocale());
+    var enrollmentJson = {"userId": userId, "enabled": true, "accountName": username};
+    var resp = CiClient.enrollFactor(conn, "totp", JSON.stringify(enrollmentJson), "qrCodeInResponse=true", getLocale());
     var json = getJSON(resp);
     if (resp != null && resp.getCode() == 201 && json != null) {
         // We got the enrollment QR code. Return it to the end
         // user for them to scan.
 
-        macros.put("@QRCODE@", json.attributes.b64QRCode);
+        macros.put("@QRCODE@", json.attributes.qrCode);
         macros.put("@ID@", json.id);
-        macros.put("@IS_VALIDATED@", jsString(json.isValidated));
-        macros.put("@IS_ENABLED@", jsString(json.isEnabled));
-        macros.put("@CREATION_TIME@", json.creationTime);
+        macros.put("@IS_VALIDATED@", jsString(json.validated));
+        macros.put("@IS_ENABLED@", jsString(json.enabled));
+        macros.put("@CREATION_TIME@", json.created);
         macros.put("@PERIOD@", jsString(json.attributes.period));
         macros.put("@DIGITS@", jsString(json.attributes.digits));
         macros.put("@SECRET@", json.attributes.secret);
@@ -247,29 +230,19 @@ function validateOTP(conn) {
     // The request has to include the type, ID, validation ID, and OTP.
     var type = getType();
     var id = getId();
-    var validationId = getValidationId();
-    var lastValidation = getLastValidation();
+    var verificationId = getVerificationId();
     var otp = getOTP();
 
     if(otp != null) {
         if(type == "smsotp" || type == "emailotp") {
-            // Either lastValidation should be passed in, or ID and
-            // validation ID individually
-            if(lastValidation != null) {
-                // Last validation is of the format: /smsotp/06b59d44-4746-41e9-a9fb-05a9eb6d5e9a/validator/8981148e-2cb5-4ca9-9178-3d1da725bcf8
-                // After split we have 5 parts, the first of which is empty. So we want parts 2 & 4 as the IDs.
-                var validationParts = lastValidation.split("/");
-                id = validationParts[2];
-                validationId = validationParts[4];
-            }
-            if(id != null && validationId != null) {
+            if(id != null && verificationId != null) {
                 // Check method ownership.
                 var authMethod = getAuthMethodById(id);
-                if(authMethod != null && authMethod.owner == userId) {
+                if(authMethod != null && authMethod.userId == userId) {
                     var validationJson = {"otp":otp};
 
-                    var resp = CiClient.validateOTP(conn, type, id, validationId, JSON.stringify(validationJson), getLocale());
-                    if (resp != null && resp.getCode() == 200) {
+                    var resp = CiClient.verifyFactor(conn, type, id, verificationId, JSON.stringify(validationJson), getLocale());
+                    if (resp != null && resp.getCode() == 204) {
                         // Return a status payload with success.
                         state.put("status", "success");
                         macros.put("@STATUS@", "success");
@@ -293,18 +266,18 @@ function validateOTP(conn) {
                 // No ID or validation ID was supplied. Return an error
                 // page via our handleError method (defined in CI_Common.js).
                 if(id == null) handleError(errorMessages["validation_failed_colon"] + " " + errorMessages["no_id"], null);
-                else if(validationId == null) handleError(errorMessages["validation_failed_colon"] + " " + errorMessages["no_validation_id"], null);
+                else if(verificationId == null) handleError(errorMessages["validation_failed_colon"] + " " + errorMessages["no_validation_id"], null);
             }
         } else if(type == "totp") {
             if(id != null) {
-                var validationJson = {"totp":otp};
+                var validationJson = {"otp":otp};
 
                 // Check method ownership.
                 var authMethod = getAuthMethodById(id);
-                if(authMethod != null && authMethod.owner == userId) {
+                if(authMethod != null && authMethod.userId == userId) {
 
-                    var resp = CiClient.verifyTOTP(conn, id, JSON.stringify(validationJson), getLocale());
-                    if (resp != null && resp.getCode() == 200) {
+                    var resp = CiClient.verifyTOTPFactor(conn, id, JSON.stringify(validationJson), getLocale());
+                    if (resp != null && resp.getCode() == 204) {
                         // Return a status payload with success.
                         state.put("status", "success");
                         macros.put("@STATUS@", "success");
@@ -386,40 +359,38 @@ function pollEnrollment(conn, userId) {
             }
         }
     }
-    
+
     if(status == "success") {
         // Check if TOTP was also added.
-        var authMethodResp = CiClient.getAuthMethods(conn, userId, getLocale());
+        var authMethodResp = CiClient.getFactors(conn, "userId=\"" + userId + "\"", getLocale());
         var authMethodJson = getJSON(authMethodResp);
         if (authMethodResp != null && authMethodResp.getCode() == 200 && authMethodJson != null) {
 
-            if(authMethodJson.authnmethods.length > authMethods.length) {
-                for(i = 0; i < authMethodJson.authnmethods.length; i++) {
-                    if(authMethodJson.authnmethods[i].methodType == "totp") {
+            if(authMethodJson.factors.length > authMethods.length) {
+                for(i = 0; i < authMethodJson.factors.length; i++) {
+                    if(authMethodJson.factors[i].type == "totp") {
                         if(!JSON.stringify(authMethods).includes("totp")) {
                             status = "successWithTOTP";
-                            state.put("id", authMethodJson.authnmethods[i].id);
+                            state.put("id", authMethodJson.factors[i].id);
                         }
                         break;
                     }
                 }
 
                 // We have more authMethods than before. Update the state with the new list.
-                state.put("authMethods", JSON.stringify(authMethodJson.authnmethods));
+
+                var authMethods = authMethodJson.factors.filter(method => {return method.type !== "signature" && method.type !== "signatures";});
+                var signatureMethods = authMethodJson.factors.filter(method => {return method.type === "signature" || method.type === "signatures";});
+                state.put("authMethods", JSON.stringify(authMethods));
+                state.put("signatureMethods", JSON.stringify(signatureMethods));
             }
         }
     }
     if(status == "success" && authenticatorId != null) {
         // If status is still success, we didn't enroll in TOTP and we want to instead do
         // a push flow. Try and find a signature method for this enrollment.
-        var signatureMethods = [];
-        var resp = CiClient.getSignatureAuthMethods(conn, userId, getLocale(), true, "enabled=true&attributes/authenticatorId=\""+authenticatorId+"\"");
-        var json = getJSON(resp);
-        if (resp != null && resp.getCode() == 200 && json != null) {
-            signatureMethods = json.signatures;
-        } else {
-            // Fail quietly here.
-        }
+
+        var signatureMethods = state.get("signatureMethods") ? JSON.parse(state.get("signatureMethods")) : [];
 
         if(signatureMethods.length > 0) {
             var highestPriority = null;

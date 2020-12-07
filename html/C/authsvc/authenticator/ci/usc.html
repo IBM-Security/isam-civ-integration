@@ -82,13 +82,13 @@
                     var method = methods[i];
                     var id = method['id'];
                     var creationDate = new Date(method['creationTime']);
-                    var type = method['methodType'];
-                    var enabled = method['isEnabled'];
+                    var type = method['type'];
+                    var enabled = method['enabled'];
                     var enabledPretty = enabled ? ciMsg.enabled : ciMsg.disabled;
                     var enablePretty = !enabled ? ciMsg.enable : ciMsg.disable;
 
                     if(type != "signature") {
-                        var enabled = method['isEnabled'] ? ciMsg.enabled : ciMsg.disabled;
+                        var enabled = method['enabled'] ? ciMsg.enabled : ciMsg.disabled;
 
                         var methodDiv = document.createElement('div');
                         methodDiv.className = "sc-device";
@@ -215,9 +215,9 @@
                         if(type == "smsotp" || type == "emailotp") {
                             var extraInfo = "";
                             if(type == "emailotp") {
-                                extraInfo = method['attributes'].otpDeliveryEmailAddress;
+                                extraInfo = method['attributes'].emailAddress;
                             } else if(type == "smsotp") {
-                                extraInfo = method['attributes'].otpDeliveryMobileNumber;
+                                extraInfo = method['attributes'].phoneNumber;
                             }
                             extraInfo = extraInfo.replace(/\*/g, "•");
                             var deviceInfoDiv = document.createElement('div');

@@ -1,6 +1,6 @@
 importClass(Packages.com.tivoli.am.fim.trustserver.sts.utilities.IDMappingExtUtils);
 
-// This function can be used to add prefixes or suffixes to the username provided by
+// This function can be used to add prefixes or suffixes to the username provided by 
 // WebSEAL or the user. By default, it just returns the username;
 function usernameMapping(username) {
     var mappedUsername = username;
@@ -27,7 +27,7 @@ function checkLogin() {
         return usernameMapping(sessionUsername);
     }
 
-    // If we have no username from either session, state, or parameter, return
+    // If we have no username from either session, state, or parameter, return 
     // a login page.
     if(username == null) {
         page.setValue("/authsvc/authenticator/ci/login.html");
@@ -493,10 +493,10 @@ function getAuthMethodById(id) {
     var authMethods = JSON.parse(state.get("authMethods"));
 
     if(authMethods == null || authMethods.length == 0) {
-        var resp = CiClient.getAuthMethods(conn, userId, getLocale());
+        var resp = CiClient.getFactors(conn, "userId=\"" + userId + "\"", getLocale());
         var json = getJSON(resp);
         if (resp != null && resp.getCode() == 200 && json != null) {
-            authMethods = json.authnmethods;
+            authMethods = json.factors;
         }
     }
 
@@ -519,10 +519,10 @@ function getSignatureMethodById(id) {
     var signatureMethods = JSON.parse(state.get("signatureMethods"));
 
     if(signatureMethods == null || signatureMethods.length == 0) {
-        var resp = CiClient.getSignatureAuthMethods(conn, userId, getLocale(), true);
+        var resp = CiClient.getFactors(conn, "userId=\"" + userId + "\"", getLocale());
         var json = getJSON(resp);
         if (resp != null && resp.getCode() == 200 && json != null) {
-            signatureMethods = json.signatures;
+            signatureMethods = json.factors.filter(method => {return method.type === "signature" || method.type === "signatures";});
         }
     }
 
@@ -543,7 +543,7 @@ function getSignatureMethodById(id) {
 function getTransientMethodById(id, type) {
     var transientMethod = null;
 
-    var resp = CiClient.getRequest(conn, "/v1.0/authnmethods/" + type + "/transient/verification/" + id, getLocale());
+    var resp = CiClient.getFactorVerification(conn, type, "transient", id, getLocale());
     var json = getJSON(resp);
     if (resp != null && resp.getCode() == 200 && json != null) {
         transientMethod = json;
@@ -632,6 +632,16 @@ function maskSensitive(array) {
                 var email = newArray[methodIndex][key]["otpDeliveryEmailAddress"];
                 if(email != null && email != "") {
                     newArray[methodIndex][key]["otpDeliveryEmailAddress"] = maskEmail(email);
+                }
+
+                var mobile = newArray[methodIndex][key]["phoneNumber"];
+                if(mobile != null && mobile != "") {
+                    newArray[methodIndex][key]["phoneNumber"] = maskPhone(mobile);
+                }
+
+                var email = newArray[methodIndex][key]["emailAddress"];
+                if(email != null && email != "") {
+                    newArray[methodIndex][key]["emailAddress"] = maskEmail(email);
                 }
             }
         }

@@ -28,6 +28,8 @@ importMappingRule("CI_Enrollment_Methods");
  * "remove": Remove the enrollment with the given ID.
  * "update": Update the enrollment with a given ID. This is mainly used to 
  *         enable or disable an auth method.
+ * "pollEnrollment": Poll an in-progress authenticator enrollment to check if it has been
+ *         completed successfully yet.
  */
 
 // The types of methods a user is allowed to complete. Only the types included
@@ -129,10 +131,10 @@ if(username != null ||
             // least one of either TOTP, SMS OTP or Email OTP is included
             // in enabledMethods
             if(someAuthnMethodsEnabled) {
-                var resp = CiClient.getAuthMethods(conn, userId, getLocale());
+                var resp = CiClient.getFactors(conn, "userId=\"" + userId + "\"&type!=\"signature\"", getLocale());
                 var json = getJSON(resp);
                 if (resp != null && resp.getCode() == 200 && json != null) {
-                    var allMethods = json.authnmethods;
+                    var allMethods = json.factors;
 
                     // If all methods are included in enabledMethods, just return
                     // the methods array as-is.
@@ -233,6 +235,7 @@ if(username != null ||
                 if(type == "verify") {
                     // Check method ownership.
                     var authenticator = getAuthenticatorById(id);
+                    // Authenticators still use owner
                     if(authenticator != null && authenticator.owner == userId) {
 
                         // If type is verify, delete the authenticator.
@@ -260,8 +263,8 @@ if(username != null ||
 
                     // Check method ownership.
                     var authMethod = getAuthMethodById(id);
-                    if(authMethod != null && authMethod.owner == userId) {
-                        var resp = CiClient.deleteAuthMethod(conn, type, id, getLocale());
+                    if(authMethod != null && authMethod.userId == userId) {
+                        var resp = CiClient.deleteFactor(conn, type, id, getLocale());
                         if (resp != null && resp.getCode() == 204) {
                             // Return a status payload with success.
                             macros.put("@STATUS@", "success");

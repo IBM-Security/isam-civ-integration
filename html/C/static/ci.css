@@ -1087,3 +1087,12 @@
      animation: none !important;
      opacity: 1 !important;
 }
+
+#errId {
+  overflow: hidden;
+  position: relative;
+  color: #da1e28;
+  border-color: #da1e28;
+  top: 5px;
+  margin: 8px 0 0 0;
+}

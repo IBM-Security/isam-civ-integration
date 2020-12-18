@@ -28,6 +28,19 @@ importMappingRule("CI_Enrollment_Methods");
  *         fails, the user is directed to an error page where they can select a
  *         back button to return to the main landing page and choose a different
  *         authentication method.
+ * "submitTransient": Create a transient transaction with the given OTP delivery detail.
+ *         Returns a OTP input page.
+ * "poll": Check the status of the IBM Verify transaction. If the transaction was
+ *         successful progress to the next step in the policy, otherwise display an error
+ *         to the user.
+ * "register": When jitEnrollment is enabled, users may just-in-time enroll if they have
+ *         no enrollments when prompted for authentication. This action is then used to
+ *         perform that enrollment.
+ * "pollEnrollment": Used to poll an in-progress authenticator enrollment to check if it
+ *         has been completed successfully yet.
+ * "validateOTP": Validate the OTP provided as a request parameter. In some
+ *         cases, the enrollment must be validated before it can be used at
+ *         runtime for authentication/verification.
  */
 
 // The OTP correlation to use in SMS and Email OTP requests
@@ -54,7 +67,7 @@ var jitEnrollment = true;
 macros.put("@JIT_ENROLLMENT@", jsString(jitEnrollment));
 
 // A flag that indicates if transient methods should be hidden if the corresponding method
-// is fully enrolled. I.e. hide transientemail is there is a validated email OTP
+// is fully enrolled, i.e. hide transientemail if there is a validated email OTP
 // enrollment that can be used for runtime.
 var hideTransientIfEnrolled = true;
 macros.put("@HIDE_TRANSIENT_IF_ENROLL@", jsString(hideTransientIfEnrolled));
@@ -150,7 +163,7 @@ if(username != null) {
             // least one of either TOTP, SMS OTP or Email OTP is included in
             // enabledMethods, and we don't have methods from state.
             if(methods.length == 0 && someAuthnMethodsEnabled) {
-                var resp = CiClient.getFactors(conn, userId, getLocale(), "");
+                var resp = CiClient.getFactors(conn, "userId=\"" + userId + "\"", getLocale());
                 var json = getJSON(resp);
                 if (resp != null && resp.getCode() == 200 && json != null) {
                     methods = json.factors;
@@ -161,7 +174,7 @@ if(username != null) {
                 }
             }
 
-            // Signature methods are the methods that can be enrolled with an
+            // Signature methods are the methods that can be enrolled with an 
             // IBM Verify authenticator. They can include biometric methods or
             // user presence (approve/deny). Signature methods verification is
             // performed by IBM Verify signing a transaction with a previously
@@ -197,7 +210,7 @@ if(username != null) {
             methods = methods.filter(method => {return method.type !== "signature" && method.type !== "signatures" && method.validated == true;});
 
             // expandVerifyMethods will be false if we only want each Verify
-            // authenticator to show as one button. If any signature methods
+            // authenticator to show as one button. If any signature methods 
             // were found, we want to do some extra processing now so that only
             // one is displayed per authenticator.
             if(!expandVerifyMethods && signatureMethods.length > 0) {
@@ -208,7 +221,7 @@ if(username != null) {
                 for(i = 0; i < signatureMethods.length; i++) {
                     var method = signatureMethods[i];
                     var priority = verifyMethodPriority.indexOf(method.subType);
-                    var storedPriority = highestPrioritiesPerId[method.attributes.authenticatorId];
+                    var storedPriority = highestPrioritiesPerId[method.references.authenticatorId];
                     if(priority != -1) {
                         if(storedPriority != null) {
                             // The lower the location in the array, the higher
@@ -216,13 +229,13 @@ if(username != null) {
                             // than what's already been found, overwrite what's
                             // stored.
                             if(priority < storedPriority) {
-                                highestPrioritiesPerId[method.attributes.authenticatorId] = priority;
-                                highestPriorityMethodPerId[method.attributes.authenticatorId] = method;
+                                highestPrioritiesPerId[method.references.authenticatorId] = priority;
+                                highestPriorityMethodPerId[method.references.authenticatorId] = method;
                             }
                         } else {
                             // No stored priority? Store the first one we found then.
-                            highestPrioritiesPerId[method.attributes.authenticatorId] = priority;
-                            highestPriorityMethodPerId[method.attributes.authenticatorId] = method;
+                            highestPrioritiesPerId[method.references.authenticatorId] = priority;
+                            highestPriorityMethodPerId[method.references.authenticatorId] = method;
                         }
                     }
                 }
@@ -308,7 +321,7 @@ if(username != null) {
                         }
 
                         // This is what our transaction payload looks like.
-                        // "authenticationMethodIds" can hold multiple method IDs.
+                        // "authenticationMethodIds" can hold multiple method IDs. 
                         // But we only want to use one. If multiple IDs are supplied,
                         // "logic" can be used to define which methods must be done
                         // to have the transaction succeed. If set to 'OR', only one
@@ -379,9 +392,9 @@ if(username != null) {
                         // optional, and will be generated by CI if not provided.
                         var verificationJson = {"correlation": otpCorrelation};
 
-                        var resp = CiClient.createVerification(conn, type, id, JSON.stringify(verificationJson), getLocale());
+                        var resp = CiClient.createFactorVerification(conn, type, id, JSON.stringify(verificationJson), getLocale());
                         var json = getJSON(resp);
-                        if (resp != null && resp.getCode() == 202 && json != null) {
+                        if (resp != null && resp.getCode() == 201 && json != null) {
                             // Create verification succeeded. Save the verificationId
                             // and the correlation.
                             state.put("verificationId", json.id);
@@ -425,15 +438,15 @@ if(username != null) {
                 var otpDelivery = null;
                 if(type == "transientsms") {
                     otpDelivery = getMobileNumber();
-                    verificationJson.otpDeliveryMobileNumber = otpDelivery;
+                    verificationJson.phoneNumber = otpDelivery;
                 } else {
                     otpDelivery = getEmailAddress();
-                    verificationJson.otpDeliveryEmailAddress = otpDelivery;
+                    verificationJson.emailAddress = otpDelivery;
                 }
                 if(otpDelivery != null) {
-                    var resp = CiClient.createTransientVerification(conn, mapTransientType(type), JSON.stringify(verificationJson), getLocale());
+                    var resp = CiClient.createFactorVerification(conn, mapTransientType(type), "transient", JSON.stringify(verificationJson), getLocale());
                     var json = getJSON(resp);
-                    if (resp != null && resp.getCode() == 202 && json != null) {
+                    if (resp != null && resp.getCode() == 201 && json != null) {
                         // Create verification succeeded. Save the verificationId
                         // and the correlation.
                         state.put("verificationId", json.id);
@@ -450,7 +463,7 @@ if(username != null) {
                         handleError(errorMessages["verification_failed_colon"] + " " + errorMessages["create_verification_failed"], resp);
                     }
                 } else {
-                    // No mobile number or email was supplied. Return an error
+                    // No mobile number or email was supplied. Return an error 
                     // page via our handleError method (defined in CI_Common.js).
                     handleError(errorMessages["verification_failed_colon"] + " " + errorMessages["no_otp_delivery"], null);
                 }
@@ -479,7 +492,7 @@ if(username != null) {
                         if(authMethod != null && authMethod.userId == userId) {
                             var verificationJson = {"otp": otp};
 
-                            var resp = CiClient.postRequest(conn, "/v2.0/factors/totp/"+id, JSON.stringify(verificationJson), getLocale());
+                            var resp = CiClient.verifyTOTPFactor(conn, id, JSON.stringify(verificationJson), getLocale());
                             if (resp != null && resp.getCode() == 204) {
                                 // Verification was a success! Set result to true so
                                 // we stop running this rule, set the username, and
@@ -524,8 +537,8 @@ if(username != null) {
                         if(authMethod != null && authMethod.userId == userId) {
                             var verificationJson = {"otp": otp};
 
-                            var resp = CiClient.verifyOTP(conn, type, id, verificationId, JSON.stringify(verificationJson), getLocale());
-                            if (resp != null && resp.getCode() == 200) {
+                            var resp = CiClient.verifyFactor(conn, type, id, verificationId, JSON.stringify(verificationJson), getLocale());
+                            if (resp != null && resp.getCode() == 204) {
                                 // Verification was a success! Set result to true so
                                 // we stop running this rule, set the username, and
                                 // log an audit event.
@@ -569,8 +582,8 @@ if(username != null) {
                     var verificationJson = {"otp": otp};
 
                     if(verificationId != null) {
-                        var resp = CiClient.verifyTransientOTP(conn, mapTransientType(type), verificationId, JSON.stringify(verificationJson), getLocale());
-                        if (resp != null && resp.getCode() == 200) {
+                        var resp = CiClient.verifyFactor(conn, mapTransientType(type), "transient", verificationId, JSON.stringify(verificationJson), getLocale());
+                        if (resp != null && resp.getCode() == 204) {
                             setUsername(username);
                             if(auditEvents) {
                                 IDMappingExtUtils.logCIAuthAuditEvent(username, type, macros.get("@SERVER_CONNECTION@"), "CI_Authentication_Rule", true, "", "");
@@ -745,13 +758,12 @@ if(username != null) {
                 page.setValue("/authsvc/authenticator/ci/device_connected.html");
             } else {
                 // There was an error. Let the user try again.
-                IDMappingExtUtils.traceString(type);
                 if(type == "totp") {
                     page.setValue("/authsvc/authenticator/ci/totp_enrollment.html");
                 } else if(type == "smsotp" || type == "emailotp") {
                     macros.put("@CORRELATION@", state.get("correlation"));
                     macros.put("@REQUIRE_VALIDATION@", jsString(true));
-                    macros.put("@LAST_VALIDATION@", state.get("lastValidation"));
+                    macros.put("@VERIFICATION_ID@", state.get("verificationId"));
                     page.setValue("/authsvc/authenticator/ci/enrollment.html");
                 }
             }

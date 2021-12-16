@@ -45,7 +45,7 @@ function enrollVerify(conn, userId, username) {
     // Check now to make sure we've saved a list of existing authenticators.
     var authenticators = JSON.parse(state.get("authenticators"));
     if(authenticators == null || authenticators.length == 0) {
-        var resp = CiClient.getAuthenticators(conn, userId, getLocale());
+        var resp = CiClientV2.getAuthenticators(conn, userId, getLocale());
         var authenticatorsJson = getJSON(resp);
         if (resp != null && resp.getCode() == 200 && authenticatorsJson != null) {
             authenticators = authenticatorsJson.authenticators;
@@ -57,7 +57,7 @@ function enrollVerify(conn, userId, username) {
     // client ID (configured on the mechanism).
     var registrationJson = {"owner": userId, "clientId": jsString(macros.get("@VERIFY_CLIENT@")), "accountName": username};
 
-    var resp = CiClient.registerAuthenticator(conn, JSON.stringify(registrationJson), true, getLocale());
+    var resp = CiClientV2.registerAuthenticator(conn, JSON.stringify(registrationJson), true, getLocale());
     var json = getJSON(resp);
     if (resp != null && resp.getCode() == 200 && json != null) {
 
@@ -93,7 +93,7 @@ function enrollVerify(conn, userId, username) {
     // Check now to make sure we've saved whether TOTP has already been registered.
     var authMethods = JSON.parse(state.get("authMethods"));
     if(authMethods == null || authMethods.length == 0) {
-        var authMethodResp = CiClient.getFactors(conn, "userId=\"" + userId + "\"&type!=\"signature\"", getLocale());
+        var authMethodResp = CiClientV2.getFactors(conn, "userId=\"" + userId + "\"&type!=\"signature\"", getLocale());
         var authMethodJson = getJSON(authMethodResp);
         if (authMethodResp != null && authMethodResp.getCode() == 200 && authMethodJson != null) {
             state.put("authMethods", JSON.stringify(authMethodJson.factors));
@@ -113,7 +113,7 @@ function enrollEmailOrSMS(conn, type, userId, username) {
         } else {
             enrollmentJson["emailAddress"] = otpDelivery;
         }
-        var resp = CiClient.enrollFactor(conn, type, JSON.stringify(enrollmentJson), false, getLocale());
+        var resp = CiClientV2.enrollFactor(conn, type, JSON.stringify(enrollmentJson), false, getLocale());
         var json = getJSON(resp);
         if (resp != null && (resp.getCode() == 201 || resp.getCode() == 202) && json != null) {
             // Save the enrollment details to send back to the
@@ -127,7 +127,7 @@ function enrollEmailOrSMS(conn, type, userId, username) {
 
             // Always perform a verification after enrollment.
             var verificationReq = {"correlation": jsString(Math.floor(1000 + Math.random() * 9000))};
-            var verificationResp = CiClient.createFactorVerification(conn, type, json.id, JSON.stringify(verificationReq), getLocale());
+            var verificationResp = CiClientV2.createFactorVerification(conn, type, json.id, JSON.stringify(verificationReq), getLocale());
             var verificationJson = getJSON(verificationResp);
 
             if (verificationResp != null && verificationResp.getCode() == 201 && verificationJson != null) {
@@ -179,7 +179,7 @@ function enrollTOTP(conn, userId, username) {
 
     // The payload has owner, enabled, and the owner display name.
     var enrollmentJson = {"userId": userId, "enabled": true, "accountName": username};
-    var resp = CiClient.enrollFactor(conn, "totp", JSON.stringify(enrollmentJson), "qrCodeInResponse=true", getLocale());
+    var resp = CiClientV2.enrollFactor(conn, "totp", JSON.stringify(enrollmentJson), "qrCodeInResponse=true", getLocale());
     var json = getJSON(resp);
     if (resp != null && resp.getCode() == 201 && json != null) {
         // We got the enrollment QR code. Return it to the end
@@ -204,7 +204,7 @@ function enrollTOTP(conn, userId, username) {
 
         // If we have authMethods in the state, update it now.
         var authMethods = JSON.parse(state.get("authMethods"));
-        if(authMethods == null || authMethods.length == 0) {
+        if(authMethods != null && authMethods.length != 0) {
             authMethods.push(json);
             state.put("authMethods", JSON.stringify(authMethods));
         }
@@ -241,7 +241,7 @@ function validateOTP(conn) {
                 if(authMethod != null && authMethod.userId == userId) {
                     var validationJson = {"otp":otp};
 
-                    var resp = CiClient.verifyFactor(conn, type, id, verificationId, JSON.stringify(validationJson), getLocale());
+                    var resp = CiClientV2.verifyFactor(conn, type, id, verificationId, JSON.stringify(validationJson), getLocale());
                     if (resp != null && resp.getCode() == 204) {
                         // Return a status payload with success.
                         state.put("status", "success");
@@ -276,7 +276,7 @@ function validateOTP(conn) {
                 var authMethod = getAuthMethodById(id);
                 if(authMethod != null && authMethod.userId == userId) {
 
-                    var resp = CiClient.verifyTOTPFactor(conn, id, JSON.stringify(validationJson), getLocale());
+                    var resp = CiClientV2.verifyTOTPFactor(conn, id, JSON.stringify(validationJson), getLocale());
                     if (resp != null && resp.getCode() == 204) {
                         // Return a status payload with success.
                         state.put("status", "success");
@@ -322,7 +322,7 @@ function pollEnrollment(conn, userId) {
 
     if(authenticatorId != null) {
         // Just fetch our (hopefully) known ID.
-        var resp = CiClient.getAuthenticator(conn, authenticatorId, getLocale());
+        var resp = CiClientV2.getAuthenticator(conn, authenticatorId, getLocale());
         var json = getJSON(resp);
         if (resp != null && resp.getCode() == 200 && json != null && json.owner == userId) {
             if(json.state == "PENDING" || json.state == "ENROLLING") {
@@ -333,7 +333,7 @@ function pollEnrollment(conn, userId) {
         }
     } else {
         // Fall back to checking list
-        var resp = CiClient.getAuthenticators(conn, userId, getLocale());
+        var resp = CiClientV2.getAuthenticators(conn, userId, getLocale());
         var json = getJSON(resp);
         if (resp != null && resp.getCode() == 200 && json != null) {
 
@@ -362,7 +362,7 @@ function pollEnrollment(conn, userId) {
 
     if(status == "success") {
         // Check if TOTP was also added.
-        var authMethodResp = CiClient.getFactors(conn, "userId=\"" + userId + "\"", getLocale());
+        var authMethodResp = CiClientV2.getFactors(conn, "userId=\"" + userId + "\"", getLocale());
         var authMethodJson = getJSON(authMethodResp);
         if (authMethodResp != null && authMethodResp.getCode() == 200 && authMethodJson != null) {
 

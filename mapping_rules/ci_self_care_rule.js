@@ -131,7 +131,7 @@ if(username != null ||
             // least one of either TOTP, SMS OTP or Email OTP is included
             // in enabledMethods
             if(someAuthnMethodsEnabled) {
-                var resp = CiClient.getFactors(conn, "userId=\"" + userId + "\"&type!=\"signature\"", getLocale());
+                var resp = CiClientV2.getFactors(conn, "userId=\"" + userId + "\"&type!=\"signature\"", getLocale());
                 var json = getJSON(resp);
                 if (resp != null && resp.getCode() == 200 && json != null) {
                     var allMethods = json.factors;
@@ -167,7 +167,7 @@ if(username != null ||
             // is included in enabledMethods
             var authenticators = [];
             if(enabledMethods.indexOf("Verify") != -1) {
-                var resp = CiClient.getAuthenticators(conn, userId, getLocale());
+                var resp = CiClientV2.getAuthenticators(conn, userId, getLocale());
                 var json = getJSON(resp);
                 if (resp != null && resp.getCode() == 200 && json != null) {
                     authenticators = json.authenticators;
@@ -239,7 +239,7 @@ if(username != null ||
                     if(authenticator != null && authenticator.owner == userId) {
 
                         // If type is verify, delete the authenticator.
-                        var resp = CiClient.deleteAuthenticator(conn, id, getLocale());
+                        var resp = CiClientV2.deleteAuthenticator(conn, id, getLocale());
                         if (resp != null && resp.getCode() == 204) {
                             // Return a status payload with success.
                             macros.put("@STATUS@", "success");
@@ -264,7 +264,7 @@ if(username != null ||
                     // Check method ownership.
                     var authMethod = getAuthMethodById(id);
                     if(authMethod != null && authMethod.userId == userId) {
-                        var resp = CiClient.deleteFactor(conn, type, id, getLocale());
+                        var resp = CiClientV2.deleteFactor(conn, type, id, getLocale());
                         if (resp != null && resp.getCode() == 204) {
                             // Return a status payload with success.
                             macros.put("@STATUS@", "success");
@@ -310,7 +310,7 @@ if(username != null ||
 
                         authenticator.enabled = enabled;
 
-                        var resp = CiClient.updateAuthenticator(conn, id, JSON.stringify(authenticator), getLocale());
+                        var resp = CiClientV2.updateAuthenticator(conn, id, JSON.stringify(authenticator), getLocale());
                         if (resp != null && resp.getCode() == 204) {
                             // Clean the state. cleanState is defined in CI_Common.js
                             // Check the function definition to confirm which state variables

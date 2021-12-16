@@ -46,7 +46,7 @@ function checkLogin() {
     } else if(password != null) {
         var mappedUsername = usernameMapping(username);
         // If we were given the password as well, attempt auth.
-        var justAuthed = CiClient.basicAuthentication(conn, mappedUsername, password, getLocale());
+        var justAuthed = CiClientV2.basicAuthentication(conn, mappedUsername, password, getLocale());
         if(justAuthed) {
             // If successful, save the just authed username as "basicAuth" in
             // the state map.
@@ -71,7 +71,7 @@ function getUserId(conn, username) {
     IDMappingExtUtils.traceString("Get user ID");
     var userId = state.get("userId");
     if(userId == null) {
-        var user = CiClient.getUser(conn, username, getLocale());
+        var user = CiClientV2.getUser(conn, username, getLocale());
         if (user != null) {
             // We've successfully gotten the user ID. Save it and the username
             // in the state map.
@@ -469,7 +469,7 @@ function getAuthenticatorById(id) {
     var authenticators = JSON.parse(state.get("authenticators"));
 
     if(authenticators == null || authenticators.length == 0) {
-        var resp = CiClient.getAuthenticator(conn, id, getLocale());
+        var resp = CiClientV2.getAuthenticator(conn, id, getLocale());
         var json = getJSON(resp);
         if (resp != null && resp.getCode() == 200 && json != null) {
             authenticator = json;
@@ -493,7 +493,7 @@ function getAuthMethodById(id) {
     var authMethods = JSON.parse(state.get("authMethods"));
 
     if(authMethods == null || authMethods.length == 0) {
-        var resp = CiClient.getFactors(conn, "userId=\"" + userId + "\"", getLocale());
+        var resp = CiClientV2.getFactors(conn, "userId=\"" + userId + "\"", getLocale());
         var json = getJSON(resp);
         if (resp != null && resp.getCode() == 200 && json != null) {
             authMethods = json.factors;
@@ -519,7 +519,7 @@ function getSignatureMethodById(id) {
     var signatureMethods = JSON.parse(state.get("signatureMethods"));
 
     if(signatureMethods == null || signatureMethods.length == 0) {
-        var resp = CiClient.getFactors(conn, "userId=\"" + userId + "\"", getLocale());
+        var resp = CiClientV2.getFactors(conn, "userId=\"" + userId + "\"", getLocale());
         var json = getJSON(resp);
         if (resp != null && resp.getCode() == 200 && json != null) {
             signatureMethods = json.factors.filter(method => {return method.type === "signature" || method.type === "signatures";});
@@ -543,7 +543,7 @@ function getSignatureMethodById(id) {
 function getTransientMethodById(id, type) {
     var transientMethod = null;
 
-    var resp = CiClient.getFactorVerification(conn, type, "transient", id, getLocale());
+    var resp = CiClientV2.getFactorVerification(conn, type, "transient", id, getLocale());
     var json = getJSON(resp);
     if (resp != null && resp.getCode() == 200 && json != null) {
         transientMethod = json;

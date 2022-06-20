@@ -3,61 +3,28 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title></title>
-    <link rel="stylesheet" type="text/css" href="/sps/static/design.css"></link>
-    <link rel="stylesheet" type="text/css" href="/sps/static/ci.css"></link>
-    <link rel="stylesheet" type="text/css" href="/sps/static/ci-popup.css"></link>
-    <script src="/sps/static/ciI18n.js"></script>
-    <script src="/sps/mga/user/mgmt/html/common.js" type="text/javascript"></script>
-    <script type="text/javascript">
+    <link type="text/css" rel="stylesheet" href="/sps/static/design.css"></link>
+    <link type="text/css" rel="stylesheet" href="/sps/static/ci.css"></link>
+    <link type="text/css "rel="stylesheet" href="/sps/static/ci-popup.css"></link>
+    <link type="text/css" rel="stylesheet" href="/sps/static/css/ci/device_connected.css" ></link>
+    <link type="text/css" rel="stylesheet" href="/sps/static/css/ci/common.css"></link>
 
-    var deviceName = "@DEVICE_NAME@";
-    var type = "@TYPE@";
-
-    function submitDone() {
-        document.getElementById("doneForm").submit();
-    }
-
-    function populateStrings() {
-        document.title = ciMsg.ibmVerify;
-        document.querySelector('h3').textContent = ciMsg.success;
-        if(type == "verify" || type == "totp") {
-            document.querySelector('h1').textContent = ciMsg.deviceConnected;
-            if(deviceName != null && deviceName != "") {
-                document.querySelector('#done-section p').textContent = ciMsg.deviceReady.replace("DEVICE_NAME", deviceName)
-            } else {
-                document.querySelector('#done-section p').textContent = ciMsg.authenticatorReady;
-            }
-        } else if(type == "smsotp") {
-            document.querySelector('h1').textContent = ciMsg.mobileConnected;
-            document.querySelector('#done-section p').textContent = ciMsg.smsReady;
-        } else if(type == "emailotp") {
-            document.querySelector('h1').textContent = ciMsg.emailConnected;
-            document.querySelector('#done-section p').textContent = ciMsg.emailReady;
-        }
-        document.querySelector("#done-section .button-bottom").textContent = ciMsg.done;
-    }
-
-    function startup() {
-        populateStrings();
-    }
-    </script>
-
-    <style>
-        a {color: #0F6DFF !important;}
-    </style>
+    <script type="text/javascript" src="/sps/static/ciI18n.js"></script>
+    <script type="text/javascript" src="/sps/mga/user/mgmt/html/common.js"></script>
+    <script type="text/javascript" src="/sps/static/scripts/ci/device_connected.js" data-device-name="@DEVICE_NAME@" data-type="@TYPE@"></script>
   </head>
-  <body onload="startup()">
-    <div id="dialog" style="z-index: 2000; box-sizing: initial; display: block;">
-        <div class="dialog-window" style="z-index: 2000;">
+  <body>
+    <div id="dialog">
+        <div class="dialog-window">
             <section id="done-section" class="dialog-content dialog-content--visible">
                 <div class="layout-large-right">
                     <h3></h3><!-- Success! -->
                     <h1></h1><!-- Your device is connected -->
                     <p class="type-body-m"></p><!-- Now you can use DEVICE_NAME to verify your identity as a second step when signing in. -->
 
-                    <button onclick="submitDone();" class="button-1 button-bottom" type="button" tabindex="1"></button><!-- Done! -->
+                    <button id="submitDone" class="button-1 button-bottom" type="button" tabindex="1"></button><!-- Done! -->
                 </div>
-                <div class="layout-left" style="background-color:#1d3649;">
+                <div class="layout-left">
                     <div class="welcome-illustrations">
                         <img src="@JUNCTION@/sps/static/design_images/verify_approve.svg" class="launch-animation" />
                     </div>

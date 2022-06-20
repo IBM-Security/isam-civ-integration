@@ -743,6 +743,28 @@ function maskEmail(email) {
 }
 
 /**
+ * Encodes values in the given JS Object. If encodedKeys is not null, only the keys defined
+ * are encoded.
+ *
+ * @param {Object} jsObj the object to encode the values of
+ * @param {Array<String>} encodedKeys a subset of keys to encode the values of
+ * @returns the encoded object.
+ */
+function encodeValues(jsObj, encodedKeys) {
+    let jsObject = JSON.parse(JSON.stringify(jsObj));
+    let keys = Object.keys(jsObject);
+    keys.forEach((key) => {
+        if(jsObject[key] != null && typeof jsObject[key] == "object") {
+            jsObject[key] = encodeValues(jsObject[key], encodedKeys);
+
+        } else if(jsObject[key] != null && (encodedKeys == null || encodedKeys.indexOf(key) > -1)){
+            jsObject[key] = jsString(IDMappingExtUtils.escapeHtml(jsObject[key]));
+        }
+    });
+    return jsObject;
+}
+
+/**
  * Convert the given java string into a javascript string!
  */
 function jsString(javaString) {

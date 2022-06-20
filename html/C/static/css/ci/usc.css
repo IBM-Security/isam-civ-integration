@@ -1,0 +1,138 @@
+html {
+  background: #f4f4f4 !important;
+}
+
+#dialog .dialog-window {
+  border: 0px !important;
+}
+
+body{
+  line-height: 1.5 !important;
+}
+
+.overlay{
+  z-index: 1000 !important;
+}
+
+.row{
+  margin: 0px !important;
+}
+
+#dialog{
+  z-index: 2000 !important;
+  box-sizing: initial !important;
+}
+
+.dialog-window{
+  z-index: 2000 !important;
+}
+
+.scan-block {
+  display: block !important;
+}
+
+#styledLoader{
+  position: absolute !important;
+  left: calc(50% - 32px) !important;
+  top: calc(40% - 72px) !important;
+  background-image: url('../../loader_dark.gif') !important;
+}
+
+#chooseMobileButton{
+  margin-top: 10px !important;
+}
+
+#chooseEmailButton{
+  margin-top:10px !important;
+  display:block !important;
+}
+
+#chooseVerifyButton{
+  margin-top: 10px !important;
+  width:250px !important;
+  margin-left:55px !important;
+}
+
+#chooseTotpButton, #chooseSmsButton{
+  margin-top:10px !important;
+  display:block !important;
+  width:250px !important;
+  margin-left:55px !important;
+}
+
+#closeOrTotpButton{
+  display:block !important;
+  width:230px !important;
+  bottom:40px !important;
+  position:absolute !important;
+}
+
+#enrolSmsButton{
+  margin-top: 140px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+#enrolEmailButton, #validateTotpButton, #validateSmsButton, #validateEmailButton{
+  margin-top: 204px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+#p1{
+  margin-top: 10px !important;
+}
+
+#p2{
+  margin-bottom:50px !important;
+}
+
+#phoneDiv{
+  height:46px !important;
+  margin-top:40px !important;
+  width:30% !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+
+#countryCode{
+  height:100% !important;
+  width:21% !important;
+  line-height:44px !important;
+  text-align:right !important;
+}
+
+.ci-input{
+  height:46px !important;
+  margin-top:100px !important;
+  width:40% !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+
+#smsOtpDelivery{
+  width:79% !important;
+  max-width:212px !important;
+  height:100% !important;
+}
+
+.loader hidden{
+  background-image: url('../../loader_light.gif') !important;
+}
+
+#div2, #div3{
+  height:40px !important;
+  margin-top:100px !important;
+  width:29% !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+  display:block !important;
+}
+
+#correlation, #smsOtp, #emailOtp{
+  width: auto !important;
+}
+
+#remove-notify-on-click {
+  color:#000000 !important;
+}

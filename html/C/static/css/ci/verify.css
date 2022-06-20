@@ -1,0 +1,27 @@
+a {
+  color: #0F6DFF !important;
+  text-decoration: none !important;
+  font-size: 11pt !important;
+}
+
+a:hover {
+  text-decoration: underline !important;
+}
+
+.otp-section{
+  height: 102px !important;
+}
+
+.access-code-p{
+  margin-top:40px !important;
+  margin-bottom:8px !important;
+  font-size:8pt !important;
+}
+
+#otp{
+  width:80% !important;
+}
+
+.dialog-back.dialog-back-light.nav-sectionlink-back {
+  background-image: url('../../design_images/back-light.svg') !important;
+}

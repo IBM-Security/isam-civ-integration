@@ -1,0 +1,54 @@
+.layout-top {
+  background-color: #1d3649 !important;
+}
+
+.type-body-m {
+  line-height: 20px !important;
+}
+
+.small-font {
+  font-size: 12pt !important;
+}
+
+a {
+  color: #3277bf !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  font-size: 10pt !important;
+}
+
+.device_verify {
+  height: 120px !important;
+}
+
+#email-button {
+  position: relative !important;
+  bottom: -16px !important;
+}
+
+.type-input-p {
+  margin-top: 40px !important;
+  margin-bottom: 8px !important;
+  font-size: 8pt !important;
+}
+
+.type-input-p-sms {
+  margin-top:20px !important;
+  margin-bottom:8px !important;
+  font-size:8pt !important;
+}
+
+.ci-input {
+  height: 46px !important;
+  min-width: 60% !important;
+  max-width: 400px !important;
+  padding-left: 12px !important;
+}
+
+h3{
+  padding-top: 80px !important;
+}
+
+.layout-bottom{
+  display:flex !important;
+}

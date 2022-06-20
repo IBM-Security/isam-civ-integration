@@ -181,11 +181,12 @@ if(username != null ||
             // Now populate all the macros! These macros are how we tell the
             // HTML pages what methods we have available.
             // Also save each method type in the state map.
-            macros.put("@AUTH_METHODS@", JSON.stringify(maskSensitive(methods)));
+            macros.put("@AUTH_METHODS@", JSON.stringify(encodeValues(maskSensitive(methods), ["nickname"])));
             macros.put("@METHOD_COUNT@", jsString(methods.length));
             state.put("authMethods", JSON.stringify(methods));
 
-            macros.put("@AUTHENTICATORS@", JSON.stringify(pruneAuthenticators(authenticators)));
+            let encodedAuthenticators = encodeValues(authenticators, ["deviceType", "platformType", "deviceName", "osVersion"]);
+            macros.put("@AUTHENTICATORS@", JSON.stringify(pruneAuthenticators(encodedAuthenticators)));
             macros.put("@DEVICE_COUNT@", jsString(authenticators.length));
             state.put("authenticators", JSON.stringify(authenticators));
 

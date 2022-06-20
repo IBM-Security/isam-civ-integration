@@ -1,0 +1,44 @@
+a {
+	color: #0F6DFF !important;
+}
+
+.download-app {
+	margin-top: -50px !important;
+	margin-bottom: 16px !important;
+}
+
+.app-store-links {
+	margin-left: 32px !important;
+}
+
+.image {
+	width: auto !important;
+}
+
+.itunes {
+	margin-right: 16px !important;
+}
+
+.apple {
+	margin-right:16px !important;
+}
+
+.heading-margin {
+	margin-top: 4px !important;
+}
+
+.scan, .sm {
+	color: #ffffff !important;
+}
+
+.access-code-p {
+	margin-top: 40px !important;
+	margin-bottom: 8px !important;
+	font-size: 8pt !important;
+}
+
+#otp {
+	height: 46px !important;
+	width: 60% !important;
+	padding-left: 12px !important;
+}

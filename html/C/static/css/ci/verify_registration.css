@@ -1,0 +1,8 @@
+.loader {
+	background-image: url('../../loader_light.gif') !important;
+	margin-top: 40px !important;
+}
+
+.success-check {
+	margin-top: -20px !important;
+}

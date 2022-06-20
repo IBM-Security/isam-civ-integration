@@ -1,0 +1,13 @@
+#dialog {
+    z-index: 2000 !important;
+    box-sizing: initial !important;
+    display: block !important;
+}
+
+.dialog-window {
+    z-index: 2000 !important;
+}
+
+.layout-left{
+  background-color: #1d3649 !important;
+}

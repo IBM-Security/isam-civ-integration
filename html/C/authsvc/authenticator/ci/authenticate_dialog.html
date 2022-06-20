@@ -3,293 +3,31 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title></title>
-    <link rel="stylesheet" type="text/css" href="/sps/static/design.css"></link>
-    <link rel="stylesheet" type="text/css" href="/sps/static/ci.css"></link>
-    <link rel="stylesheet" type="text/css" href="/sps/static/ci-popup.css"></link>
-    <script src="/sps/static/ciI18n.js"></script>
-    <script src="/sps/mga/user/mgmt/html/common.js" type="text/javascript"></script>
-    <script type="text/javascript">
+    <link type="text/css" rel="stylesheet" href="/sps/static/design.css"></link>
+    <link type="text/css" rel="stylesheet" href="/sps/static/ci.css"></link>
+    <link type="text/css" rel="stylesheet" href="/sps/static/ci-popup.css"></link>
+    <link type="text/css" rel="stylesheet" href="/sps/static/css/ci/authenticate_dialog.css"></link>
+    <link type="text/css" rel="stylesheet" href="/sps/static/css/ci/common.css"></link>
 
-    var methods = @AUTH_METHODS@;
-    var signature_methods = @SIGNATURE_METHODS@;
-    var transient_methods = @TRANSIENT_METHODS@;
-    var expand_verify_methods = "@EXPAND_VERIFY_METHODS@";
-    var jit_enrollment = "@JIT_ENROLLMENT@";
-
-    function createGrid() {
-
-        var verify_method_div = document.getElementById("verify-method-container");
-        var totp_method_div = document.getElementById("totp-method-container");
-        var sms_method_div = document.getElementById("sms-method-container");
-        var email_method_div = document.getElementById("email-method-container");
-
-        var verify_method_title = document.createElement('div');
-        var verify_title_bold = document.createElement('b');
-        verify_title_bold.textContent = ciMsg["ibmVerifyApp"];
-        verify_method_title.appendChild(verify_title_bold);
-        verify_method_div.appendChild(verify_method_title);
-
-        var totp_method_title = document.createElement('div');
-        var totp_title_bold = document.createElement('b');
-        totp_title_bold.textContent = ciMsg["totpApp"];
-        totp_method_title.appendChild(totp_title_bold);
-        totp_method_div.appendChild(totp_method_title);
-
-        var email_method_title = document.createElement('div');
-        var email_title_bold = document.createElement('b');
-        email_title_bold.textContent = ciMsg["email"];
-        email_method_title.appendChild(email_title_bold);
-        email_method_div.appendChild(email_method_title);
-
-        var sms_method_title = document.createElement('div');
-        var sms_title_bold = document.createElement('b');
-        sms_title_bold.textContent = ciMsg["textMessage"];
-        sms_method_title.appendChild(sms_title_bold);
-        sms_method_div.appendChild(sms_method_title);
-
-        for(var i = 0; i < methods.length; i++) {
-            var method = methods[i];
-
-            var id = method['id'];
-            var creationDate = new Date(method['creationTime']);
-
-            var type = method['type'];
-            var enabled = method['enabled'];
-
-            if(type != "signature" && enabled) {
-                var method_div = document.createElement('div');
-                method_div.className = "line-method";
-                method_div.id = id;
-                method_div.type = type;
-
-                method_div.onclick = function () {
-                    document.querySelector(".layout-left .loader").classList.remove('hidden');
-                    document.querySelector(".layout-left .welcome-illustrations .launch-animation").classList.add('hidden');
-                    document.getElementById("chooseMethodForm").type.value = this.type;
-                    document.getElementById("chooseMethodForm").id.value = this.id;
-                    document.getElementById("chooseMethodForm").submit();
-                };
-
-                method_div.addEventListener("keyup", function(event) {
-                    event.preventDefault();
-                    // Enter key is 13, space is 32
-                    if (event.keyCode === 13 || event.keyCode == 32) {
-                        this.click();
-                    }
-                });
-
-                var prettyType = ciMsg["totpApp"];
-                var sendText = ciMsg["totpApp"];
-                var extraInfo = "";
-                if(type == "emailotp") {
-                    prettyType = ciMsg["email"];
-                    extraInfo = method['attributes'].emailAddress;
-                } else if(type == "smsotp") {
-                    prettyType = ciMsg["textMessage"];
-                    extraInfo = method['attributes'].phoneNumber;
-                }
-                extraInfo = extraInfo.replace(/\*/g, "•");
-
-                var type_div = document.createElement('div');
-                type_div.className = "method-type";
-                type_div.textContent = extraInfo;
-                method_div.appendChild(type_div);
-
-                var link_div = document.createElement('a');
-                link_div.className = "method-link";
-                link_div.href = "javascript:void(0);";
-                link_div.textContent = type == "totp" ? ciMsg.enterCode : ciMsg.sendCode;
-                link_div.id = id;
-                link_div.type = type;
-
-                method_div.appendChild(link_div);
-
-                if(type == "smsotp") {
-                    sms_method_div.appendChild(method_div);
-                } else if(type == "emailotp") {
-                    email_method_div.appendChild(method_div);
-                } else if(type == "totp") {
-                    totp_method_div.appendChild(method_div);
-                }
-            }
+    <script type="text/javascript" src="/sps/static/ciI18n.js"></script>
+    <script type="text/javascript" src="/sps/mga/user/mgmt/html/common.js"></script>
+    <script type="text/javascript" src="/sps/static/scripts/ci/authenticate_dialog.js" id="authenticate-methods-tag"
+        data-hide-transient-if-enroll="@HIDE_TRANSIENT_IF_ENROLL@" data-expand-verify-methods="@EXPAND_VERIFY_METHODS@" 
+        data-jit-enrollment="@JIT_ENROLLMENT@">
+        {
+            "authMethods":@AUTH_METHODS@,
+            "signatureMethods":@SIGNATURE_METHODS@,
+            "transMethods":@TRANSIENT_METHODS@
         }
-
-        for(var i = 0; i < signature_methods.length; i++) {
-
-            var signature_method = signature_methods[i];
-            var id = signature_method['id'];
-            var authenticator = signature_method["_embedded"];
-            var authenticatorId = authenticator['id'];
-
-            var enabled = authenticator['enabled'];
-            if(enabled) {
-                var type = signature_method["type"];
-                var subType = signature_method["subType"];
-
-                var method_div = document.createElement('div');
-                method_div.className = "line-method";
-                method_div.id = id;
-                method_div.type = type;
-
-                method_div.onclick = function () {
-                    document.querySelector(".layout-left .loader").classList.remove('hidden');
-                    document.querySelector(".layout-left .welcome-illustrations .launch-animation").classList.add('hidden');
-                    document.getElementById("chooseMethodForm").type.value = this.type;
-                    document.getElementById("chooseMethodForm").id.value = this.id;
-                    document.getElementById("chooseMethodForm").submit();
-                };
-
-                method_div.addEventListener("keyup", function(event) {
-                    event.preventDefault();
-                    // Enter key is 13, space is 32
-                    if (event.keyCode === 13 || event.keyCode == 32) {
-                        this.click();
-                    }
-                });
-
-                var type_div = document.createElement('div');
-                type_div.className = "method-type";
-                var description = authenticator.attributes.deviceName + ' (' + authenticator.attributes.deviceType + " " + (authenticator.attributes.deviceType.startsWith("i") ? ciMsg.ios + " " : ciMsg.android + " ") + authenticator.attributes.osVersion + ')';
-                if(expand_verify_methods === "true") {
-                    description = authenticator.attributes.deviceName + " - " + ciMsg[subType];
-                }
-                type_div.textContent = description
-                method_div.appendChild(type_div);
-
-                var link_div = document.createElement('a');
-                link_div.className = "method-link";
-                link_div.href = "javascript:void(0);";
-                link_div.textContent = ciMsg.sendPush;
-                link_div.id = id;
-                link_div.type = type;
-
-                method_div.appendChild(link_div);
-
-                verify_method_div.appendChild(method_div);
-            }
-        }
-
-        for(var i = 0; i < transient_methods.length; i++) {
-
-            var transient_method = null;
-            var transient_value = null;
-            var keys = Object.keys(transient_methods[i]);
-
-            if(keys.length > 0) {
-                transient_method = keys[0];
-                transient_value = transient_methods[i][transient_method];
-            }
-
-            if("@HIDE_TRANSIENT_IF_ENROLL@" == "true" && (
-                    (transient_method == "transientsms" && sms_method_div.children.length > 1) ||
-                    (transient_method == "transientemail" && email_method_div.children.length > 1))) {
-                continue;
-            }
-
-            var method_div = document.createElement('div');
-            method_div.className = "line-method";
-            method_div.type = transient_method;
-
-            method_div.onclick = function () {
-                document.querySelector(".layout-left .loader").classList.remove('hidden');
-                document.querySelector(".layout-left .welcome-illustrations .launch-animation").classList.add('hidden');
-                document.getElementById("chooseMethodForm").type.value = this.type;
-                document.getElementById("chooseMethodForm").submit();
-            };
-
-            method_div.addEventListener("keyup", function(event) {
-                event.preventDefault();
-                // Enter key is 13, space is 32
-                if (event.keyCode === 13 || event.keyCode == 32) {
-                    this.click();
-                }
-            });
-
-            var prettyType = ciMsg["textMessage"];
-            var extraInfo = transient_value.replace(/\*/g, "•");
-            if(transient_method == "transientemail") {
-                prettyType = ciMsg["email"];
-            }
-
-            var type_div = document.createElement('div');
-            type_div.className = "method-type";
-            type_div.textContent = extraInfo;
-            method_div.appendChild(type_div);
-
-            var link_div = document.createElement('a');
-            link_div.className = "method-link";
-            link_div.href = "javascript:void(0);";
-            link_div.textContent = ciMsg.sendCode;
-            link_div.id = transient_method;
-            link_div.type = transient_method;
-
-            method_div.appendChild(link_div);
-            if(transient_method == "transientsms") {
-                sms_method_div.appendChild(method_div);
-            } else if(transient_method == "transientemail") {
-                email_method_div.appendChild(method_div);
-            }
-        }
-
-        if(methods.length == 0 && signature_methods.length == 0 && transient_methods.length == 0) {
-            document.getElementById("empty-method-container").classList.remove("hidden");
-        } else if(methods.length == 0 && signature_methods.length == 0 && jit_enrollment === "true") {
-            document.getElementById("jit-enrollment-container").classList.remove("hidden");
-        }
-
-        if(verify_method_div.children.length > 1) {
-            verify_method_div.appendChild(document.createElement('hr'));
-            verify_method_div.classList.remove("hidden");
-        }
-        if(totp_method_div.children.length > 1) {
-            totp_method_div.appendChild(document.createElement('hr'));
-            totp_method_div.classList.remove("hidden");
-        }
-        if(sms_method_div.children.length > 1) {
-            sms_method_div.appendChild(document.createElement('hr'));
-            sms_method_div.classList.remove("hidden");
-        }
-        if(email_method_div.children.length > 1) {
-            email_method_div.appendChild(document.createElement('hr'));
-            email_method_div.classList.remove("hidden");
-        }
-    }
-
-    function enrollPrompt() {
-        document.querySelector(".layout-left .loader").classList.remove('hidden');
-        document.querySelector(".layout-left .welcome-illustrations .launch-animation").classList.add('hidden');
-        document.getElementById("enrollPromptForm").submit();
-    }
-
-    function populateStrings() {
-        document.title = ciMsg.authMethodSelection;
-        document.querySelector('h3').textContent = ciMsg.twoStepVeri;
-        document.querySelector('h1').textContent = ciMsg.chooseAMethod;
-        document.getElementById('verify-question').textContent = ciMsg.howToVerify;
-        document.querySelectorAll('p')[1].textContent = ciMsg.whoopsNoMethods;
-        if(ciMsg.useADifferentMethod) document.querySelectorAll('p')[2].innerHTML = ciMsg.useADifferentMethod + ' <a href="javascript:void(0);" onclick="enrollPrompt()">' + ciMsg.enrollNow + '</a>';
-    }
-
-    function startup() {
-        populateStrings();
-        createGrid();
-    }
     </script>
-
-    <style>
-        .type-body-m {
-            font-size: 10pt !important;
-        }
-        a {color: #0F6DFF !important;}
-    </style>
   </head>
-  <body onload="startup()">
+  <body>
 
-    <div id="dialog" style="z-index: 2000; box-sizing: initial; display: block;">
-        <div class="dialog-window" style="z-index: 2000;">
+    <div id="dialog">
+        <div class="dialog-window">
             <section class="dialog-content dialog-content--visible" role="main" aria-label="Instructions for this step">
 
-                <div class="layout-left" style="background-color: #1d3649;">
+                <div class="layout-left">
                     <div class="welcome-illustrations">
                         <div class="loader loader-dark hidden"></div>
                         <img src="@JUNCTION@/sps/static/design_images/credentials_devices.svg" class="launch-animation" />
@@ -298,9 +36,9 @@
 
                 <div class="layout-large-right">
                     <h3></h3><!-- Two-step verification -->
-                    <h1 style="margin-top:4px;"></h1><!-- Choose a method -->
+                    <h1></h1><!-- Choose a method -->
                     <p id="verify-question" class="type-body-m"> </p><!-- How would you like to verify it's you? -->
-                    <div id="verify-method-container" class="line-method-container hidden" style="margin-top: 30px;">
+                    <div id="verify-method-container" class="line-method-container hidden">
                     </div>
                     <div id="totp-method-container" class="line-method-container hidden">
                     </div>

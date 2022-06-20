@@ -4,30 +4,25 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title></title>
-    <link rel="stylesheet" type="text/css" href="/sps/static/design.css"></link>
-    <link rel="stylesheet" type="text/css" href="/sps/static/ci.css"></link>
-    <link rel="stylesheet" type="text/css" href="/sps/static/ci-popup.css"></link>
-    <script src="/sps/static/ciI18n.js"></script>
-  <script>
-    function cancel() {
-        document.getElementById("cancelForm").submit(); 
-    }
-    function populateStrings() {
-        document.title = ciMsg.errorLabel;
-        document.querySelector("h1").textContent = ciMsg.errorLabel;
-    }
-  </script>
+    <link type="text/css" rel="stylesheet" href="/sps/static/design.css"></link>
+    <link type="text/css" rel="stylesheet" href="/sps/static/ci.css"></link>
+    <link type="text/css" rel="stylesheet" href="/sps/static/ci-popup.css"></link>
+    <link type="text/css" rel="stylesheet" href="/sps/static/css/ci/error.css"></link>
+    <link type="text/css" rel="stylesheet" href="/sps/static/css/ci/common.css"></link>
+    
+    <script type="text/javascript" src="/sps/static/ciI18n.js"></script>
+    <script type="text/javascript" src="/sps/static/scripts/ci/error.js"></script>
   </head>
-  <body onload="populateStrings()">
-    <div id="dialog" style="z-index: 2000; box-sizing: initial; display: block;">
-        <div class="dialog-window notransition" style="z-index: 2000;">
+  <body>
+    <div id="dialog">
+        <div class="dialog-window notransition">
             <section id="try-section" class="dialog-content dialog-content--visible notransition">
                 <div class="layout-large-right">
                     <h1></h1><!-- Error -->
                     <p class="type-body-m">@ERROR_MESSAGE@</p>
                 </div>
-                <div class="layout-left" style="background-color:#1d3649;">
-                    <a href="#" class="dialog-back dialog-back-light nav-sectionlink-back" title="Back" role="navigation" tabindex="50" onclick="cancel();" style="background-image: url('./static/design_images/back-light.svg');"></a>
+                <div class="layout-left">
+                    <a href="#" class="dialog-back dialog-back-light nav-sectionlink-back" title="Back" role="navigation" tabindex="50" id="cancelButton"></a>
                     <div class="welcome-illustrations">
                         <img src="@JUNCTION@/sps/static/design_images/verify_deny.svg" class="launch-animation" />
                     </div>

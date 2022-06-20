@@ -1,123 +1,55 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title></title>
-    <link rel="stylesheet" type="text/css" href="/sps/static/design.css"></link>
-    <link rel="stylesheet" type="text/css" href="/sps/static/ci.css"></link>
-    <link rel="stylesheet" type="text/css" href="/sps/static/ci-popup.css"></link>
-    <script src="/sps/static/ciI18n.js"></script>
-    <script src="/sps/mga/user/mgmt/html/common.js" type="text/javascript"></script>
-    <script type="text/javascript">
 
-    function validateOtp(button) {
-        document.querySelector(".loader").classList.remove('hidden');
-        document.querySelector(".welcome-illustrations .launch-animation").classList.add('hidden');
-        var container = button.parentNode.parentNode;
-        var otpInput = container.querySelector('#otp');
-        var otp = otpInput.value;
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title></title>
+  <link type="text/css" rel="stylesheet" href="/sps/static/design.css">
+  </link>
+  <link type="text/css" rel="stylesheet" href="/sps/static/ci.css">
+  </link>
+  <link type="text/css" rel="stylesheet" href="/sps/static/ci-popup.css">
+  </link>
+  <link type="text/css" rel="stylesheet" href="/sps/static/css/ci/enrollment.css">
+  </link>
+  <link type="text/css" rel="stylesheet" href="/sps/static/css/ci/common.css">
+  </link>
+  <script type="text/javascript" src="/sps/static/ciI18n.js"></script>
+  <script type="text/javascript" src="/sps/mga/user/mgmt/html/common.js"></script>
+  <script type="text/javascript" src="/sps/static/scripts/ci/enrollment.js" data-type="@TYPE@" data-correlation="@CORRELATION@"></script>
+</head>
 
-        if(checkValid(otpInput, "otp")) {
-            document.getElementById("validateForm").type.value = "@TYPE@";
-            document.getElementById("validateForm").otp.value = otp;
-            document.getElementById("validateForm").submit();
-        }
-    }
-
-    function showValidation() {
-        document.getElementById("qrcode-section").classList.remove('dialog-content--visible');
-        document.getElementById("qrcode-section").classList.add('dialog-content--hidden');
-        setTimeout(function () {
-            document.getElementById("qrcode-section").style.left = '-100%';
-        }, 300);
-        document.getElementById("validation-section").style.left = '';
-        document.getElementById("validation-section").classList.add('dialog-content--visible');
-    }
-
-    function checkValid(input) {
-        var valid = false;
-        var value = input.value;
-        if(value != null && value != "" && input.validity.valid) {
-            valid = true;
-        }
-        if(valid) {
-            if (input.classList.contains('input-invalid')) {
-                input.classList.remove('input-invalid');
-            }
-        } else {
-            input.classList.add('input-invalid');
-        }
-        document.getElementById("verify-button").disabled = !valid;
-
-        return valid;
-    }
-
-    function populateStrings() {
-        document.title = ciMsg.letsTry;
-        document.getElementById("correlation").textContent = "@CORRELATION@" + " -";
-        if("@TYPE@" == "smsotp") {
-            document.querySelector('#validation-section h3').textContent = ciMsg.verifyMobile;
-            document.querySelector('#validation-section p').textContent = ciMsg.smsCodeDesc;
-            document.querySelector("img").src = getJunctionName() + "/sps/static/design_images/credentials_bubble.svg";
-        } else {
-            document.querySelector('#validation-section h3').textContent = ciMsg.verifyEmail;
-            document.querySelector('#validation-section p').textContent = ciMsg.emailCodeDesc;
-            document.querySelector("img").src = getJunctionName() + "/sps/static/design_images/envelope-open.svg";
-        }
-        document.querySelector('#validation-section h1').textContent = ciMsg.letsTry;
-        document.querySelectorAll("#validation-section p")[1].textContent = ciMsg.accessCode;
-        document.getElementById("otp").placeholder = ciMsg.enterCode;
-        document.querySelector("#validation-section .button-bottom").textContent = ciMsg.verify;
-    }
-
-    function startup() {
-        populateStrings();
-
-        var input = document.querySelector('#validation-section #otp');
-        input.addEventListener("keyup", function(event) {
-            event.preventDefault();
-            // Enter key is 13, space is 32
-            if (event.keyCode === 13 || event.keyCode == 32) {
-                document.querySelector('#validation-section #verify-button').click();
-            }
-        });
-    }
-    </script>
-
-    <style>
-        a {color: #0F6DFF !important;}
-    </style>
-  </head>
-  <body onload="startup()">
-    <div id="dialog" style="z-index: 2000; box-sizing: initial; display: block;">
-        <div class="dialog-window" style="z-index: 2000;">
-            <section id="validation-section" class="dialog-content dialog-content--visible" role="main">
-                <div class="layout-left" style="background-color:#1d3649;">
-                    <div class="welcome-illustrations">
-                        <div class="loader hidden" style="background-image: url('./static/loader_dark.gif'); margin-top: 40px;"></div>
-                        <img src="@JUNCTION@/sps/static/design_images/welcome_illustration.svg" class="launch-animation" />
-                    </div>
-                </div>
-                <div class="layout-large-right">
-                    <h3></h3><!-- Verify your mobile number -->
-                    <h1 style="margin-top:4px;"></h1><!-- Let's try it out -->
-                    <p class="type-body-m"></p><!-- A one-time access code was sent to your mobile number. -->
-                    <p style="margin-top:40px;font-size:8pt;margin-bottom:8px;"></p><!-- Access Code -->
-                    <div style="height:46px;width:70%;">
-                        <div id="correlation" class="textbox-left" style="width:20%;padding-left:8px;padding-right:0px;height:46px;line-height:44px;"></div>
-                        <input id="otp" class="textbox-right" type="number" style="width:80%;height:46px;" oninput="checkValid(this);" tabindex="1">
-                    </div>
-                    <button id="verify-button" class="button-1 button-bottom" onclick="validateOtp(this)" type="button" tabindex="1" disabled></button><!-- Verify -->
-                    <div class="loader hidden" style="background-image: url('./static/loader_light.gif');"></div>
-                </div>
-            </section>
+<body>
+  <div id="dialog">
+    <div class="dialog-window">
+      <section id="validation-section" class="dialog-content dialog-content--visible" role="main">
+        <div class="layout-left">
+          <div class="welcome-illustrations">
+            <div id="darkLoadingIndicator" class="loader hidden"></div>
+            <img src="@JUNCTION@/sps/static/design_images/welcome_illustration.svg" class="launch-animation" />
+          </div>
         </div>
+        <div class="layout-large-right">
+          <h3></h3><!-- Verify your mobile number -->
+          <h1></h1><!-- Let's try it out -->
+          <p class="type-body-m"></p><!-- A one-time access code was sent to your mobile number. -->
+          <p class="access-code-p"></p><!-- Access Code -->
+          <div class="middle">
+            <div id="correlation" class="textbox-left"></div>
+            <input id="otp" class="textbox-right" type="number" tabindex="1">
+          </div>
+          <button id="verify-button" class="button-1 button-bottom" type="button" tabindex="1" disabled></button><!-- Verify -->
+          <div id="lightLoadingIndicator" class="loader hidden"></div>
+        </div>
+      </section>
     </div>
-    <form id="validateForm" method="POST" action="@ACTION@">
-      <input type="hidden" name="action" value="validateOTP">
-      <input type="hidden" name="type" value="">
-      <input type="hidden" name="otp" value="">
-      <input type="hidden" name="operation" value="verify">
-    </form>
-  </body>
+  </div>
+  <form id="validateForm" method="POST" action="@ACTION@">
+    <input type="hidden" name="action" value="validateOTP">
+    <input type="hidden" name="type" value="">
+    <input type="hidden" name="otp" value="">
+    <input type="hidden" name="operation" value="verify">
+  </form>
+</body>
+
 </html>

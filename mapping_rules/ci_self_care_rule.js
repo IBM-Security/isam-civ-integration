@@ -5,6 +5,8 @@ importMappingRule("CI_Common");
 importMappingRule("CI_Enrollment_Methods");
 
 /**
+ * Copyright contributors to the IBM Security Verify Access and Verify SaaS Strong Authentication Integration project.
+ *
  * This mapping rule allows a IBM Security Verify user to add or modify
  * authentication methods.
  *

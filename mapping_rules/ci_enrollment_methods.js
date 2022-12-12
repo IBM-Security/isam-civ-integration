@@ -3,6 +3,8 @@ importPackage(Packages.com.ibm.security.access.server_connections);
 importClass(Packages.com.tivoli.am.fim.trustserver.sts.utilities.IDMappingExtUtils);
 importMappingRule("CI_Common");
 
+// Copyright contributors to the IBM Security Verify Access and Verify SaaS Strong Authentication Integration project.
+
 // This variable controls the priority of Verify methods, for display and for initial try
 // it out scenarios.
 var verifyMethodPriority = ["face", "fingerprint", "userPresence"];

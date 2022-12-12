@@ -1,3 +1,4 @@
+// Copyright contributors to the IBM Security Verify Access and Verify SaaS Strong Authentication Integration project.
 window.addEventListener('load', (event) => {
     startup();
     document.getElementById("submitDone").addEventListener('click', submitDone);

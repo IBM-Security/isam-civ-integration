@@ -125,7 +125,8 @@ var bypass = macros.get("@BYPASS@") == "true" ? true : false;
 var includeTOTP = enabledMethods.indexOf("TOTP") != -1;
 var includeSMS = enabledMethods.indexOf("SMSOTP") != -1;
 var includeEmail = enabledMethods.indexOf("EmailOTP") != -1;
-var someAuthnMethodsEnabled = includeTOTP || includeSMS || includeEmail;
+var includeSignature = enabledMethods.indexOf("Verify") != -1;
+var someAuthnMethodsEnabled = includeTOTP || includeSMS || includeEmail || includeSignature;
 
 // First step is to authenticate the user against CI with their username and
 // password. If no username has been supplied as a request parameter, redirect
@@ -182,7 +183,7 @@ if(username != null) {
             // performed by IBM Verify signing a transaction with a previously
             // registered key pair, hence the name.
             var signatureMethods = state.get("signatureMethods") ? JSON.parse(state.get("signatureMethods")) : [];
-            if(signatureMethods.length == 0 && enabledMethods.indexOf("Verify") != -1) {
+            if(signatureMethods.length == 0 && includeSignature) {
                 signatureMethods = methods.filter(method => {return method.type === "signature" || method.type === "signatures";});
 
                 if(signatureMethods.length > 0) {
@@ -289,6 +290,7 @@ if(username != null) {
                     setJITEnrolling("true");
                 } else {
                     page.setValue("/authsvc/authenticator/ci/authenticate_dialog.html");
+                    macros.put("@ENABLED_METHODS@", JSON.stringify(enabledMethods));
                     if(jitEnrolling) {
                         // We're already mid-JIT-enrollment, disable the macro
                         macros.put("@JIT_ENROLLMENT@", "false");
@@ -764,6 +766,8 @@ if(username != null) {
                 if(type == "totp") {
                     page.setValue("/authsvc/authenticator/ci/totp_enrollment.html");
                 } else if(type == "smsotp" || type == "emailotp") {
+                    macros.put("@ID@", state.get("id"));
+                    macros.put("@TYPE@", type);
                     macros.put("@CORRELATION@", state.get("correlation"));
                     macros.put("@REQUIRE_VALIDATION@", jsString(true));
                     macros.put("@VERIFICATION_ID@", state.get("verificationId"));

@@ -147,13 +147,13 @@ if(username != null ||
                         // out those that are in enabledMethods.
                         for(j = 0; j < allMethods.length; j++) {
                             var method = allMethods[j];
-                            if(method["methodType"] == "totp" && includeTOTP) {
+                            if((method["methodType"] == "totp" || method["type"] == "totp") && includeTOTP) {
                                 methods.push(method);
                             }
-                            if(method["methodType"] == "smsotp" && includeSMS) {
+                            if((method["methodType"] == "smsotp" || method["type"] == "smsotp") && includeSMS) {
                                 methods.push(method);
                             }
-                            if(method["methodType"] == "emailotp" && includeEmail) {
+                            if((method["methodType"] == "emailotp" || method["type"] == "emailotp") && includeEmail) {
                                 methods.push(method);
                             }
                         }

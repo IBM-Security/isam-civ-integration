@@ -12,7 +12,22 @@ var ad_transient_methods = methodsJSON["transMethods"];
 
 var ad_expand_verify_methods = ad_data_tags.dataset.expandVerifyMethods;
 var ad_jit_enrollment = ad_data_tags.dataset.jitEnrollment;
-var ad_hide_transient = ad_data_tags.dataset.hideTransientIfEnroll
+var ad_hide_transient = ad_data_tags.dataset.hideTransientIfEnroll;
+var ad_enabled_methods = ad_data_tags.dataset.enabledMethods;
+
+var include_totp = false;
+var include_sms = false;
+var include_email = false;
+var include_verify = false;
+
+if (ad_enabled_methods && ad_enabled_methods.length > 0) {
+    ad_enabled_methods = JSON.parse(ad_enabled_methods.replace(/&quot;/g, '"'));
+
+    include_totp = ad_enabled_methods.indexOf("TOTP") != -1;
+    include_sms = ad_enabled_methods.indexOf("SMSOTP") != -1;
+    include_email = ad_enabled_methods.indexOf("EmailOTP") != -1;
+    include_verify = ad_enabled_methods.indexOf("Verify") != -1;
+}
 
 function createGrid() {
 
@@ -53,6 +68,11 @@ function createGrid() {
 
         var type = method['type'];
         var enabled = method['enabled'];
+        if((type == "emailotp" && !include_email) ||
+                (type == "smsotp" && !include_sms) ||
+                (type == "totp" && !include_totp)) {
+            continue;
+        }
 
         if (type != "signature" && enabled) {
             var method_div = document.createElement('div');
@@ -116,62 +136,64 @@ function createGrid() {
         }
     }
 
-    for (var i = 0; i < ad_signature_methods.length; i++) {
+    if(include_verify) {
+        for (var i = 0; i < ad_signature_methods.length; i++) {
 
-        var signature_method = ad_signature_methods[i];
-        var id = signature_method['id'];
-        var authenticator = signature_method["_embedded"];
-        var authenticatorId = authenticator['id'];
+            var signature_method = ad_signature_methods[i];
+            var id = signature_method['id'];
+            var authenticator = signature_method["_embedded"];
+            var authenticatorId = authenticator['id'];
 
-        var enabled = authenticator['enabled'];
-        if (enabled) {
-            var type = signature_method["type"];
-            var subType = signature_method["subType"];
+            var enabled = authenticator['enabled'];
+            if (enabled) {
+                var type = signature_method["type"];
+                var subType = signature_method["subType"];
 
-            var method_div = document.createElement('div');
-            method_div.className = "line-method";
-            method_div.id = id;
-            method_div.type = type;
+                var method_div = document.createElement('div');
+                method_div.className = "line-method";
+                method_div.id = id;
+                method_div.type = type;
 
-            method_div.onclick = function() {
-                document.querySelector(".layout-left .loader").classList.remove('hidden');
-                document.querySelector(".layout-left .welcome-illustrations .launch-animation").classList.add('hidden');
-                document.getElementById("chooseMethodForm").type.value = this.type;
-                document.getElementById("chooseMethodForm").id.value = this.id;
-                document.getElementById("chooseMethodForm").submit();
-            };
+                method_div.onclick = function() {
+                    document.querySelector(".layout-left .loader").classList.remove('hidden');
+                    document.querySelector(".layout-left .welcome-illustrations .launch-animation").classList.add('hidden');
+                    document.getElementById("chooseMethodForm").type.value = this.type;
+                    document.getElementById("chooseMethodForm").id.value = this.id;
+                    document.getElementById("chooseMethodForm").submit();
+                };
 
-            method_div.addEventListener("keyup", function(event) {
-                event.preventDefault();
-                // Enter key is 13, space is 32
-                if (event.keyCode === 13 || event.keyCode == 32) {
-                    this.click();
+                method_div.addEventListener("keyup", function(event) {
+                    event.preventDefault();
+                    // Enter key is 13, space is 32
+                    if (event.keyCode === 13 || event.keyCode == 32) {
+                        this.click();
+                    }
+                });
+
+                var type_div = document.createElement('div');
+                type_div.className = "method-type";
+                var description = authenticator.attributes.deviceName + ' (' + authenticator.attributes.deviceType + " " + (authenticator.attributes.deviceType.startsWith("i") ? ciMsg.ios + " " : ciMsg.android + " ") + authenticator.attributes.osVersion + ')';
+                if (ad_expand_verify_methods === "true" || ad_expand_verify_methods === true) {
+                    description = authenticator.attributes.deviceName + " - " + ciMsg[subType];
                 }
-            });
+                type_div.textContent = description
+                method_div.appendChild(type_div);
 
-            var type_div = document.createElement('div');
-            type_div.className = "method-type";
-            var description = authenticator.attributes.deviceName + ' (' + authenticator.attributes.deviceType + " " + (authenticator.attributes.deviceType.startsWith("i") ? ciMsg.ios + " " : ciMsg.android + " ") + authenticator.attributes.osVersion + ')';
-            if (ad_expand_verify_methods === "true" || ad_expand_verify_methods === true) {
-                description = authenticator.attributes.deviceName + " - " + ciMsg[subType];
+                var link_div = document.createElement('a');
+                link_div.className = "method-link";
+                link_div.href = "#";
+                link_div.textContent = ciMsg.sendPush;
+                link_div.id = id;
+                link_div.type = type;
+
+                link_div.addEventListener("click", function(event) {
+                    event.preventDefault(); // Prevent default action (a following a link)
+                }, false);
+
+                method_div.appendChild(link_div);
+
+                verify_method_div.appendChild(method_div);
             }
-            type_div.textContent = description
-            method_div.appendChild(type_div);
-
-            var link_div = document.createElement('a');
-            link_div.className = "method-link";
-            link_div.href = "#";
-            link_div.textContent = ciMsg.sendPush;
-            link_div.id = id;
-            link_div.type = type;
-
-            link_div.addEventListener("click", function(event) {
-                event.preventDefault(); // Prevent default action (a following a link)
-            }, false);
-
-            method_div.appendChild(link_div);
-
-            verify_method_div.appendChild(method_div);
         }
     }
 

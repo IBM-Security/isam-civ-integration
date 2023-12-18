@@ -94,19 +94,19 @@ function startup() {
     var includeEmail = usc_enabledMethods.indexOf("EmailOTP") != -1;
     var includeVerify = usc_enabledMethods.indexOf("Verify") != -1;
     if (!includeTOTP) {
-        document.querySelector('[next-target="totp"]').classList.add('hidden');
+        document.querySelector('[next-target="totp"]').style.visibility = "hidden";
     }
     if (!includeSMS) {
-        document.querySelector('[data-target="section-sms"]').classList.add('hidden');
+        document.querySelector('[data-target="section-sms"]').style.visibility = "hidden";
     }
     if (!includeEmail) {
-        document.querySelector('[data-target="section-email"]').classList.add('hidden');
+        document.querySelector('[data-target="section-email"]').style.visibility = "hidden";
     }
     if (!includeVerify) {
-        document.querySelector('[next-target="verify"]').classList.add('hidden');
+        document.querySelector('[next-target="verify"]').style.visibility = "hidden";
     }
     if (!includeTOTP && !includeSMS && !includeVerify) {
-        document.querySelector('[data-target="section-mobile-choose"]').classList.add('hidden');
+        document.querySelector('[data-target="section-mobile-choose"]').style.visibility = "hidden";
     }
 
     var dropdownList = document.querySelector('.dropdown-list');

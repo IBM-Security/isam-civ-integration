@@ -137,6 +137,10 @@ function handleError(errMessage, resp) {
 
         if(json != null && json.messageDescription != null) {
             errorMessage = json.messageDescription;
+
+            if(json.messageId != null) {
+                errorMessage = json.messageId + " " + errorMessage;
+            }
         }
     }
 

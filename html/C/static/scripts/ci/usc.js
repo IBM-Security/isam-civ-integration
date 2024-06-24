@@ -972,7 +972,6 @@ function registerAuthenticatorOrTOTP(button) {
     registerRequest.open("PUT", usc_actionLocation, true);
     registerRequest.setRequestHeader("Accept", "application/json");
     registerRequest.setRequestHeader("Content-Type", "application/json");
-
     if (ajaxTimer != null) {
         window.clearTimeout(ajaxTimer);
     }
@@ -1134,7 +1133,7 @@ function displayQRCode(qrcode) {
 
 function displayQRCodeError(message) {
     Array.prototype.forEach.call(document.querySelectorAll('.qr-code-error'), function(error) {
-        if (message.includes("CSIAH0610E")) {
+        if (message.includes("CSIBN0019E") || message.includes("CSIAH0610E")) {
             error.querySelector('.scan b').textContent = ciMsg.qrCodeErrorAlreadyEnroll;
             error.querySelector('.sm').textContent = ciMsg.qrCodeErrorEnrollOnce;
         }

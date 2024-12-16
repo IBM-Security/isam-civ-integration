@@ -1,21 +1,21 @@
-# Verify Access + Verify SaaS integration
-[Verify SaaS](http://www.ibm.com/security/identity-access-management/cloud-identity) is the SaaS IBM offering that supports several multi-factor authentication types including the IBM Verify app. One advantage of leveraging authentication methods from the cloud is that the methods can be updated with newer technology more rapidly, and new methods can be adopted without the need for an IBM Security Verify Access update.
+# Verify Identity Access + Verify SaaS integration
+[Verify SaaS](http://www.ibm.com/security/identity-access-management/cloud-identity) is the SaaS IBM offering that supports several multi-factor authentication types including the IBM Verify app. One advantage of leveraging authentication methods from the cloud is that the methods can be updated with newer technology more rapidly, and new methods can be adopted without the need for an IBM Verify Identity Access update.
 
 A second advantage is that Verify SaaS supplies both an email gateway and an SMS gateway, for SMS and Email OTP methods.
 
 ![Strong Auth](images/strong_auth.png)
 
-The Verify SaaS authentication types can be leveraged from Verify Access. Instead of redirecting users to Verify SaaS to perform authentication the Verify SaaS API integration within Verify Access can be used, starting at ISAM 9.0.5. This allows for complete control over the look and feel of the authentication experience.
+The Verify SaaS authentication types can be leveraged from Verify Identity Access. Instead of redirecting users to Verify SaaS to perform authentication the Verify SaaS API integration within Verify Identity Access can be used, starting at ISAM 9.0.5. This allows for complete control over the look and feel of the authentication experience.
 
 The API Integration is achieved through a series of Info Map rules as well as a new Authentication Mechanism type - Cloud Identity JavaScript. The new mechanism type is very similar to an Info Map mechanism, with a few extra properties.
 
 ### What is in this repo?
 
 #### Mapping Rules
-Update the out of the box mapping rules on Verify Access (AAC > Global Settings > Mapping Rules) with the contents of the rules in [mapping_rules](/mapping_rules).
+Update the out of the box mapping rules on Verify Identity Access (AAC > Global Settings > Mapping Rules) with the contents of the rules in [mapping_rules](/mapping_rules).
 
 #### HTML templates
-Upload the HTML files and CSS rules from [html](/html) to Verify Access via template files (AAC > Global Settings > Template Files).
+Upload the HTML files and CSS rules from [html](/html) to Verify Identity Access via template files (AAC > Global Settings > Template Files).
 
 ### Applying updates for IBM Verify to 9.0.5
 

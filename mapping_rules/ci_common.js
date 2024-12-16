@@ -1,6 +1,6 @@
 importClass(Packages.com.tivoli.am.fim.trustserver.sts.utilities.IDMappingExtUtils);
 
-// Copyright contributors to the IBM Security Verify Access and Verify SaaS Strong Authentication Integration project.
+// Copyright contributors to the IBM Verify Identity Access and Verify SaaS Strong Authentication Integration project.
 
 // This function can be used to add prefixes or suffixes to the username provided by 
 // WebSEAL or the user. By default, it just returns the username;

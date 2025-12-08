@@ -189,7 +189,7 @@ function populateStrings() {
     document.getElementById("countryDropdown").textContent = ciMsg.US + " " + je_phoneCodes[ciMsg.US];
     document.querySelector("#enroll-section h3").textContent = ciMsg.recommended;
     document.querySelector("#enroll-section h1").textContent = ciMsg.setupIBMVerify;
-    document.querySelector("p").innerHTML = ciMsg.verifyEnrollDesc;
+    PARSE_AND_ADD_MSG(ciMsg.verifyEnrollDesc, document.querySelector("p"));
     document.querySelector("#enroll-section #verify-button").textContent = ciMsg.setUp;
     document.querySelector("#enroll-section #totp-method-container b").textContent = ciMsg.mobileApp;
     document.querySelector("#enroll-section #totp-method-container p").textContent = ciMsg.totpEnrollDesc;
@@ -213,6 +213,22 @@ function populateStrings() {
     document.getElementById("smsotp-input").placeholder = ciMsg.enterMobileAreaCode;
     document.getElementById("smsotp-input").style.width = document.getElementById("smsotp-input").getAttribute('placeholder').length * 8 + 12 + "px";
     document.getElementById("sms-code-button").textContent = ciMsg.sendAccessCode;
+}
+
+function PARSE_AND_ADD_MSG(msg, elem) {
+	const parser = new DOMParser();
+	const doc = parser.parseFromString(msg, "text/html");
+	const hasElements = doc.body.children.length > 0;
+    if (hasElements) {
+      // Treat as HTML
+      doc.body.childNodes.forEach(node => {
+        elem.appendChild(node.cloneNode(true));
+      });
+    } else {
+      // Treat as plain text
+      const textNode = document.createTextNode(doc.body.textContent);
+      elem.appendChild(textNode);
+    }
 }
 
 function configureEvent(inputSelector, buttonSelector) {

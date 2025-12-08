@@ -73,7 +73,7 @@ function populateStrings() {
     document.querySelector('#download-section h3').textContent = ciMsg.twoStepVeri;
     document.querySelector('#download-section h1').textContent = ciMsg.downloadApp;
     document.querySelector('#download-section p').textContent = ciMsg.downloadOrNextGeneric;
-    document.querySelectorAll('#download-section .ordered-list li')[0].innerHTML = ciMsg.launchAppStore;
+    PARSE_AND_ADD_MSG(ciMsg.launchAppStore, document.querySelectorAll('#download-section .ordered-list li')[0]);
     document.querySelectorAll('#download-section .ordered-list li')[1].textContent = ciMsg.searchForApp;
     document.querySelectorAll('#download-section .ordered-list li')[2].textContent = ciMsg.install;
     document.querySelector("#download-section .button-bottom").textContent = ciMsg.nextConnectAccount;
@@ -94,6 +94,22 @@ function populateStrings() {
     document.querySelectorAll("#validation-section p")[2].textContent = ciMsg.accessCode;
     document.getElementById("otp").placeholder = ciMsg.enterCode;
     document.querySelector("#validation-section .button-bottom").textContent = ciMsg.validate;
+}
+
+function PARSE_AND_ADD_MSG(msg, elem) {
+	const parser = new DOMParser();
+	const doc = parser.parseFromString(msg, "text/html");
+	const hasElements = doc.body.children.length > 0;
+    if (hasElements) {
+      // Treat as HTML
+      doc.body.childNodes.forEach(node => {
+        elem.appendChild(node.cloneNode(true));
+      });
+    } else {
+      // Treat as plain text
+      const textNode = document.createTextNode(doc.body.textContent);
+      elem.appendChild(textNode);
+    }
 }
 
 function startup() {

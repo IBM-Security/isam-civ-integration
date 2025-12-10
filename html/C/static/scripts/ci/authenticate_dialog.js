@@ -300,7 +300,27 @@ function populateStrings() {
     document.getElementById('verify-question').textContent = ciMsg.howToVerify;
     document.querySelectorAll('p')[1].textContent = ciMsg.whoopsNoMethods;
     if (ciMsg.useADifferentMethod) {
-        document.querySelectorAll('p')[2].innerHTML = ciMsg.useADifferentMethod + ' <a href="#" id="enrollPromptOnClick">' + ciMsg.enrollNow + '</a>';
+        // Get the paragraph element
+        var paragraph = document.querySelectorAll('p')[2];
+        
+        // Clear existing content
+        while (paragraph.firstChild) {
+            paragraph.removeChild(paragraph.firstChild);
+        }
+        
+        // Add the first part of the text
+        paragraph.appendChild(document.createTextNode(ciMsg.useADifferentMethod + ' '));
+        
+        // Create the link element
+        var link = document.createElement('a');
+        link.href = '#';
+        link.id = 'enrollPromptOnClick';
+        link.textContent = ciMsg.enrollNow;
+        
+        // Add the link to the paragraph
+        paragraph.appendChild(link);
+        
+        // Add the event listener to the link
         document.getElementById("enrollPromptOnClick").addEventListener("click", function(event) {
             enrollPrompt();
             event.preventDefault(); // Prevent default action (a following a link)

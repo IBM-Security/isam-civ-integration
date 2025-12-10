@@ -1363,8 +1363,23 @@ function notify(message, sticky) {
             removeNotify(notificationRibbon[i]);
         } else {
             notificationText = notificationRibbon[notificationRibbon.length - 1].querySelector('p');
-            notificationText.textContent = message;
-            notificationText.innerHTML += ' <a href="#" id="remove-notify-on-click" >' + ciMsg.okGotIt + '</a>';
+            // Clear existing content
+            while (notificationText.firstChild) {
+                notificationText.removeChild(notificationText.firstChild);
+            }
+
+            // Add the first part of the text
+            notificationText.appendChild(document.createTextNode(message));
+
+            // Create the link element
+            var link = document.createElement('a');
+            link.href = '#';
+            link.id = 'remove-notify-on-click';
+            link.textContent = ciMsg.okGotIt;
+
+            // Add the link
+            notificationText.appendChild(link);
+            
             notificationRibbon[notificationRibbon.length - 1].classList.add('intime-alert--visible');
 
             document.getElementById("remove-notify-on-click").addEventListener("click", function(event) {
@@ -1408,10 +1423,11 @@ function populateStrings() {
     document.querySelectorAll('[data-name="section-welcome"] .unordered-list li')[2].textContent = ciMsg.reason3;
     document.querySelectorAll('[data-name="section-welcome"] .ordered-list li')[0].textContent = ciMsg.how1;
     document.querySelectorAll('[data-name="section-welcome"] .ordered-list li')[1].textContent = ciMsg.how2;
-    document.querySelectorAll('[data-name="section-welcome"] .layout-large-left h3')[0].innerHTML = ciMsg.welcomeName + usc_name;
-    document.querySelectorAll('[data-name="section-welcome"] .layout-large-left h1')[0].innerHTML = ciMsg.strengthenYourAccount;
+
+    PARSE_AND_ADD_MSG(ciMsg.welcomeName + usc_name, document.querySelectorAll('[data-name="section-welcome"] .layout-large-left h3')[0]);
+    PARSE_AND_ADD_MSG(ciMsg.strengthenYourAccount, document.querySelectorAll('[data-name="section-welcome"] .layout-large-left h1')[0]);
     document.querySelectorAll('[data-name="section-welcome"] .layout-large-left .type-body-m')[0].textContent = ciMsg.accountDesc1;
-    document.querySelectorAll('[data-name="section-welcome"] .layout-large-left .type-body-m')[1].innerHTML = ciMsg.accountDesc2;
+    PARSE_AND_ADD_MSG(ciMsg.accountDesc2, document.querySelectorAll('[data-name="section-welcome"] .layout-large-left .type-body-m')[1]);
     document.querySelector('.button-1.nav-sectionlink[data-target="section-mobile-choose"]').textContent = ciMsg.getStartedMobile;
     document.querySelector('.button-1.nav-sectionlink[data-target="section-email"]').textContent = ciMsg.getStartedEmail;
     document.querySelector('[data-name="section-welcome"] .learn-more-link').textContent = ciMsg.learnMore;
@@ -1424,7 +1440,7 @@ function populateStrings() {
 
     document.querySelector('[data-name="section-download"] h1').textContent = ciMsg.downloadApp;
     document.querySelector('.download-app').alt = ciMsg.downloadApp;
-    document.querySelectorAll('[data-name="section-download"] .ordered-list li')[0].innerHTML = ciMsg.launchAppStore;
+    PARSE_AND_ADD_MSG(ciMsg.launchAppStore, document.querySelectorAll('[data-name="section-download"] .ordered-list li')[0]);
     document.querySelectorAll('[data-name="section-download"] .ordered-list li')[1].textContent = ciMsg.searchForVerify;
     document.querySelectorAll('[data-name="section-download"] .ordered-list li')[2].textContent = ciMsg.install;
     document.querySelector('[data-target="section-connectaccount"]').textContent = ciMsg.nextStepConnectAccount;
@@ -1471,6 +1487,22 @@ function populateStrings() {
     document.styleSheets[2].insertRule('.enrollment-failed:after { content: "' + ciMsg.enrollmentFailed + '" !important; }', document.styleSheets[2].cssRules.length);
     document.styleSheets[2].insertRule('.validation-failed:after { content: "' + ciMsg.validationFailed + '" !important; }', document.styleSheets[2].cssRules.length);
     document.styleSheets[2].insertRule('.all-device-containers-empty:after { content: "' + ciMsg.noEnrollments + '" !important; }', document.styleSheets[0].cssRules.length);
+}
+
+function PARSE_AND_ADD_MSG(msg, elem) {
+	const parser = new DOMParser();
+	const doc = parser.parseFromString(msg, "text/html");
+	const hasElements = doc.body.children.length > 0;
+    if (hasElements) {
+      // Treat as HTML
+      doc.body.childNodes.forEach(node => {
+        elem.appendChild(node.cloneNode(true));
+      });
+    } else {
+      // Treat as plain text
+      const textNode = document.createTextNode(doc.body.textContent);
+      elem.appendChild(textNode);
+    }
 }
 
 function configureEvent(inputSelector, buttonSelector) {
